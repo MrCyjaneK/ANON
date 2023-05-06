@@ -122,6 +122,18 @@ android {
             buildConfigField 'String', 'NETWORK', '"staging"'
             applicationIdSuffix ".staging"
         }
+        ViewOnlymainNet {
+            dimension "app"
+            resValue 'string', 'app_title', '"Anon View"'
+            buildConfigField 'String', 'NETWORK', '"main"'
+            applicationIdSuffix ".view"
+        }
+        ViewOnlystageNet {
+            dimension "app"
+            resValue 'string', 'app_title', '"Anon View-StageNet"'
+            buildConfigField 'String', 'NETWORK', '"staging"'
+            applicationIdSuffix ".view.staging"
+        }
     }
     namespace 'anon.xmr.app.anon_wallet'
 
