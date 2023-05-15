@@ -2,11 +2,11 @@ package xmr.anon_wallet.wallet.channels
 
 import android.app.Activity
 import android.content.Intent
-import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
+import com.m2049r.xmrwallet.model.Wallet
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
 import io.flutter.plugin.common.BinaryMessenger
@@ -37,10 +37,59 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "backup" -> backup(call, result)
             "validatePayload" -> validatePayload(call, result)
             "openBackupFile" -> openBackupFile(call, result)
+            "restoreViewOnly" -> restoreViewOnly(call, result)
             "parseBackupFile" -> parseBackupFile(call, result)
             "parseBackup" -> parseBackup(call, result)
             "restore" -> restore(call, result)
             "restoreFromSeed" -> restoreFromSeed(call, result)
+        }
+    }
+
+    private fun restoreViewOnly(call: MethodCall, result: Result) {
+        val primaryAddress = call.argument<String?>("primaryAddress")
+        val privateViewKey = call.argument<String?>("privateViewKey")
+        val restoreHeight = call.argument<Number?>("restoreHeight")
+        val pin = call.argument<String>("pin")
+
+        if (primaryAddress == null || privateViewKey == null || restoreHeight == null) {
+            result.error("0", "Invalid params", null)
+            return
+        }
+        if (!Wallet.isAddressValid(primaryAddress)) {
+            result.error("primaryAddress", "Invalid Address", null)
+            return
+        }
+        if ( !(privateViewKey.length == 64 && privateViewKey.matches("^[0-9a-fA-F]+$".toRegex()))) {
+            result.error("privateViewKey", "Invalid View Key", null)
+            return
+        }
+        val walletFileName = "default"
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                val walletFile = File(AnonWallet.walletDir, walletFileName)
+                val wallet = WalletManager.getInstance().createWalletWithKeys(
+                    walletFile,pin,
+                    "English",
+                    restoreHeight.toLong(),
+                    primaryAddress,
+                    privateViewKey,
+                    ""
+                )
+                wallet.restoreHeight = restoreHeight.toLong()
+                Prefs.passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), pin)
+                Prefs.restoreHeight = wallet.restoreHeight
+                val isOk = wallet.status.isOk
+                wallet.store()
+                wallet.close()
+                if (!isOk) {
+                    result.error("0", "Unable to restore wallet", null)
+                    return@withContext
+                }
+                //wait for preferences to be saved
+                delay(600)
+                result.success(true)
+                activity.restart()
+            }
         }
     }
 
@@ -171,6 +220,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     //No operation
                 }
             }
+
             BACK_UP_READ_CODE -> {
                 if (resultCode == Activity.RESULT_CANCELED) {
                     currentResult?.error("0", "canceled", null)

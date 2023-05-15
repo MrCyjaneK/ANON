@@ -1,3 +1,4 @@
+import 'package:anon_wallet/models/config.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:flutter/services.dart';
 
@@ -56,6 +57,8 @@ class WalletChannel {
 
   Future<WalletState> getWalletState() async {
     int value = await platform.invokeMethod("walletState");
+    bool isViewOnly = await platform.invokeMethod("isViewOnly");
+    anonConfigState.setWalletViewState(isViewOnly);
     if (value == 1) {
       return WalletState.walletCreated;
     }

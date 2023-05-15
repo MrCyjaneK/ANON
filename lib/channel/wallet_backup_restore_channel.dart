@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/services.dart';
 
 class BackUpRestoreChannel {
@@ -41,6 +43,16 @@ class BackUpRestoreChannel {
       "restoreHeight": height.toInt(),
       "pin": pin,
       "passPhrase": passPhrase
+    });
+  }
+
+  Future restoreViewOnly(
+      String primaryAddress, String privateViewKey, num num, String pin) async {
+    return platform.invokeMethod("restoreViewOnly", {
+      "primaryAddress": primaryAddress,
+      "privateViewKey": privateViewKey,
+      "restoreHeight": num.toInt(),
+      "pin": pin
     });
   }
 }

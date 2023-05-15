@@ -6,8 +6,7 @@ class _AnonConfigState {
 
   get isViewOnly => _isViewOnly;
 
-  setWalletView(bool isViewOnly) => _isViewOnly = isViewOnly;
+  setWalletViewState(bool isViewOnly) => _isViewOnly = isViewOnly;
 }
-
 
 final anonConfigState = _AnonConfigState();

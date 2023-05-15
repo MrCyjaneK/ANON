@@ -3,10 +3,12 @@ import 'dart:convert';
 
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/models/backup.dart';
+import 'package:anon_wallet/models/config.dart';
 import 'package:anon_wallet/screens/onboard/onboard_screen.dart';
 import 'package:anon_wallet/screens/onboard/onboard_state.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_from_backup.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_from_seed.dart';
+import 'package:anon_wallet/screens/onboard/restore/restore_view_only.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
@@ -52,79 +54,87 @@ class _LandingScreenState extends State<LandingScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: [
-                Consumer(
-                  builder: (context, ref, c) {
-                    var existingNode = ref.watch(nodeFromPrefs);
-                    return ElevatedButton(
-                      style: ElevatedButton.styleFrom(primary: Colors.white),
-                      onPressed: () async {
-                        ref.read(remoteUserName.notifier).state = "";
-                        ref.read(remotePassword.notifier).state = "";
-                        ref.read(remoteHost.notifier).state = "";
-                        ref.read(navigatorState.notifier).state = 0;
-                        ref.read(walletSeedPhraseProvider.notifier).state = "";
-                        ref.read(walletLockPin.notifier).state = "";
-                        if (existingNode.hasValue &&
-                            existingNode.value != null) {
-                          ref.read(remoteHost.notifier).state =
-                              existingNode.value!.toNodeString();
-                        }
-                        // showDialog(
-                        //     context: context,
-                        //     builder: (context) {
-                        //       return AlertDialog(
-                        //           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                        //           content: SizedBox(
-                        //             height: 60,
-                        //             child: Column(children: [
-                        //               const Center(
-                        //                 child: CircularProgressIndicator(
-                        //                   strokeWidth: 1,
-                        //                 ),
-                        //               ),
-                        //               const Padding(padding: EdgeInsets.only(bottom: 8)),
-                        //               Text(
-                        //                 "Please wait,wallet is creating...",
-                        //                 style: Theme.of(context).textTheme.caption,
-                        //               )
-                        //             ]),
-                        //           ));
-                        //     });
-                        try {
-                          // if(pin == null){
-                          //   return;
-                          // }
-                          // var wallet = await WalletChannel().create(pin);
-                          // wallet.pin = pin;
-                          // Navigator.pop(context);
-                          // wallet.seed = "scorpion enough attitude image mountain off stem head this quick vivid defy exotic reveal type monitor crash mosquito universe oxygen clap wedding vocal labor".split(" ");
-                          // await Future.delayed(Duration(milliseconds: 120));
-                          // NodeChannel().testRPC();
+                !anonConfigState.isViewOnly
+                    ? Consumer(
+                        builder: (context, ref, c) {
+                          var existingNode = ref.watch(nodeFromPrefs);
+                          return ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white),
+                            onPressed: () async {
+                              ref.read(remoteUserName.notifier).state = "";
+                              ref.read(remotePassword.notifier).state = "";
+                              ref.read(remoteHost.notifier).state = "";
+                              ref.read(navigatorState.notifier).state = 0;
+                              ref
+                                  .read(walletSeedPhraseProvider.notifier)
+                                  .state = "";
+                              ref.read(walletLockPin.notifier).state = "";
+                              if (existingNode.hasValue &&
+                                  existingNode.value != null) {
+                                ref.read(remoteHost.notifier).state =
+                                    existingNode.value!.toNodeString();
+                              }
+                              // showDialog(
+                              //     context: context,
+                              //     builder: (context) {
+                              //       return AlertDialog(
+                              //           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                              //           content: SizedBox(
+                              //             height: 60,
+                              //             child: Column(children: [
+                              //               const Center(
+                              //                 child: CircularProgressIndicator(
+                              //                   strokeWidth: 1,
+                              //                 ),
+                              //               ),
+                              //               const Padding(padding: EdgeInsets.only(bottom: 8)),
+                              //               Text(
+                              //                 "Please wait,wallet is creating...",
+                              //                 style: Theme.of(context).textTheme.caption,
+                              //               )
+                              //             ]),
+                              //           ));
+                              //     });
+                              try {
+                                // if(pin == null){
+                                //   return;
+                                // }
+                                // var wallet = await WalletChannel().create(pin);
+                                // wallet.pin = pin;
+                                // Navigator.pop(context);
+                                // wallet.seed = "scorpion enough attitude image mountain off stem head this quick vivid defy exotic reveal type monitor crash mosquito universe oxygen clap wedding vocal labor".split(" ");
+                                // await Future.delayed(Duration(milliseconds: 120));
+                                // NodeChannel().testRPC();
 
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (c) => const OnboardScreen(),
-                                  settings: const RouteSettings()));
-                        } catch (e, s) {
-                          debugPrintStack(stackTrace: s);
-                        }
-                      },
-                      child: Text("CREATE WALLET",
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
-                              ?.copyWith(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w700)),
-                    );
-                  },
-                ),
-                const Padding(padding: EdgeInsets.all(12)),
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (c) => const OnboardScreen(),
+                                        settings: const RouteSettings()));
+                              } catch (e, s) {
+                                debugPrintStack(stackTrace: s);
+                              }
+                            },
+                            child: Text("CREATE WALLET",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w700)),
+                          );
+                        },
+                      )
+                    : const SizedBox(),
+                !anonConfigState.isViewOnly
+                    ? const Padding(padding: EdgeInsets.all(12))
+                    : const SizedBox(),
                 Column(
                   children: [
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(primary: Colors.white),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white),
                       onPressed: () {
                         showRestoreOptions(context);
                       },
@@ -183,58 +193,78 @@ class _LandingScreenState extends State<LandingScreen> {
                     ],
                   ),
                   actions: [
-                    TextButton(
-                        onPressed: () async {
-                          try {
-                            loadingFile.value = true;
-                            String value =
-                                await BackUpRestoreChannel().openBackUpFile();
-                            pageController.nextPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInSine);
-                            backupFileUri.value = value;
-                            loadingFile.value = false;
-                            pageController.animateToPage(1,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInSine);
-                          } catch (e) {
-                            loadingFile.value = false;
-                            Navigator.pop(context);
-                          }
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            loadingFile.value
-                                ? const SizedBox(
-                                    child: Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 12),
-                                    child: SizedBox.square(
-                                      dimension: 12,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 1,
+                    Opacity(
+                      opacity: anonConfigState.isViewOnly ? 0.6 : 1,
+                      child: TextButton(
+                          onPressed: () async {
+                            if (anonConfigState.isViewOnly) {
+                              //TODO:restore from backup file
+                              return;
+                            }
+                            try {
+                              loadingFile.value = true;
+                              String value =
+                                  await BackUpRestoreChannel().openBackUpFile();
+                              pageController.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInSine);
+                              backupFileUri.value = value;
+                              loadingFile.value = false;
+                              pageController.animateToPage(1,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInSine);
+                            } catch (e) {
+                              loadingFile.value = false;
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              loadingFile.value
+                                  ? const SizedBox(
+                                      child: Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 12),
+                                      child: SizedBox.square(
+                                        dimension: 12,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1,
+                                        ),
                                       ),
-                                    ),
-                                  ))
-                                : const SizedBox.shrink(),
-                            Text(!loadingFile.value
-                                ? "Restore from anon backup"
-                                : "Reading file..."),
-                          ],
-                        )),
+                                    ))
+                                  : const SizedBox.shrink(),
+                              Text(!loadingFile.value
+                                  ? "Restore from anon backup"
+                                  : "Reading file..."),
+                            ],
+                          )),
+                    ),
                     const Divider(),
-                    TextButton(
-                        onPressed: () async {
-                          final navigator = Navigator.of(context);
-                          navigator.pop();
-                          await Future.delayed(
-                              const Duration(milliseconds: 150));
-                          navigator.push(MaterialPageRoute(
-                              builder: (context) => const RestoreFromSeed()));
-                        },
-                        child: const Text("Restore from seed")),
+                    if (!anonConfigState.isViewOnly)
+                      TextButton(
+                          onPressed: () async {
+                            final navigator = Navigator.of(context);
+                            navigator.pop();
+                            await Future.delayed(
+                                const Duration(milliseconds: 150));
+                            navigator.push(MaterialPageRoute(
+                                builder: (context) => const RestoreFromSeed()));
+                          },
+                          child: const Text("Restore from seed"))
+                    else
+                      TextButton(
+                          onPressed: () async {
+                            final navigator = Navigator.of(context);
+                            navigator.pop();
+                            await Future.delayed(
+                                const Duration(milliseconds: 150));
+                            navigator.push(MaterialPageRoute(
+                                builder: (context) =>
+                                    const RestoreViewOnlyWallet()));
+                          },
+                          child: const Text("Restore from keys")),
                     const Padding(padding: EdgeInsets.all(12))
                   ],
                   actionsOverflowDirection: VerticalDirection.down,

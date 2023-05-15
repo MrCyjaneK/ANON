@@ -25,12 +25,14 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
         Column(
           children: [
             Center(
-              child: Hero(
-                  tag: "anon_logo",
-                  child: SafeArea(
-                      child: SizedBox(
-                          width: 180,
-                          child: Image.asset("assets/anon_logo.png")))),
+              child: Center(
+                child: Hero(
+                    tag: "anon_logo",
+                    child: SafeArea(
+                        child: SizedBox(
+                            width: 180,
+                            child: Image.asset("assets/anon_logo.png")))),
+              ),
             ),
             Expanded(
               child: RestoreNodeSetup(

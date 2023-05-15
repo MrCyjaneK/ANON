@@ -1,0 +1,296 @@
+import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
+import 'package:anon_wallet/screens/onboard/restore/restore_node_setup.dart';
+import 'package:anon_wallet/screens/set_pin_screen.dart';
+import 'package:anon_wallet/theme/theme_provider.dart';
+import 'package:anon_wallet/widgets/show_passphrase_dialog.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class RestoreViewOnlyWallet extends StatefulWidget {
+  const RestoreViewOnlyWallet({Key? key}) : super(key: key);
+
+  @override
+  State<RestoreViewOnlyWallet> createState() => _RestoreViewOnlyWalletState();
+}
+
+class _RestoreViewOnlyWalletState extends State<RestoreViewOnlyWallet> {
+  final PageController _pageController = PageController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: PageView(
+      physics: const NeverScrollableScrollPhysics(),
+      controller: _pageController,
+      children: [
+        Column(
+          children: [
+            Center(
+              child: Hero(
+                  tag: "anon_logo",
+                  child: SafeArea(
+                      child: SizedBox(
+                          width: 180,
+                          child: Image.asset("assets/anon_logo.png")))),
+            ),
+            Center(
+              child: Text(
+                "NODE CONNECTION",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Expanded(
+              child: RestoreNodeSetup(
+                  onButtonPressed: () {
+                    _pageController.nextPage(
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.ease);
+                  },
+                  skipAppBar: true,
+                  pageController: _pageController),
+            )
+          ],
+        ),
+        ImportViewOnlyKeys(
+          pageController: _pageController,
+        ),
+        Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 280,
+                      height: 280,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    Hero(
+                        tag: "anon_logo",
+                        child: SizedBox(
+                            width: 180,
+                            child: Image.asset("assets/anon_logo.png"))),
+                  ],
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Text("Restoring wallet..."),
+                )
+              ],
+            ),
+          ),
+        )
+      ],
+    ));
+  }
+}
+
+class ImportViewOnlyKeys extends StatefulWidget {
+  final PageController pageController;
+
+  const ImportViewOnlyKeys({Key? key, required this.pageController})
+      : super(key: key);
+
+  @override
+  State<ImportViewOnlyKeys> createState() => _ImportViewOnlyKeysState();
+}
+
+class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
+  String _primaryAddress = "";
+  String? _primaryAddressError = null;
+  String? _privateViewKeyError = null;
+  String _privateViewKey = "";
+  num? _restoreHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Center(
+              child: Hero(
+                  tag: "anon_logo",
+                  child: SafeArea(
+                      child: SizedBox(
+                          width: 180,
+                          child: Image.asset("assets/anon_logo.png")))),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Center(
+              child: Text(
+                "NODE CONNECTION",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text("PRIMARY ADDRESS",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary)),
+              ),
+              subtitle: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _primaryAddress = value;
+                  });
+                },
+                maxLines: 1,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  errorText: _primaryAddressError,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white, width: 1),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text("PRIVATE VIEW ONLY KEY",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary)),
+              ),
+              subtitle: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _privateViewKey = value;
+                  });
+                },
+                maxLines: 1,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  errorText: _privateViewKeyError,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white, width: 1),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text("RESTORE KEY",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary)),
+              ),
+              subtitle: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _restoreHeight = num.tryParse(value);
+                  });
+                },
+                maxLines: 1,
+                keyboardType: const TextInputType.numberWithOptions(
+                    decimal: false, signed: true),
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white, width: 1),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        height: 80,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        alignment: Alignment.bottomRight,
+        child: Builder(builder: (context) {
+          bool isActive = (_primaryAddress.isNotEmpty &&
+              _privateViewKey.isNotEmpty &&
+              _restoreHeight != null);
+          return OutlinedButton(
+            style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  width: 1.0,
+                  color: isActive ? Colors.white : Colors.white24,
+                ),
+                primary: isActive ? Colors.white : Colors.white24,
+                shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                        width: 12,
+                        color: isActive ? Colors.white : Colors.white24),
+                    borderRadius: BorderRadius.circular(8)),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 6)),
+            onPressed: isActive
+                ? () async {
+                    try {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      String? pin =
+                          await Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const SetPinScreen(
+                          title: "Set up pin",
+                        ),
+                      ));
+                      if (pin != null && pin.isNotEmpty) {
+                        await widget.pageController.nextPage(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.ease);
+                        await BackUpRestoreChannel().restoreViewOnly(
+                            _primaryAddress,
+                            _privateViewKey,
+                            _restoreHeight!,
+                            pin);
+                      }
+                    } on PlatformException catch (exception) {
+                      widget.pageController.previousPage(
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.ease);
+                      if (exception.code == "primaryAddress") {
+                        setState(() {
+                          _primaryAddressError = exception.message;
+                        });
+                      }
+                      if (exception.code == "privateViewKey") {
+                        setState(() {
+                          _privateViewKeyError = exception.message;
+                        });
+                      }
+                    } catch (e) {
+                      // widget.pageController
+                      //     .previousPage(duration: const Duration(milliseconds: 500), curve: Curves.ease);
+                    }
+                  }
+                : null,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 44),
+              child: Text("Next"),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}

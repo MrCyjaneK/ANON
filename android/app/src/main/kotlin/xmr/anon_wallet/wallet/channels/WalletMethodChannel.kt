@@ -2,6 +2,7 @@ package xmr.anon_wallet.wallet.channels
 
 import android.util.Log
 import androidx.lifecycle.Lifecycle
+import anon.xmr.app.anon_wallet.BuildConfig
 import com.m2049r.xmrwallet.model.NetworkType
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
@@ -43,6 +44,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         when (call.method) {
             "create" -> createWallet(call, result)
             "walletState" -> walletState(call, result)
+            "isViewOnly" -> isViewOnly(call, result)
             "openWallet" -> openWallet(call, result)
             "viewWalletInfo" -> viewWalletInfo(call, result)
             "rescan" -> rescan(call, result)
@@ -52,6 +54,18 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "setTxUserNotes" -> setTxUserNotes(call, result)
             "wipeWallet" -> wipeWallet(call, result)
             "lock" -> lock(call, result)
+        }
+    }
+
+    private fun isViewOnly(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    result.success(BuildConfig.VIEW_ONLY)
+                } catch (e: Exception) {
+                    result.success(false)
+                }
+            }
         }
     }
 

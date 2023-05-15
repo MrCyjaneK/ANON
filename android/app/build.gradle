@@ -107,7 +107,8 @@ android {
     productFlavors {
         mainNet {
             dimension "app"
-            resValue 'string', 'app_title', '"ANON"'
+            resValue 'string', 'app_title', '"Anon"'
+            buildConfigField 'boolean', 'VIEW_ONLY', 'false'
             buildConfigField 'String', 'NETWORK', '"main"'
         }
         dev{
@@ -120,17 +121,20 @@ android {
             dimension "app"
             resValue 'string', 'app_title', '"ANON StageNet"'
             buildConfigField 'String', 'NETWORK', '"staging"'
+            buildConfigField 'boolean', 'VIEW_ONLY', 'false'
             applicationIdSuffix ".staging"
         }
-        ViewOnlymainNet {
+        viewOnlymainNet {
             dimension "app"
-            resValue 'string', 'app_title', '"Anon View"'
+            resValue 'string', 'app_title', '"Anon View Only"'
             buildConfigField 'String', 'NETWORK', '"main"'
+            buildConfigField 'boolean', 'VIEW_ONLY', 'true'
             applicationIdSuffix ".view"
         }
-        ViewOnlystageNet {
+        viewOnlystageNet {
             dimension "app"
-            resValue 'string', 'app_title', '"Anon View-StageNet"'
+            resValue 'string', 'app_title', '"Anon View Only -StageNet"'
+            buildConfigField 'boolean', 'VIEW_ONLY', 'true'
             buildConfigField 'String', 'NETWORK', '"staging"'
             applicationIdSuffix ".view.staging"
         }
