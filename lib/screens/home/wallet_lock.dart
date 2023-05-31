@@ -36,7 +36,7 @@ class WalletLock extends ConsumerWidget {
                     ],
                   ),
                   Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Text(
                       "Closing wallet",
                       style: Theme.of(context)

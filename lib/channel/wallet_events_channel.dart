@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/models/wallet.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -42,7 +43,9 @@ class WalletEventsChannel {
         channel.receiveBroadcastStream().asBroadcastStream().listen((event) {
       try {
         var type = event['EVENT_TYPE'];
-        print("Sync:${type} ${event}");
+        if(kDebugMode){
+          print("Sync:${type} ${event}");
+        }
         switch (type) {
           case "NODE":
             {
@@ -75,7 +78,9 @@ class WalletEventsChannel {
             }
         }
       } catch (e) {
-        print(e);
+        if(kDebugMode){
+          print(e);
+        }
       }
     });
   }

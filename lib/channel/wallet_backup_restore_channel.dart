@@ -36,7 +36,6 @@ class BackUpRestoreChannel {
 
   Future restoreFromSeed(
       String seed, num height, String passPhrase, String pin) async {
-    print("height ${height}");
     return platform.invokeMethod("restoreFromSeed", {
       "seed": seed,
       "restoreHeight": height.toInt(),

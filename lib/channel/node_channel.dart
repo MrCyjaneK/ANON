@@ -22,7 +22,7 @@ class NodeChannel {
   }
 
   Future setProxy(String proxy, String port) async {
-    dynamic value = await platform
+     await platform
         .invokeMethod("setProxy", {"proxyServer": proxy, "proxyPort": port});
   }
 
@@ -60,7 +60,6 @@ class NodeChannel {
         return Node.fromJson(value);
       }
     } catch (e) {
-      print(e);
       return null;
     }
     return null;
@@ -96,7 +95,7 @@ class NodeChannel {
   }
 
   Future removeNode(Node node) async {
-    dynamic value = await platform.invokeMethod("removeNode", {
+    await platform.invokeMethod("removeNode", {
       "host": node.host,
       "port": node.port,
       "password": node.password,

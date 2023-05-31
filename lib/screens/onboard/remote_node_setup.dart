@@ -59,7 +59,7 @@ class RemoteNodeWidget extends ConsumerWidget {
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.white, width: 1),
+                          borderSide: const BorderSide(color: Colors.white, width: 1),
                         ),
                         helperText: nodeMessage,
                         helperMaxLines: 3,

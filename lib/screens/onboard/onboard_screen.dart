@@ -233,13 +233,4 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
     }
   }
 
-  _navigateToHome() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (c) {
-        return const WalletHome();
-      }),
-      (route) => false,
-    );
-  }
 }

@@ -104,8 +104,8 @@ class _LandingScreenState extends State<LandingScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (c) => OnboardScreen(),
-                                  settings: RouteSettings()));
+                                  builder: (c) => const OnboardScreen(),
+                                  settings: const RouteSettings()));
                         } catch (e, s) {
                           debugPrintStack(stackTrace: s);
                         }

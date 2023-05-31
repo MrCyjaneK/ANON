@@ -377,7 +377,7 @@ class BackupDialog extends HookWidget {
                         curve: Curves.easeInSine);
                     error.value = e.message;
                     loading.value = false;
-                  } catch (e, s) {
+                  } catch (e) {
                     pageController.animateToPage(0,
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInSine);
