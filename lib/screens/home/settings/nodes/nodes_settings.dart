@@ -15,142 +15,144 @@ class NodesSettingsScreens extends ConsumerStatefulWidget {
       _NodesSettingsScreensState();
 }
 
+final _nodesListProvider =
+    FutureProvider<List<Node>>((ref) => NodeChannel().getAllNodes());
+
 class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
-  List<Node> nodes = [];
-  bool loading = false;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      load();
-    });
-  }
-
-  load() async {
-    setState(() {
-      loading = true;
-    });
-    var values = await NodeChannel().getAllNodes();
-    setState(() {
-      nodes = values;
-      loading = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    var asyncNodes = ref.watch(_nodesListProvider);
+    List<Node> nodes = asyncNodes.asData?.value ?? [];
+    bool isLoading = asyncNodes.isLoading;
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          const SliverAppBar(
-            title: Text("Nodes"),
-            actions: [
-              // Consumer(
-              //   builder: (context, ref, child) {
-              //     return TextButton(
-              //         onPressed: () {
-              //           showModalBottomSheet(
-              //               context: context,
-              //               barrierColor: barrierColor,
-              //               builder: (context) {
-              //                 return Container(
-              //                   height: MediaQuery.of(context).size.height / 1.6,
-              //                   child: Scaffold(
-              //                     body: RemoteNodeAddSheet(),
-              //                   ),
-              //                 );
-              //               }).then((value) => load());
-              //         },
-              //         child: const Text("Add Node")
-              //     );
-              //   },
-              // )
-            ],
-          ),
-          SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-            return Wrap(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                  child: InkWell(
-                    onTap: () {
-                      showDialog(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.refresh(_nodesListProvider);
+          return Future.value();
+        },
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              title: const Text("Nodes"),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      showModalBottomSheet(
                           context: context,
                           barrierColor: barrierColor,
                           builder: (context) {
-                            return NodeDetails(nodes[index]);
-                          }).then((value) => load());
+                            return const SizedBox(
+                              child: Scaffold(
+                                body: RemoteNodeAddSheet(),
+                              ),
+                            );
+                          }).then((value) => ref.refresh(_nodesListProvider));
                     },
+                    child: const Text("Add Node"))
+              ],
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(1),
+                child: Opacity(
+                  opacity: isLoading ? 1 : 0,
+                  child: const LinearProgressIndicator(
+                    minHeight: 1,
+                  ),
+                ),
+              ),
+            ),
+            SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+              return Wrap(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 12),
                     child: Card(
                       color: Colors.grey[900]?.withOpacity(0.9),
-                      child: ListTile(
-                        title: Text("${nodes[index].host}",
-                            maxLines: 1, overflow: TextOverflow.ellipsis),
-                        subtitle: Text("Height: ${nodes[index].height}"),
-                        trailing: nodes[index].isActive == true
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 12,
-                                    width: 12,
-                                    decoration: BoxDecoration(
-                                        color: Colors.green,
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
-                                  ),
-                                  const Text("Active")
-                                ],
-                              )
-                            : IconButton(
-                                onPressed: () async {
-                                  showDialog(
+                      child: Container(
+                        height: 80,
+                        alignment: Alignment.center,
+                        child: ListTile(
+                          onTap: () {
+                            showDialog(
                                     context: context,
                                     barrierColor: barrierColor,
                                     builder: (context) {
-                                      return AlertDialog(
-                                        backgroundColor: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                        content: const Text(
-                                            "Do you want to remove this node ?"),
-                                        actions: [
-                                          TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text("Cancel")),
-                                          TextButton(
-                                              onPressed: () {
-                                                NodeChannel()
-                                                    .removeNode(nodes[index])
-                                                    .then((value) {
-                                                  load();
-                                                });
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text("Delete")),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                icon: Icon(Icons.delete)),
+                                      return NodeDetails(nodes[index]);
+                                    })
+                                .then(
+                                    (value) => ref.refresh(_nodesListProvider));
+                          },
+                          title: Text("${nodes[index].host}",
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                          subtitle: Text(
+                              nodes[index].isActive == true
+                                  ? "Height: ${nodes[index].blockchainHeight}"
+                                  : "Inactive",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
+                          trailing: nodes[index].isActive == true
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.network_check,
+                                        color: Colors.green),
+                                    const Padding(padding: EdgeInsets.all(4)),
+                                    Text("Active",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall)
+                                  ],
+                                )
+                              : IconButton(
+                                  onPressed: () async {
+                                    showDialog(
+                                      context: context,
+                                      barrierColor: barrierColor,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          backgroundColor: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          content: const Text(
+                                              "Do you want to remove this node ?"),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text("Cancel")),
+                                            TextButton(
+                                                onPressed: () async {
+                                                  try {
+                                                    await NodeChannel()
+                                                        .removeNode(
+                                                            nodes[index]);
+                                                    ref.refresh(
+                                                        _nodesListProvider);
+                                                  } catch (e) {
+                                                    ref.refresh(
+                                                        _nodesListProvider);
+                                                    print(e);
+                                                  }
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text("Delete")),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  icon: const Icon(Icons.delete)),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const Divider(
-                  color: Colors.white54,
-                )
-              ],
-            );
-          }, childCount: nodes.length))
-        ],
+                ],
+              );
+            }, childCount: nodes.length))
+          ],
+        ),
       ),
     );
   }
@@ -297,7 +299,7 @@ class _NodeDetailsState extends State<NodeDetails> {
         loading = false;
         error = null;
       });
-      await Future.delayed(Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
       Navigator.pop(context);
     } catch (e) {
       setState(() {
@@ -332,7 +334,7 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
       slivers: [
         SliverAppBar(
           automaticallyImplyLeading: false,
-          title: Text("Add Node"),
+          title: const Text("Add Node"),
           centerTitle: true,
           bottom: isLoading.value
               ? const PreferredSize(
@@ -354,7 +356,7 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
               decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white, width: 1),
+                  borderSide: const BorderSide(color: Colors.white, width: 1),
                 ),
                 helperText: nodeStatus.value,
                 helperMaxLines: 3,
@@ -380,7 +382,7 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
               decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white, width: 1),
+                  borderSide: const BorderSide(color: Colors.white, width: 1),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -423,19 +425,21 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
               mainAxisSize: MainAxisSize.max,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    connect(
+                  onPressed: () async {
+                    await connect(
                         nodeTextController.text,
                         userNameTextController.text,
                         passWordTextController.text,
                         isLoading,
                         nodeStatus,
                         context);
+                    await Future.delayed(Duration(milliseconds: 200));
+                    ref.refresh(_nodesListProvider);
                   },
                   style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
                       backgroundColor: MaterialStateColor.resolveWith(
                           (states) => Colors.white)),
-                  child: Text("Add Node"),
+                  child: const Text("Add Node"),
                 )
               ],
             ),

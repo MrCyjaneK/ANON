@@ -20,6 +20,9 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             "setNode" -> setNode(call, result)
             "setProxy" -> setProxy(call, result)
             "getProxy" -> getProxy(call, result)
+            "getAllNodes" -> getAllNodes(result)
+            "addNewNode" -> addNewNode(call, result)
+            "removeNode" -> removeNode(call, result)
             "getNodeFromPrefs" -> getNodeFromPrefs(call, result)
             "setCurrentNode" -> setCurrentNode(call, result)
             "testRpc" -> testRpc(call, result)
@@ -263,6 +266,108 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             }
         }
     }
+
+
+
+    private fun addNewNode(call: MethodCall, result: Result) {
+        val port = call.argument<Int>("port")
+        var host = call.argument<String>("host")
+        val userName = call.argument<String?>("username")
+        val password = call.argument<String?>("password")
+        if (port == null || host == null) {
+            return result.error("1", "Invalid params", "")
+        }
+        if (host.lowercase().startsWith("http://")) {
+            host = host.replace("http://", "")
+        }
+        if (host.lowercase().startsWith("https://")) {
+            host = host.replace("https://", "")
+        }
+
+        this.scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    val findResult = NodeManager.getNodes().find {
+                        (it.host).lowercase() == host.lowercase() && (it.rpcPort == port)
+                    }
+                    if (findResult != null) {
+                        result.error("1", "Node already exist", "")
+                        return@withContext
+                    }
+                    val node = NodeInfo(/**/)
+                    node.host = host
+                    node.rpcPort = port
+                    userName?.let {
+                        node.username = it
+                    }
+                    password?.let {
+                        node.password = it
+                    }
+                    val testSuccess = node.testRpcService()
+                    if (testSuccess == true) {
+                        result.success(node.toHashMap())
+                        NodeManager.addNode(node)
+                    } else {
+                        result.error("2", "Failed to connect to remote node", "")
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    result.error("2", "${e.message}", e.cause)
+                    throw CancellationException(e.message)
+                }
+            }
+        }
+    }
+
+
+
+    private fun removeNode(call: MethodCall, result: Result) {
+        val port = call.argument<Int>("port")
+        var host = call.argument<String>("host")
+        val userName = call.argument<String?>("username")
+        val password = call.argument<String?>("password")
+        if (port == null || host == null) {
+            return result.error("1", "Invalid params", "")
+        }
+        if (host.lowercase().startsWith("http://")) {
+            host = host.replace("http://", "")
+        }
+        if (host.lowercase().startsWith("https://")) {
+            host = host.replace("https://", "")
+        }
+        scope.launch {
+            withContext(Dispatchers.IO){
+                try {
+                    NodeManager.removeNode(host,port,userName,password)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                result.success(true);
+            }
+        }
+    }
+
+
+
+    private fun getAllNodes(result: Result) {
+        scope.launch {
+            val server = AnonPreferences(AnonWallet.getAppContext()).serverUrl
+            val port = AnonPreferences(AnonWallet.getAppContext()).serverPort
+            val nodesList = arrayListOf<HashMap<String, Any>>()
+            NodeManager.getNodes().let { items->
+                items.forEach {
+                    val nodeHashMap = it.toHashMap()
+                    nodeHashMap["isActive"] = server == it.host && port == it.rpcPort;
+                    nodesList.add(nodeHashMap)
+                }
+            }
+            withContext(Dispatchers.IO) {
+                result.success(nodesList)
+            }
+        }
+    }
+
+
 
     companion object {
         const val CHANNEL_NAME = "node.channel"

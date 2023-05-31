@@ -1,5 +1,6 @@
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
+import 'package:anon_wallet/screens/home/settings/nodes/nodes_settings.dart';
 import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/screens/home/settings/view_wallet_private.dart';
@@ -46,15 +47,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Text("Connection", style: titleStyle),
                 ),
                 Divider(color: dividerColor, height: 2),
-                Opacity(
-                  opacity: 0.4,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                    onTap: () {
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => const NodesSettingsScreens()));
-                    },
-                    title: const Text("Node"),
-                  ),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 34),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const NodesSettingsScreens()));
+                  },
+                  title: const Text("Node"),
+                  subtitle: Text("Manage nodes",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: dividerColor)),
                 ),
                 HookConsumer(builder: (context, ref, child) {
                   Proxy proxy = ref.watch(proxyStateProvider);
@@ -138,22 +145,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Divider(color: dividerColor, height: 2),
                 Consumer(
                   builder: (context, ref, child) {
-                    bool isConnecting = ref.watch(connectingToNodeStateProvider);
-                    bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
-                    bool  isLoading = isConnecting || isWalletOpening;
+                    bool isConnecting =
+                        ref.watch(connectingToNodeStateProvider);
+                    bool isWalletOpening =
+                        ref.watch(walletLoadingProvider) ?? false;
+                    bool isLoading = isConnecting || isWalletOpening;
 
-                    return  Opacity(
+                    return Opacity(
                       opacity: isLoading ? 0.4 : 1,
                       child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                        onTap: !isLoading ? () {
-                          showWipeDialog(context);
-                        } : null,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 34),
+                        onTap: !isLoading
+                            ? () {
+                                showWipeDialog(context);
+                              }
+                            : null,
                         title: const Text("Secure Wipe"),
                       ),
                     );
                   },
-
                 ),
                 Divider(color: dividerColor, height: 2),
               ],
@@ -395,9 +406,9 @@ class BackupDialog extends HookWidget {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 loading.value
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 34),
-                        child: const Center(
+                    ? const Padding(
+                        padding: EdgeInsets.only(top: 34),
+                        child: Center(
                           child: SizedBox.square(
                             dimension: 62,
                             child: CircularProgressIndicator(

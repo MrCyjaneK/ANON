@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:flutter/services.dart';

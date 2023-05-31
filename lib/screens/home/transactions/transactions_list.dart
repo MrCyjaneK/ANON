@@ -118,7 +118,7 @@ class _TransactionsListState extends State<TransactionsList> {
               bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
               Map<String, num>? sync = ref.watch(syncProgressStateProvider);
               bool isActive = isConnecting || isWalletOpening || sync != null;
-              return  SliverPadding(padding: EdgeInsets.all(isActive ? 24 : 0));
+              return SliverPadding(padding: EdgeInsets.all(isActive ? 24 : 0));
             },
           )
         ],

@@ -29,9 +29,9 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
                 child: Hero(
                     tag: "anon_logo",
                     child: SafeArea(
-                    child: SizedBox(
-                        width: 180,
-                        child: Image.asset("assets/anon_logo.png")))),
+                        child: SizedBox(
+                            width: 180,
+                            child: Image.asset("assets/anon_logo.png")))),
               ),
             ),
             Expanded(
@@ -130,9 +130,9 @@ class _SeedEntryState extends State<SeedEntry> {
                 Hero(
                     tag: "anon_logo",
                     child: SafeArea(
-                    child: SizedBox(
-                        width: 180,
-                        child: Image.asset("assets/anon_logo.png")))),
+                        child: SizedBox(
+                            width: 180,
+                            child: Image.asset("assets/anon_logo.png")))),
                 Text(
                   "MNEMONIC SEED",
                   style: Theme.of(context)
