@@ -61,7 +61,7 @@ class _QRScannerViewState extends State<QRScannerView> {
 }
 
 PersistentBottomSheetController showQRBottomSheet(BuildContext context,
-    {Function(String value)? onScanCallback = null}) {
+    {Function(String value)? onScanCallback}) {
   return showBottomSheet(
       context: context,
       builder: (context) {

@@ -1,5 +1,4 @@
 import 'package:anon_wallet/anon_wallet.dart';
-import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/widgets/number_pad.dart';
 import 'package:flutter/material.dart';
 

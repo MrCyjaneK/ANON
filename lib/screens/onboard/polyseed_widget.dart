@@ -26,18 +26,16 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Hero(
-                      tag: "anon_logo",
-                      child: SizedBox(
-                          width: 180,
-                          child: Image.asset("assets/anon_logo.png"))),
-                ],
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Hero(
+                    tag: "anon_logo",
+                    child: SizedBox(
+                        width: 180,
+                        child: Image.asset("assets/anon_logo.png"))),
+              ],
             ),
           ),
           SliverGrid(
@@ -53,7 +51,7 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Text('${index + 1}.'),
-                      Container(
+                      SizedBox(
                         width: 80,
                         child: Text(
                           seeds[index],

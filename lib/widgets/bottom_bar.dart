@@ -81,7 +81,7 @@ class BottomBar extends StatelessWidget {
 
               final inactiveColor = items[index].inactiveColor ??
                   (brightness == Brightness.light
-                      ? Color.fromARGB(255, 80, 80, 80)
+                      ? const Color.fromARGB(255, 80, 80, 80)
                       : const Color(0xF2FFFFFF));
 
               return _BottomBarItemWidget(

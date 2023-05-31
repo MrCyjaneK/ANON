@@ -24,15 +24,13 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
       children: [
         Column(
           children: [
-            Container(
-              child: Center(
-                child: Hero(
-                    tag: "anon_logo",
-                    child: SafeArea(
-                        child: SizedBox(
-                            width: 180,
-                            child: Image.asset("assets/anon_logo.png")))),
-              ),
+            Center(
+              child: Hero(
+                  tag: "anon_logo",
+                  child: SafeArea(
+                      child: SizedBox(
+                          width: 180,
+                          child: Image.asset("assets/anon_logo.png")))),
             ),
             Expanded(
               child: RestoreNodeSetup(
@@ -59,7 +57,7 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    Container(
+                    const SizedBox(
                       width: 280,
                       height: 280,
                       child: CircularProgressIndicator(strokeWidth: 2),
@@ -221,7 +219,7 @@ class _SeedEntryState extends State<SeedEntry> {
                       style: OutlinedButton.styleFrom(
                           side:
                               const BorderSide(width: 1.0, color: Colors.white),
-                          primary: Colors.white,
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                               side: const BorderSide(
                                   width: 12, color: Colors.white),

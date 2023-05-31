@@ -4,7 +4,6 @@ import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/screens/onboard/onboard_state.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -59,7 +58,8 @@ class RemoteNodeWidget extends ConsumerWidget {
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.white, width: 1),
+                          borderSide:
+                              const BorderSide(color: Colors.white, width: 1),
                         ),
                         helperText: nodeMessage,
                         helperMaxLines: 3,
@@ -106,7 +106,8 @@ class RemoteNodeWidget extends ConsumerWidget {
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.white, width: 1),
+                      borderSide:
+                          const BorderSide(color: Colors.white, width: 1),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -133,7 +134,8 @@ class RemoteNodeWidget extends ConsumerWidget {
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.white, width: 1),
+                      borderSide:
+                          const BorderSide(color: Colors.white, width: 1),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -181,12 +183,12 @@ class RemoteNodeWidget extends ConsumerWidget {
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
-                            return ProxySettings();
+                            return const ProxySettings();
                           },
                         ));
                       },
-                      label: Text("Proxy Settings"),
-                      icon: Icon(Icons.shield_outlined),
+                      label: const Text("Proxy Settings"),
+                      icon: const Icon(Icons.shield_outlined),
                     ),
                   );
                 },

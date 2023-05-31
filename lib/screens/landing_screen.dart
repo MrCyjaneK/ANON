@@ -179,7 +179,7 @@ class _LandingScreenState extends State<LandingScreen> {
                           child: SizedBox(
                               width: 84,
                               child: Image.asset("assets/anon_logo.png"))),
-                      Text("Restore"),
+                      const Text("Restore"),
                     ],
                   ),
                   actions: [

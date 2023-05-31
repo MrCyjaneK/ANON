@@ -22,7 +22,7 @@ class NodeChannel {
   }
 
   Future setProxy(String proxy, String port) async {
-     await platform
+    await platform
         .invokeMethod("setProxy", {"proxyServer": proxy, "proxyPort": port});
   }
 

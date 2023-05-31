@@ -11,23 +11,21 @@ class WalletPassphraseWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Container(
+      child: SizedBox(
         height: MediaQuery.of(context).size.height - 120,
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Hero(
-                        tag: "anon_logo",
-                        child: SizedBox(
-                            width: 180,
-                            child: Image.asset("assets/anon_logo.png"))),
-                  ],
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Hero(
+                      tag: "anon_logo",
+                      child: SizedBox(
+                          width: 180,
+                          child: Image.asset("assets/anon_logo.png"))),
+                ],
               ),
             ),
             SliverToBoxAdapter(

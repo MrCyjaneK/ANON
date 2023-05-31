@@ -32,14 +32,14 @@ class RestoreNodeSetup extends ConsumerWidget {
         slivers: [
           !skipAppBar
               ? SliverAppBar(
-                  title: Text("Node Setup"),
+                  title: const Text("Node Setup"),
                   leading: IconButton(
                     onPressed: () {
                       pageController.previousPage(
                           curve: Curves.easeInOutQuad,
                           duration: const Duration(milliseconds: 500));
                     },
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                   ),
                 )
               : const SliverToBoxAdapter(),
@@ -63,7 +63,8 @@ class RestoreNodeSetup extends ConsumerWidget {
                     decoration: InputDecoration(
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.white, width: 1),
+                        borderSide:
+                            const BorderSide(color: Colors.white, width: 1),
                       ),
                       helperText: nodeMessage,
                       helperMaxLines: 3,
@@ -109,7 +110,7 @@ class RestoreNodeSetup extends ConsumerWidget {
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white, width: 1),
+                    borderSide: const BorderSide(color: Colors.white, width: 1),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -136,7 +137,7 @@ class RestoreNodeSetup extends ConsumerWidget {
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white, width: 1),
+                    borderSide: const BorderSide(color: Colors.white, width: 1),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -184,12 +185,12 @@ class RestoreNodeSetup extends ConsumerWidget {
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
-                          return ProxySettings();
+                          return const ProxySettings();
                         },
                       ));
                     },
-                    label: Text("Proxy Settings"),
-                    icon: Icon(Icons.shield_outlined),
+                    label: const Text("Proxy Settings"),
+                    icon: const Icon(Icons.shield_outlined),
                   ),
                 );
               },
@@ -200,14 +201,15 @@ class RestoreNodeSetup extends ConsumerWidget {
             child: Container(
               alignment: Alignment.bottomCenter,
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-              child: Container(
+              child: SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                      side: BorderSide(width: 1.0, color: Colors.white),
-                      primary: Colors.white,
+                      side: const BorderSide(width: 1.0, color: Colors.white),
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                          side: BorderSide(width: 12, color: Colors.white),
+                          side:
+                              const BorderSide(width: 12, color: Colors.white),
                           borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 6)),

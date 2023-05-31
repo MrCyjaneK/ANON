@@ -58,24 +58,21 @@ class NumberPad extends StatelessWidget {
             Align(
               alignment: Alignment.topLeft,
               child: Container(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 15),
-                  width: 80,
-                  height: 80,
-                  child: ClipOval(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onLongPress: () => onDeleteLongPress(),
-                        highlightColor:
-                            Theme.of(context).scaffoldBackgroundColor,
-                        splashColor: Theme.of(context)
-                            .scaffoldBackgroundColor
-                            .withOpacity(0.4),
-                        onTap: onDeleteCancelTap,
-                        child: const Center(
-                          child: Icon(Icons.backspace),
-                        ),
+                margin: const EdgeInsets.only(top: 15),
+                width: 80,
+                height: 80,
+                child: ClipOval(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onLongPress: () => onDeleteLongPress(),
+                      highlightColor: Theme.of(context).scaffoldBackgroundColor,
+                      splashColor: Theme.of(context)
+                          .scaffoldBackgroundColor
+                          .withOpacity(0.4),
+                      onTap: onDeleteCancelTap,
+                      child: const Center(
+                        child: Icon(Icons.backspace),
                       ),
                     ),
                   ),

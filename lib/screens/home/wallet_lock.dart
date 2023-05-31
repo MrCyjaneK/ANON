@@ -41,7 +41,7 @@ class WalletLock extends ConsumerWidget {
                       "Closing wallet",
                       style: Theme.of(context)
                           .textTheme
-                          .caption
+                          .bodySmall
                           ?.copyWith(fontSize: 11),
                     ),
                   )

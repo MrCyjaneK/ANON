@@ -84,7 +84,7 @@ class ProgressSliverWidget extends ConsumerWidget {
                     const Padding(padding: EdgeInsets.all(6)),
                     Text(
                       "Disconnected",
-                      style: Theme.of(context).textTheme.caption,
+                      style: Theme.of(context).textTheme.bodySmall,
                     )
                   ],
                 );

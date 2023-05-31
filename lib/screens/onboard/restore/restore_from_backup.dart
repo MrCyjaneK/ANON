@@ -76,7 +76,7 @@ class _RestoreFromBackupState extends State<RestoreFromBackup> {
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    Container(
+                    const SizedBox(
                       width: 200,
                       height: 200,
                       child: CircularProgressIndicator(strokeWidth: 2),
@@ -88,9 +88,9 @@ class _RestoreFromBackupState extends State<RestoreFromBackup> {
                             child: Image.asset("assets/anon_logo.png"))),
                   ],
                 ),
-                Padding(padding: EdgeInsets.all(12)),
-                Text("Restoring wallet from backup"),
-                Padding(padding: EdgeInsets.all(2)),
+                const Padding(padding: EdgeInsets.all(12)),
+                const Text("Restoring wallet from backup"),
+                const Padding(padding: EdgeInsets.all(2)),
                 Text(
                   "App will restart after restore",
                   style: Theme.of(context).textTheme.bodySmall,
@@ -159,9 +159,10 @@ class BackupPreviewScreen extends StatelessWidget {
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                       side: const BorderSide(width: 1.0, color: Colors.white),
-                      primary: Colors.white,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                          side: BorderSide(width: 12, color: Colors.white),
+                          side:
+                              const BorderSide(width: 12, color: Colors.white),
                           borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 6)),

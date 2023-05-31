@@ -27,7 +27,7 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          await ref.refresh(_nodesListProvider);
+          ref.refresh(_nodesListProvider);
           return Future.value();
         },
         child: CustomScrollView(

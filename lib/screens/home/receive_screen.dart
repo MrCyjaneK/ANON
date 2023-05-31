@@ -1,9 +1,6 @@
-import 'package:anon_wallet/channel/address_channel.dart';
-import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/screens/home/subaddress/edit_sub_address.dart';
 import 'package:anon_wallet/screens/home/subaddress/sub_addresses.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
-import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
