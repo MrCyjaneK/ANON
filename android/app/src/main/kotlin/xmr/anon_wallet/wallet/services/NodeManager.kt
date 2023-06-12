@@ -29,6 +29,7 @@ object NodeManager {
             val preferences = AnonPreferences(AnonWallet.getAppContext())
             val serverUrl = preferences.serverUrl
             val serverPort = preferences.serverPort
+            WalletManager.getInstance().setProxy(getProxy())
             if (serverUrl == null || serverUrl.isEmpty() || serverPort == null) {
                 isConfigured = false
                 WalletEventsChannel.sendEvent(

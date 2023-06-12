@@ -220,6 +220,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             result.error("1", "Invalid pin", "invalid pin")
                             return@withContext
                         }
+                        WalletManager.getInstance().setProxy(getProxy())
                         val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
                         wallet.setProxy(getProxy())
                         result.success(wallet.walletToHashMap())
