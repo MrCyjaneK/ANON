@@ -18,6 +18,12 @@ final walletAddressProvider = Provider((ref) {
   return wallet != null ? wallet.address : "";
 });
 
+final walletNodeDaemonHeight = Provider<int>((ref) {
+  var walletAsync = ref.watch(walletStateStreamProvider);
+  Wallet? wallet = walletAsync.value;
+  return wallet != null ? wallet.blockChainHeight.toInt() : 0;
+});
+
 final connectionStatus = Provider<bool>((ref) {
   var walletAsync = ref.watch(walletStateStreamProvider);
   Wallet? wallet = walletAsync.value;

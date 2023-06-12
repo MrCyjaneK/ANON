@@ -16,6 +16,7 @@ class Wallet {
   bool isSynchronized = false;
   String status = "";
   num blockChainHeight = 0;
+  num daemonBlockChainHeight = 0;
   num height = 0;
   num balance = 0;
   num unlockedBalance = 0;
@@ -37,6 +38,7 @@ class Wallet {
     connectionStatus = json['connectionStatus'] ?? "";
     status = json['status'] ?? "";
     blockChainHeight = json['blockChainHeight'] ?? 0;
+    daemonBlockChainHeight = json['daemonBlockChainHeight'] ?? 0;
     connection = json['connection'] ?? "";
     connectionError = json['connectionError'] ?? "";
     isSynchronized = json['isSynchronized'] ?? false;

@@ -255,6 +255,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
 
                     NodeManager.setCurrentActiveNode(node)
                     WalletManager.getInstance().setDaemon(node)
+                    result.success(node.toHashMap())
                     WalletManager.getInstance().wallet?.let {
                         it.refresh()
                         it.startRefresh()
@@ -348,20 +349,19 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
     }
 
 
-
     private fun getAllNodes(result: Result) {
         scope.launch {
-            val server = AnonPreferences(AnonWallet.getAppContext()).serverUrl
-            val port = AnonPreferences(AnonWallet.getAppContext()).serverPort
-            val nodesList = arrayListOf<HashMap<String, Any>>()
-            NodeManager.getNodes().let { items->
-                items.forEach {
-                    val nodeHashMap = it.toHashMap()
-                    nodeHashMap["isActive"] = server == it.host && port == it.rpcPort;
-                    nodesList.add(nodeHashMap)
+            withContext(Dispatchers.Default) {
+                val server = AnonPreferences(AnonWallet.getAppContext()).serverUrl
+                val port = AnonPreferences(AnonWallet.getAppContext()).serverPort
+                val nodesList = arrayListOf<HashMap<String, Any>>()
+                NodeManager.getNodes().let { items ->
+                    items.forEach {
+                        val nodeHashMap = it.toHashMap()
+                        nodeHashMap["isActive"] = server == it.host && port == it.rpcPort;
+                        nodesList.add(nodeHashMap)
+                    }
                 }
-            }
-            withContext(Dispatchers.IO) {
                 result.success(nodesList)
             }
         }

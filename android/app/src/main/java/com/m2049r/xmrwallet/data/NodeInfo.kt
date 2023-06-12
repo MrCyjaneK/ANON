@@ -92,10 +92,11 @@ class NodeInfo : Node {
     }
 
     fun toHashMap(): HashMap<String, Any> {
+        val wallet = WalletManager.getInstance().wallet;
         val hashMap = hashMapOf<String, Any>()
         hashMap["height"] = height
-        hashMap["blockchainHeight"] = WalletManager.getInstance().blockchainHeight ?: 0
         hashMap["responseCode"] = responseCode
+        hashMap["daemonBlockChainHeight"] = wallet?.daemonBlockChainHeight ?: -1
         hashMap["host"] = host
         hashMap["rpcPort"] = rpcPort
         hashMap["majorVersion"] = majorVersion

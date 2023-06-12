@@ -1,14 +1,13 @@
 package xmr.anon_wallet.wallet.services
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.m2049r.xmrwallet.data.NodeInfo
-
 import com.m2049r.xmrwallet.model.WalletManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel
 import xmr.anon_wallet.wallet.utils.AnonPreferences
@@ -55,6 +54,7 @@ object NodeManager {
                     put("status", "connecting")
                 })
                 currentNode = node
+                WalletManager.getInstance().setProxy(getProxy())
                 WalletManager.getInstance().setDaemon(node)
                 isConfigured = true
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {
@@ -117,7 +117,6 @@ object NodeManager {
     }
 
 
-
     suspend fun storeNodesList() {
         withContext(Dispatchers.IO) {
             val nodeListFile = AnonWallet.nodesFile
@@ -151,10 +150,20 @@ object NodeManager {
         }
     }
 
+    private fun getProxy(): String {
+        val prefs = AnonPreferences(AnonWallet.getAppContext());
+        return if (prefs.proxyPort.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
+            ""
+        } else {
+            "${prefs.proxyServer}:${prefs.proxyPort}"
+        }
+    }
+
     suspend fun getNodes(): ArrayList<NodeInfo> {
         return withContext(Dispatchers.IO) {
             try {
                 readNodes()
+                //push if connected node is not in the list or update if it is in the list
                 nodes.find { it.host == currentNode?.host && it.rpcPort == currentNode?.rpcPort }
                     .let {
                         if (it == null && currentNode != null) {
@@ -164,6 +173,7 @@ object NodeManager {
                 nodes = ArrayList(
                     nodes.distinctBy { it.toString() }
                 )
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }

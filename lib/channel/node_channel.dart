@@ -82,6 +82,7 @@ class NodeChannel {
     value.forEach((item) {
       nodes.add(Node.fromJson(item));
     });
+    nodes.sort((a, b) => a.isActive == true ? -1 : 1);
     return nodes;
   }
 
