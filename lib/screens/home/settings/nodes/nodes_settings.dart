@@ -166,6 +166,7 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      testRpc();
       setState(() {
         node = widget.node;
       });
