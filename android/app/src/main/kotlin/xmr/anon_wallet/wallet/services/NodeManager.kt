@@ -1,5 +1,6 @@
 package xmr.anon_wallet.wallet.services
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.m2049r.xmrwallet.data.NodeInfo
@@ -201,12 +202,10 @@ object NodeManager {
     }
 
     suspend fun removeNode(host: String, port: Int, userName: String?, password: String?) {
-        nodes = ArrayList(
-            nodes.filter {
-                it.host != host &&
-                        it.rpcPort != port
-            }.toList()
-        )
+        nodes.removeIf {
+            it.host == host &&
+                    it.rpcPort == port
+        }
         storeNodesList()
     }
 
