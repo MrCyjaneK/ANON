@@ -260,7 +260,6 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         it.refresh()
                         it.startRefresh()
                     }
-                    result.success(node.toHashMap())
                 } catch (e: Exception) {
                     result.error("1","${e.message}",e)
                 }
