@@ -256,9 +256,13 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     NodeManager.setCurrentActiveNode(node)
                     WalletManager.getInstance().setDaemon(node)
                     result.success(node.toHashMap())
-                    WalletManager.getInstance().wallet?.let {
-                        it.refresh()
-                        it.startRefresh()
+                    try {
+                        WalletManager.getInstance().wallet?.let {
+                            it.refresh()
+                            it.startRefresh()
+                        }
+                    } catch (e: Exception) {
+                        //no-op
                     }
                 } catch (e: Exception) {
                     result.error("1","${e.message}",e)
