@@ -18,11 +18,16 @@ class NodesSettingsScreens extends ConsumerStatefulWidget {
 final _nodesListProvider = FutureProvider<List<Node>>((ref) => NodeChannel().getAllNodes());
 
 class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
+  Node? _settingCurrentNode;
+
   @override
   Widget build(BuildContext context) {
     var asyncNodes = ref.watch(_nodesListProvider);
     List<Node> nodes = asyncNodes.asData?.value ?? [];
     bool isLoading = asyncNodes.isLoading;
+    Node? connectedNode = nodes.where((element) => element.isActive == true).first;
+    bool isConnected = ref.watch(connectionStatus);
+    nodes = nodes.where((element) => element.isActive == false).toList();
 
     return Scaffold(
       body: RefreshIndicator(
@@ -53,26 +58,121 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(1),
                 child: Opacity(
-                  opacity: isLoading ? 1 : 0,
+                  opacity: (isLoading || _settingCurrentNode != null) ? 1 : 0,
                   child: const LinearProgressIndicator(
                     minHeight: 1,
                   ),
                 ),
               ),
             ),
+            const SliverPadding(padding: EdgeInsets.all(12)),
+            SliverAppBar(
+              automaticallyImplyLeading: false,
+              toolbarHeight: 120,
+              flexibleSpace: Card(
+                  elevation: _settingCurrentNode == null ? 28 : 0,
+                  borderOnForeground: true,
+                  shadowColor: isConnected ? Colors.green.withOpacity(0.4) : Colors.red.withOpacity(0.4),
+                  surfaceTintColor: Colors.white,
+                  color: Colors.grey[900],
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 600),
+                    child: _settingCurrentNode != null
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Switching node",
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const Divider(),
+                                Text("${_settingCurrentNode?.host}", style: Theme.of(context).textTheme.bodySmall)
+                              ],
+                            ),
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              const Padding(padding: EdgeInsets.all(4)),
+                              ListTile(
+                                title: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  child: Text("${connectedNode.host}"),
+                                ),
+                                subtitle: Text("Port : ${connectedNode.port}"),
+                                trailing: Container(
+                                  height: 12,
+                                  width: 12,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isConnected ? Colors.green : Colors.red,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Proxy : ${connectedNode.proxyServer ?? "Not Set"}",
+                                      style: Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    Consumer(
+                                      builder: (context, ref, c) {
+                                        int activeNodeDaemonHeight = ref.watch(walletNodeDaemonHeight);
+                                        int activeHeight = (activeNodeDaemonHeight > connectedNode.height)
+                                            ? activeNodeDaemonHeight
+                                            : connectedNode.height;
+                                        return Text(
+                                            connectedNode.isActive == true ? "Daemon Height: $activeHeight" : "Inactive",
+                                            style: Theme.of(context).textTheme.bodySmall,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Padding(padding: EdgeInsets.all(4)),
+                            ],
+                          ),
+                  )),
+            ),
+            const SliverPadding(padding: EdgeInsets.all(12)),
+            const SliverToBoxAdapter(
+              child: Divider(),
+            ),
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                child: Text("Available Nodes"),
+              ),
+            ),
+            const SliverToBoxAdapter(
+              child: Divider(),
+            ),
             SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
               return Wrap(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
                     child: Card(
-                      color: Colors.grey[900]?.withOpacity(0.9),
+                      color: Colors.grey[900]?.withOpacity(0.6),
                       child: Container(
                         height: 80,
                         alignment: Alignment.center,
                         child: ListTile(
                           onTap: () {
+                            if(nodes[index].isActive != true){
+                              setAsCurrentNode(nodes[index]);
+                            }
+                          },
+                          onLongPress: () {
                             showDialog(
                                 context: context,
                                 barrierColor: barrierColor,
@@ -96,7 +196,14 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.network_check, color: Colors.green),
+                                    Container(
+                                      height: 12,
+                                      width: 12,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: isConnected ? Colors.green : Colors.red,
+                                      ),
+                                    ),
                                     const Padding(padding: EdgeInsets.all(4)),
                                     Text("Active", style: Theme.of(context).textTheme.labelSmall)
                                   ],
@@ -146,6 +253,24 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
       ),
     );
   }
+
+  Future setAsCurrentNode(Node node) async {
+    try {
+      setState(() {
+        _settingCurrentNode = node;
+      });
+      await NodeChannel().setCurrentNode(node);
+      setState(() {
+        _settingCurrentNode = null;
+      });
+      ref.refresh(_nodesListProvider);
+      await Future.delayed(const Duration(milliseconds: 300));
+    } catch (e) {
+      setState(() {
+        _settingCurrentNode = null;
+      });
+    }
+  }
 }
 
 class NodeDetails extends ConsumerStatefulWidget {
@@ -180,49 +305,56 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
       contentPadding: const EdgeInsets.only(top: 2, left: 12, right: 12, bottom: 6),
       content: SizedBox(
           width: MediaQuery.of(context).size.width,
-          height: 344,
-          child: Column(
-            children: [
-              AnimatedOpacity(
-                opacity: loading ? 1 : 0,
-                duration: const Duration(milliseconds: 300),
-                child: const LinearProgressIndicator(
-                  minHeight: 1,
+          height: 360,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                AnimatedOpacity(
+                  opacity: loading ? 1 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  child: const LinearProgressIndicator(
+                    minHeight: 1,
+                  ),
                 ),
-              ),
-              AnimatedOpacity(
-                opacity: error != null ? 1 : 0,
-                duration: const Duration(milliseconds: 300),
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  width: double.infinity,
-                  color: Colors.red,
-                  child:
-                      Text("$error", style: Theme.of(context).textTheme.subtitle2?.copyWith(fontSize: 13), maxLines: 1),
+                AnimatedContainer(
+                  height: error != null ? 80 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(8),
+                    width: double.infinity,
+                    child:
+                        Text("$error", style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 13,color: Colors.red),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 3),
+                  ),
                 ),
-              ),
-              ListTile(
-                title: Text("Host"),
-                subtitle: Text("${node?.host}"),
-              ),
-              const Divider(color: Colors.white70),
-              ListTile(
-                title: const Text("Height"),
-                trailing: Text("${node?.height}"),
-              ),
-              const Divider(color: Colors.white70),
-              ListTile(
-                title: const Text("Port"),
-                trailing: Text("${widget.node.port}"),
-              ),
-              const Divider(color: Colors.white70),
-              ListTile(
-                title: const Text("Version"),
-                trailing: Text("${node?.majorVersion}"),
-              ),
-              const Divider(color: Colors.white70),
-            ],
+                ListTile(
+                  title: const Text("Host"),
+                  subtitle: Text("${node?.host}"),
+                ),
+                const Divider(color: Colors.white70),
+                ListTile(
+                  title: const Text("Port"),
+                  trailing: Text("${widget.node.port}"),
+                ),
+                const Divider(color: Colors.white70),
+                ListTile(
+                  title: const Text("Version"),
+                  trailing: Text("${node?.majorVersion}"),
+                ),
+                const Divider(color: Colors.white70),
+                ListTile(
+                  title: const Text("Username"),
+                  trailing: Text("${node?.username} "),
+                ),
+                const Divider(color: Colors.white70),
+                ListTile(
+                  title: const Text("Password"),
+                  trailing: Text("${node?.password} "),
+                ),
+              ],
+            ),
           )),
       actions: [
         TextButton(
@@ -399,7 +531,7 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
                 ElevatedButton(
                   onPressed: () async {
                     await connect(nodeTextController.text, userNameTextController.text, passWordTextController.text,
-                        isLoading, nodeStatus, context,ref);
+                        isLoading, nodeStatus, context, ref);
                     await Future.delayed(Duration(milliseconds: 200));
                     ref.refresh(_nodesListProvider);
                   },
@@ -418,7 +550,7 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
   }
 
   Future connect(String host, String username, String password, ValueNotifier<bool> isLoading,
-      ValueNotifier<String?> nodeStatus, BuildContext context,WidgetRef ref) async {
+      ValueNotifier<String?> nodeStatus, BuildContext context, WidgetRef ref) async {
     int port = 38081;
     Uri uri = Uri.parse(host);
     if (uri.hasPort) {
