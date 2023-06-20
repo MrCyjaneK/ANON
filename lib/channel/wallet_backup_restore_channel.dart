@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/services.dart';
 
 class BackUpRestoreChannel {
@@ -16,6 +14,11 @@ class BackUpRestoreChannel {
   Future<bool> makeBackup(String password) async {
     bool value =
         await platform.invokeMethod("backup", {"seedPassphrase": password});
+    return value;
+  }
+
+  Future<bool> exportFile(String path) async {
+    bool value = await platform.invokeMethod("exportFile", {"path": path});
     return value;
   }
 

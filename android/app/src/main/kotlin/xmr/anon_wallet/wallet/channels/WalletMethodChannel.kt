@@ -51,6 +51,10 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "refresh" -> refresh(call, result)
             "startSync" -> startSync(call, result)
             "getTxKey" -> getTxKey(call, result)
+            "exportOutputs" -> exportOutputs(call, result)
+            "importKeyImages" -> importKeyImages(call, result)
+            "setTrustedDaemon" -> setTrustedDaemon(call, result)
+            "submitTransaction" -> submitTransaction(call, result)
             "setTxUserNotes" -> setTxUserNotes(call, result)
             "wipeWallet" -> wipeWallet(call, result)
             "lock" -> lock(call, result)
@@ -64,6 +68,25 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     result.success(BuildConfig.VIEW_ONLY)
                 } catch (e: Exception) {
                     result.success(false)
+                }
+            }
+        }
+    }
+
+    private fun setTrustedDaemon(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("arg")) {
+                    try {
+                        val arg = call.argument<Boolean>("arg") as Boolean
+                        val eo = WalletManager.getInstance().wallet.setTrustedDaemon(arg)
+                        result.success(eo)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
                 }
             }
         }
@@ -438,6 +461,64 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         }
     }
 
+    private fun exportOutputs(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("filename") && call.hasArgument("all")) {
+                    try {
+                        val filename = call.argument<String>("filename") as String
+                        val all = call.argument<Boolean>("all") as Boolean
+                        val eo = WalletManager.getInstance().wallet.exportOutputs(filename, all)
+                        result.success(eo)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
+        }
+    }
+
+    private fun importKeyImages(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("filename")) {
+                    try {
+                        val filename = call.argument<String>("filename") as String
+                        val eo = WalletManager.getInstance().wallet.importKeyImages(filename)
+                        result.success(eo)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
+        }
+    }
+
+    private fun submitTransaction(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("filename")) {
+                    try {
+                        val filename = call.argument<String>("filename") as String
+                        val eo = WalletManager.getInstance().wallet.submitTransaction(filename)
+                        result.success(eo)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
+        }
+    }
+    
     private fun getTxKey(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {

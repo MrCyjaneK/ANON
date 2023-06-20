@@ -25,4 +25,12 @@ class SpendMethodChannel {
     return await platform.invokeMethod("composeAndBroadcast",
         {"amount": amount, "address": address, "notes": notes});
   }
+
+  dynamic composeAndSave(
+      String amount, String address, String notes, String path) async {
+    return await platform.invokeMethod(
+      "composeAndSave",
+      {"amount": amount, "address": address, "notes": notes, "path": path},
+    );
+  }
 }

@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:anon_wallet/channel/spend_channel.dart';
+import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/models/broadcast_tx_state.dart';
-import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 
 class SpendValidationNotifier extends ChangeNotifier {
   bool? validAddress;
@@ -45,10 +48,19 @@ class TransactionStateNotifier extends StateNotifier<TxState> {
     var broadcastState = TxState();
     broadcastState.state = "waiting";
     state = broadcastState;
-    var returnValue =
-        await SpendMethodChannel().composeAndBroadcast(amount, address, notes);
-    state = TxState.fromJson(returnValue);
-    AppHaptics.mediumImpact();
+    final appDocumentsDir = await getApplicationDocumentsDirectory();
+    final fpath = "${appDocumentsDir.path}/unsigned_monero_tx";
+    if (await File(fpath).exists()) {
+      await File(fpath).delete();
+    }
+    var returnValue = await SpendMethodChannel()
+        .composeAndSave(amount, address, notes, fpath);
+    print("----returnValue compose");
+    print(returnValue);
+    state = TxState.fromJson(returnValue..addAll({"isLocal": true}));
+    print("----returnValue compose");
+    await BackUpRestoreChannel().exportFile(fpath);
+    //AppHaptics.mediumImpact();
   }
 }
 

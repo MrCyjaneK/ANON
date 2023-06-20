@@ -35,6 +35,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "backup" -> backup(call, result)
+            "exportFile" -> exportFile(call, result)
             "validatePayload" -> validatePayload(call, result)
             "openBackupFile" -> openBackupFile(call, result)
             "restoreViewOnly" -> restoreViewOnly(call, result)
@@ -256,6 +257,31 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         }
                     } else {
                         result.error("1", "Invalid passphrase", "")
+                    }
+                } catch (e: Exception) {
+                    result.error("2", e.message, "")
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun exportFile(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    val path = call.argument<String?>("path") as String
+                    WalletMethodChannel.backupPath = path
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "*/*"
+                                putExtra(Intent.EXTRA_TITLE, File(path).name)
+                            }
+                            currentResult = result
+                            activity.startActivityForResult(intent, BACKUP_EXPORT_CODE)
+                        }
                     }
                 } catch (e: Exception) {
                     result.error("2", e.message, "")

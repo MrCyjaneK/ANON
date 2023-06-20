@@ -18,6 +18,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
             "validate" -> validate(call, result)
             "composeTransaction" -> composeTransaction(call, result)
             "composeAndBroadcast" -> composeAndBroadcast(call, result)
+            "composeAndSave" -> composeAndSave(call, result)
         }
     }
 
@@ -91,6 +92,51 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun composeAndSave(call: MethodCall, result: Result) {
+        val address = call.argument<String?>("address")
+        val amount = call.argument<String>("amount")
+        val notes = call.argument<String>("notes")
+        val path = call.argument<String>("path")
+        val amountNumeric = Wallet.getAmountFromString(amount)
+        if (address == null || amount == null) {
+            return result.error("1", "invalid args", null)
+        }
+        this.scope.launch {
+            withContext(Dispatchers.IO) {
+                val wallet = WalletManager.getInstance().wallet
+                val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default);
+                val txId = pendingTx.firstTxIdJ;
+                var error = "";
+                var success = false;
+                try {
+                    success = pendingTx.commit(path, true)
+                    if (success) {
+                        wallet.refreshHistory()
+                        wallet.setUserNote(txId, notes)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    error = e.message ?: "";
+                }
+
+                wallet.store()
+                withContext(Dispatchers.IO) {
+                    result.success(
+                        hashMapOf(
+                            "fee" to pendingTx.fee,
+                            "amount" to pendingTx.amount,
+                            "state" to if (success) "success" else "error",
+                            "status" to pendingTx.status.toString(),
+                            "txId" to (txId ?: ""),
+                            "txCount" to pendingTx.txCount,
+                            "errorString" to error.ifEmpty { pendingTx.errorString },
+                        )
+                    )
                 }
             }
         }

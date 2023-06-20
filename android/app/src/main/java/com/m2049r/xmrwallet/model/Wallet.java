@@ -434,6 +434,11 @@ public class Wallet {
 
     private native long getHistoryJ();
 
+    public native boolean exportOutputs(String filename, boolean all);
+    public native String importKeyImages(String filename);
+    public native String submitTransaction(String filename);
+    public native boolean setTrustedDaemon(boolean arg);
+
     public void refreshHistory() {
         getHistory().refreshWithNotes(this);
     }

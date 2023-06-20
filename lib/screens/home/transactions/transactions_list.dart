@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/screens/home/transactions/sticky_progress.dart';
@@ -7,9 +10,11 @@ import 'package:anon_wallet/screens/home/wallet_lock.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 class TransactionsList extends StatefulWidget {
   final VoidCallback? onScanClick;
@@ -71,13 +76,39 @@ class _TransactionsListState extends State<TransactionsList> {
                   icon: const Icon(Icons.crop_free)),
               PopupMenuButton<int>(
                 onSelected: (item) {
-                  if (item == 0) {
-                    WalletChannel().rescan();
+                  switch (item) {
+                    case 0:
+                      WalletChannel().rescan();
+                      break;
+                    case 1:
+                      doExportStuff(context);
+                      break;
+                    case 2:
+                      doImportStuff(context);
+                      break;
+
+                    case 3:
+                      doBroadcastStuff(context);
+                      break;
                   }
                 },
                 itemBuilder: (context) => [
                   const PopupMenuItem<int>(
-                      value: 0, child: Text('Resync blockchain')),
+                    value: 0,
+                    child: Text('Resync blockchain'),
+                  ),
+                  const PopupMenuItem<int>(
+                    value: 1,
+                    child: Text('Export outputs'),
+                  ),
+                  const PopupMenuItem<int>(
+                    value: 2,
+                    child: Text('Import key images'),
+                  ),
+                  const PopupMenuItem<int>(
+                    value: 3,
+                    child: Text('Broadcast tx'),
+                  ),
                 ],
               ),
             ],
@@ -92,7 +123,7 @@ class _TransactionsListState extends State<TransactionsList> {
                     var amount = ref.watch(walletBalanceProvider);
                     return Text(
                       "${formatMonero(amount)} XMR",
-                      style: Theme.of(context).textTheme.headline4,
+                      style: Theme.of(context).textTheme.headlineMedium,
                     );
                   },
                 ),
@@ -146,10 +177,48 @@ class _TransactionsListState extends State<TransactionsList> {
   }
 }
 
+void doExportStuff(BuildContext context) async {
+  final appDocumentsDir = await getApplicationDocumentsDirectory();
+  final fpath = "${appDocumentsDir.path}/wallet_outputs";
+  if (await File(fpath).exists()) {
+    await File(fpath).delete();
+  }
+  final smth = await WalletChannel().exportOutputs(
+    fpath,
+    true,
+  );
+  await BackUpRestoreChannel().exportFile(fpath);
+}
+
 String formatTime(int? timestamp) {
   if (timestamp == null) {
     return "";
   }
   var dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
   return DateFormat("H:mm\ndd/M").format(dateTime);
+}
+
+void doImportStuff(BuildContext context) async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    dialogTitle: 'Pick file',
+    allowMultiple: false,
+  );
+  if (result == null) return;
+  await WalletChannel().setTrustedDaemon(true);
+  final resp = await WalletChannel().importKeyImages(result.files[0].path!);
+  scLog(context, resp.toString());
+}
+
+void scLog(BuildContext context, String txt) async {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(txt)));
+}
+
+void doBroadcastStuff(BuildContext context) async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    dialogTitle: 'Pick file',
+    allowMultiple: false,
+  );
+  if (result == null) return;
+  final resp = await WalletChannel().submitTransaction(result.files[0].path!);
+  scLog(context, resp.toString());
 }

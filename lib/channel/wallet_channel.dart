@@ -45,6 +45,28 @@ class WalletChannel {
     return value;
   }
 
+  Future<bool?> exportOutputs(String filename, bool all) async {
+    bool? value = await platform
+        .invokeMethod("exportOutputs", {"filename": filename, "all": all});
+    return value;
+  }
+
+  Future<String?> importKeyImages(String filename) async {
+    String? value =
+        await platform.invokeMethod("importKeyImages", {"filename": filename});
+    return value;
+  }
+
+  Future<void> setTrustedDaemon(bool arg) async {
+    await platform.invokeMethod("setTrustedDaemon", {"arg": arg});
+  }
+
+  Future<String?> submitTransaction(String filename) async {
+    String? value = await platform
+        .invokeMethod("submitTransaction", {"filename": filename});
+    return value;
+  }
+
   Future<bool> setTxUserNotes(String txId, String notes) async {
     bool value = await platform
         .invokeMethod("setTxUserNotes", {"txId": txId, "message": notes});

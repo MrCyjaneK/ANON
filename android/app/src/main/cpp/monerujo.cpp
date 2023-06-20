@@ -764,6 +764,15 @@ Java_com_m2049r_xmrwallet_model_Wallet_getConnectionStatusJ(JNIEnv *env, jobject
     return wallet->connected();
 }
 //TODO virtual void setTrustedDaemon(bool arg) = 0;
+JNIEXPORT jboolean JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_setTrustedDaemon(JNIEnv *env, jobject instance, jboolean arg) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+ 
+    wallet->setTrustedDaemon(arg);
+    return static_cast<jboolean>(true);
+}
+
+
 //TODO virtual bool trustedDaemon() const = 0;
 
 JNIEXPORT jboolean JNICALL
@@ -1042,7 +1051,41 @@ Java_com_m2049r_xmrwallet_model_Wallet_disposeTransaction(JNIEnv *env, jobject i
 
 //virtual bool exportKeyImages(const std::string &filename) = 0;
 //virtual bool importKeyImages(const std::string &filename) = 0;
+JNIEXPORT jstring JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_importKeyImages(JNIEnv *env, jobject instance, jstring filename) {
+    const char *_filename = env->GetStringUTFChars(filename, nullptr);
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+ 
+    bool success = wallet->importKeyImages(_filename);
+    if (success) {
+        return env->NewStringUTF("Imported");
+    } 
+    return env->NewStringUTF(wallet->errorString().c_str());
+}
 
+
+// virtual bool submitTransaction(const std::string &fileName) = 0;
+JNIEXPORT jstring JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_submitTransaction(JNIEnv *env, jobject instance, jstring filename) {
+    const char *_filename = env->GetStringUTFChars(filename, nullptr);
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+ 
+    bool success = wallet->submitTransaction(_filename);
+    if (success) {
+        return env->NewStringUTF("Transaction submitted!");
+    }
+    return env->NewStringUTF(wallet->errorString().c_str());
+}
+
+//virtual bool exportOutputs(const std::string &filename, bool all = false) = 0;
+JNIEXPORT jboolean JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_exportOutputs(JNIEnv *env, jobject instance, jstring filename, jboolean all) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    const char *_filename = env->GetStringUTFChars(filename, nullptr);
+    return wallet->exportOutputs(_filename, all);
+ 
+    // return env->NewStringUTF(outputs.c_str());
+}
 
 //virtual TransactionHistory * history() const = 0;
 JNIEXPORT jlong JNICALL
