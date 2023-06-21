@@ -23,6 +23,7 @@ class RestoreNodeSetup extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Node? node = ref.watch(nodeConnectionProvider);
+
     String? nodeMessage;
     if (node != null && node.responseCode <= 200) {
       nodeMessage = "Connected to ${node.host}\nHeight : ${node.height}";
@@ -214,7 +215,7 @@ class RestoreNodeSetup extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 6)),
                   onPressed: () async {
-                    if (node != null) {
+                    } else if (node != null) {
                       onButtonPressed();
                       return;
                     }
@@ -228,5 +229,57 @@ class RestoreNodeSetup extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void showConfirmColdAlertExternal(BuildContext context, Function callback) {
+    FocusNode focusNode = FocusNode();
+    showDialog(
+        context: context,
+        barrierColor: barrierColor,
+        barrierDismissible: false,
+        builder: (context) {
+          return HookBuilder(
+            builder: (context) {
+              useEffect(() {
+                focusNode.requestFocus();
+                return null;
+              }, []);
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+                content: SizedBox(
+                  width: MediaQuery.of(context).size.width / 1.3,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Do you want to create an offline wallet? Using this option will not use any node and will operate in a fully-offline way. You will need a separate wallet to sign transactions.",
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Cancel")),
+                  TextButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        onButtonPressed();
+                      },
+                      child: const Text("Confirm"))
+                ],
+              );
+            },
+          );
+        });
   }
 }

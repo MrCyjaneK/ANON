@@ -1048,7 +1048,16 @@ Java_com_m2049r_xmrwallet_model_Wallet_disposeTransaction(JNIEnv *env, jobject i
     wallet->disposeTransaction(_pendingTransaction);
 }
 
-//virtual bool exportKeyImages(const std::string &filename) = 0;
+//virtual bool exportKeyImages(const std::string &filename, bool all = false) = 0;
+JNIEXPORT jboolean JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_exportKeyImages(JNIEnv *env, jobject instance, jstring filename, jboolean all) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    const char *_filename = env->GetStringUTFChars(filename, nullptr);
+    return wallet->exportKeyImages(_filename, all);
+
+    // return env->NewStringUTF(outputs.c_str());
+}
+
 //virtual bool importKeyImages(const std::string &filename) = 0;
 JNIEXPORT jstring JNICALL
 Java_com_m2049r_xmrwallet_model_Wallet_importKeyImages(JNIEnv *env, jobject instance, jstring filename) {
@@ -1083,6 +1092,33 @@ Java_com_m2049r_xmrwallet_model_Wallet_exportOutputs(JNIEnv *env, jobject instan
     const char *_filename = env->GetStringUTFChars(filename, nullptr);
     return wallet->exportOutputs(_filename, all);
     // return env->NewStringUTF(outputs.c_str());
+}
+
+//virtual bool importOutputs(const std::string &filename) = 0;
+JNIEXPORT jstring JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_importOutputsJ(JNIEnv *env, jobject instance, jstring filename) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    const char *_filename = env->GetStringUTFChars(filename, nullptr);
+    bool success = wallet->importOutputs(_filename);
+    if (success) {
+        return env->NewStringUTF("Imported");
+    }
+    return env->NewStringUTF(wallet->errorString().c_str());
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_signAndExportJ(JNIEnv *env, jobject instance, jstring input_file, jstring output_file) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    const char *_input_file = env->GetStringUTFChars(input_file, nullptr);
+    Monero::UnsignedTransaction *tx = wallet->loadUnsignedTx(_input_file);
+    const char *_output_file = env->GetStringUTFChars(output_file, nullptr);
+
+
+    bool success = tx->sign(_output_file);
+    if (success) {
+        return env->NewStringUTF("Signed");
+    }
+    return env->NewStringUTF(wallet->errorString().c_str());
 }
 
 //virtual TransactionHistory * history() const = 0;

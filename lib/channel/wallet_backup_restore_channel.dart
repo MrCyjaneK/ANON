@@ -49,7 +49,6 @@ class BackUpRestoreChannel {
     });
   }
 
-  Future restoreViewOnly(
       String primaryAddress, String privateViewKey, num num, String pin) async {
     return platform.invokeMethod("restoreViewOnly", {
       "primaryAddress": primaryAddress,

@@ -81,14 +81,13 @@ class _TransactionsListState extends State<TransactionsList> {
                       WalletChannel().rescan();
                       break;
                     case 1:
-                      doExportStuff(context);
+                      importOutputs(context);
                       break;
                     case 2:
-                      doImportStuff(context);
+                      exportKeyImages(context);
                       break;
-
                     case 3:
-                      doBroadcastStuff(context);
+                      signTx(context);
                       break;
                   }
                 },
@@ -99,15 +98,15 @@ class _TransactionsListState extends State<TransactionsList> {
                   ),
                   const PopupMenuItem<int>(
                     value: 1,
-                    child: Text('Export outputs'),
+                    child: Text('Import outputs'),
                   ),
                   const PopupMenuItem<int>(
                     value: 2,
-                    child: Text('Import key images'),
+                    child: Text('Export key images'),
                   ),
                   const PopupMenuItem<int>(
                     value: 3,
-                    child: Text('Broadcast tx'),
+                    child: Text('Sign Tx'),
                   ),
                 ],
               ),
@@ -177,17 +176,51 @@ class _TransactionsListState extends State<TransactionsList> {
   }
 }
 
-void doExportStuff(BuildContext context) async {
+void importOutputs(BuildContext context) async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    dialogTitle: 'Import outputs',
+    allowMultiple: false,
+  );
+  if (result == null) return;
+  // await WalletChannel().setTrustedDaemon(true);
+  final resp = await WalletChannel().importOutputsJ(result.files[0].path!);
+  scLog(context, resp.toString());
+}
+
+void exportKeyImages(BuildContext context) async {
   final appDocumentsDir = await getApplicationDocumentsDirectory();
-  final fpath = "${appDocumentsDir.path}/wallet_outputs";
+  final fpath = "${appDocumentsDir.path}/key_images_export";
   if (await File(fpath).exists()) {
     await File(fpath).delete();
   }
-  final smth = await WalletChannel().exportOutputs(
+  final resp = await WalletChannel().exportKeyImages(
     fpath,
     true,
   );
+  scLog(context, resp.toString());
+
   await BackUpRestoreChannel().exportFile(fpath);
+}
+
+void signTx(BuildContext context) async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    dialogTitle: 'Import unsigned tx',
+    allowMultiple: false,
+  );
+  if (result == null) return;
+  final appDocumentsDir = await getApplicationDocumentsDirectory();
+  final fpath = "${appDocumentsDir.path}/signed_monero_tx";
+  if (await File(fpath).exists()) {
+    File(fpath).delete();
+  }
+  final resp =
+      await WalletChannel().signAndExportJ(result.files[0].path!, fpath);
+  await BackUpRestoreChannel().exportFile(fpath);
+  scLog(context, resp.toString());
+}
+
+void scLog(BuildContext context, String txt) async {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(txt)));
 }
 
 String formatTime(int? timestamp) {

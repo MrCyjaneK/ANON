@@ -57,7 +57,86 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "submitTransaction" -> submitTransaction(call, result)
             "setTxUserNotes" -> setTxUserNotes(call, result)
             "wipeWallet" -> wipeWallet(call, result)
+            "importOutputsJ" -> importOutputsJ(call, result)
+            "exportKeyImages" -> exportKeyImages(call, result)
+            "signAndExportJ" -> signAndExportJ(call, result)
+            "setTrustedDaemon" -> setTrustedDaemon(call, result)
             "lock" -> lock(call, result)
+        }
+    }
+    private fun importOutputsJ(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("filename")) {
+                    try {
+                        val filename = call.argument<String>("filename") as String
+                        val eo = WalletManager.getInstance().wallet.importOutputsJ(filename)
+                        result.success(eo)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
+        }
+    }
+    private fun exportKeyImages(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("filename") && call.hasArgument("all")) {
+                    try {
+                        val filename = call.argument<String>("filename") as String
+                        val all = call.argument<Boolean>("all") as Boolean
+                        val eo = WalletManager.getInstance().wallet.exportKeyImages(filename, all)
+                        result.success(eo)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
+        }
+    }
+    private fun signAndExportJ(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("inputFile") && call.hasArgument("outputFile")) {
+                    try {
+                        val inputFile = call.argument<String>("inputFile") as String
+                        val outputFile = call.argument<String>("outputFile") as String
+                        val eo = WalletManager.getInstance().wallet.signAndExportJ(inputFile, outputFile)
+                        result.success(eo)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
+        }
+    }
+
+    private fun setTrustedDaemon(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                if (call.hasArgument("arg")) {
+                    try {
+                        val arg = call.argument<Boolean>("arg") as Boolean
+                        val eo = WalletManager.getInstance().wallet.setTrustedDaemon(arg)
+                        result.success(eo)
+                    } catch (e: Exception) {
+                        result.error("1", e.message, "")
+                        throw CancellationException(e.message)
+                    }
+                } else {
+                    result.error("0", "invalid params", null)
+                }
+            }
         }
     }
 

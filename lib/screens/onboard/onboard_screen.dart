@@ -7,9 +7,11 @@ import 'package:anon_wallet/screens/onboard/remote_node_setup.dart';
 import 'package:anon_wallet/screens/onboard/wallet_passphrase.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:anon_wallet/state/node_state.dart';
+import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class OnboardScreen extends ConsumerStatefulWidget {
@@ -136,6 +138,7 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
               builder: (context, ref, c) {
                 var value = ref.watch(nextButtonValidation);
                 var page = ref.watch(navigatorState);
+                var rHost = ref.watch(remoteHost);
                 Node? connection = ref.watch(nodeConnectionState).value;
                 String nextButton = "Connect";
                 if (page == 0) {
@@ -161,14 +164,18 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                   child: ElevatedButton(
                     style:
                         ElevatedButton.styleFrom(backgroundColor: Colors.white),
-                    onPressed: value
-                        ? () async {
-                            onNext(context);
-                          }
-                        : null,
-                    child: Text(nextButton,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Colors.black, fontWeight: FontWeight.w700)),
+                    onPressed: () async {
+                      if (rHost.isEmpty && page == 0) {
+                        showConfirmColdAlert();
+                      } else if (value) {
+                        onNext(context);
+                      }
+                    },
+                    child: Text(
+                      nextButton,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Colors.black, fontWeight: FontWeight.w700),
+                    ),
                   ),
                 );
               },
@@ -179,12 +186,65 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
     );
   }
 
-  onNext(BuildContext context) async {
+  void showConfirmColdAlert() {
+    FocusNode focusNode = FocusNode();
+    showDialog(
+        context: context,
+        barrierColor: barrierColor,
+        barrierDismissible: false,
+        builder: (context) {
+          return HookBuilder(
+            builder: (context) {
+              useEffect(() {
+                focusNode.requestFocus();
+                return null;
+              }, []);
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+                content: SizedBox(
+                  width: MediaQuery.of(context).size.width / 1.3,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Do you want to create an offline wallet? Using this option will not use any node and will operate in a fully-offline way. You will need a separate wallet to sign transactions.",
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Cancel")),
+                  TextButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        onNext(context, coldMode: true);
+                      },
+                      child: const Text("Confirm"))
+                ],
+              );
+            },
+          );
+        });
+  }
+
+  onNext(BuildContext context, {bool coldMode = false}) async {
     FocusManager.instance.primaryFocus?.unfocus();
     Node? connectionState = ref.read(nodeConnectionState).value;
-    if (pageController.page == 0 &&
-        connectionState != null &&
-        connectionState.isConnected()) {
+    if ((pageController.page == 0 &&
+            connectionState != null &&
+            connectionState.isConnected()) ||
+        coldMode) {
       pageController.nextPage(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOutSine);
@@ -195,13 +255,17 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
         await ref.read(nodeConnectionProvider.notifier).connect();
       } on PlatformException catch (e) {
         ScaffoldMessenger.of(context).showMaterialBanner(
-            MaterialBanner(content: Text("${e.message}"), actions: [
-          TextButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-              },
-              child: const Text("Close"))
-        ]));
+          MaterialBanner(
+            content: Text("${e.message}"),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                  },
+                  child: const Text("Close"))
+            ],
+          ),
+        );
       }
       return;
     }

@@ -443,8 +443,13 @@ public class Wallet {
         getHistory().refreshWithNotes(this);
     }
 
-//virtual AddressBook * addressBook() const = 0;
-//virtual void setListener(WalletListener *) = 0;
+    public native String importOutputsJ(String filename);
+    public native boolean exportKeyImages(String filename, boolean all);
+    public native String signAndExportJ(String inputFile, String outputFile);
+    public native boolean setTrustedDaemon(boolean arg);
+
+    //virtual AddressBook * addressBook() const = 0;
+    //virtual void setListener(WalletListener *) = 0;
 
     private native long setListenerJ(WalletListener listener);
 

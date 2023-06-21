@@ -101,6 +101,25 @@ class WalletChannel {
         .invokeMethod("wipeWallet", {"seedPassphrase": seedPassphrase});
   }
 
+  Future<String?> importOutputsJ(String filename) async {
+    return await platform
+        .invokeMethod("importOutputsJ", {"filename": filename});
+  }
+
+  Future exportKeyImages(String filename, bool all) async {
+    return await platform
+        .invokeMethod("exportKeyImages", {"filename": filename, "all": all});
+  }
+
+  Future<String?> signAndExportJ(String inputFile, String outputFile) async {
+    return await platform.invokeMethod(
+        "signAndExportJ", {"inputFile": inputFile, "outputFile": outputFile});
+  }
+
+  Future<void> setTrustedDaemon(bool arg) async {
+    await platform.invokeMethod("setTrustedDaemon", {"arg": arg});
+  }
+
   Future lock() async {
     dynamic value = await platform.invokeMethod("lock");
   }
