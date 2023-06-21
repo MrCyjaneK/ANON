@@ -38,7 +38,7 @@ class Node {
   Node.fromJson(Map json) {
     try {
       height = json['height'] ?? 0;
-      blockchainHeight = json['blockchainHeight'] ?? 0;
+      blockchainHeight = json['daemonBlockChainHeight'] ?? 0;
       isActive = json['isActive'] ?? false;
       status = json['status'] ?? "disconnected";
       connectionError = json['connection_error'] ?? "";

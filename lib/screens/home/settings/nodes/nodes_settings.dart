@@ -12,10 +12,12 @@ class NodesSettingsScreens extends ConsumerStatefulWidget {
   const NodesSettingsScreens({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<NodesSettingsScreens> createState() => _NodesSettingsScreensState();
+  ConsumerState<NodesSettingsScreens> createState() =>
+      _NodesSettingsScreensState();
 }
 
-final _nodesListProvider = FutureProvider<List<Node>>((ref) => NodeChannel().getAllNodes());
+final _nodesListProvider =
+    FutureProvider<List<Node>>((ref) => NodeChannel().getAllNodes());
 
 class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
   Node? _settingCurrentNode;
@@ -25,7 +27,8 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
     var asyncNodes = ref.watch(_nodesListProvider);
     List<Node> nodes = asyncNodes.asData?.value ?? [];
     bool isLoading = asyncNodes.isLoading;
-    Node? connectedNode = nodes.where((element) => element.isActive == true).first;
+    Node? connectedNode =
+        nodes.where((element) => element.isActive == true).first;
     bool isConnected = ref.watch(connectionStatus);
     nodes = nodes.where((element) => element.isActive == false).toList();
 
@@ -72,10 +75,13 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
               flexibleSpace: Card(
                   elevation: _settingCurrentNode == null ? 28 : 0,
                   borderOnForeground: true,
-                  shadowColor: isConnected ? Colors.green.withOpacity(0.4) : Colors.red.withOpacity(0.4),
+                  shadowColor: isConnected
+                      ? Colors.green.withOpacity(0.4)
+                      : Colors.red.withOpacity(0.4),
                   surfaceTintColor: Colors.white,
                   color: Colors.grey[900],
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 600),
                     child: _settingCurrentNode != null
@@ -86,10 +92,13 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                               children: [
                                 Text(
                                   "Switching node",
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const Divider(),
-                                Text("${_settingCurrentNode?.host}", style: Theme.of(context).textTheme.bodySmall)
+                                Text("${_settingCurrentNode?.host}",
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall)
                               ],
                             ),
                           )
@@ -99,7 +108,8 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                               const Padding(padding: EdgeInsets.all(4)),
                               ListTile(
                                 title: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
                                   child: Text("${connectedNode.host}"),
                                 ),
                                 subtitle: Text("Port : ${connectedNode.port}"),
@@ -108,28 +118,39 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                   width: 12,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: isConnected ? Colors.green : Colors.red,
+                                    color:
+                                        isConnected ? Colors.green : Colors.red,
                                   ),
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       "Proxy : ${connectedNode.proxyServer ?? "Not Set"}",
-                                      style: Theme.of(context).textTheme.bodySmall,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
                                     ),
                                     Consumer(
                                       builder: (context, ref, c) {
-                                        int activeNodeDaemonHeight = ref.watch(walletNodeDaemonHeight);
-                                        int activeHeight = (activeNodeDaemonHeight > connectedNode.height)
-                                            ? activeNodeDaemonHeight
-                                            : connectedNode.height;
+                                        int activeNodeDaemonHeight =
+                                            ref.watch(walletNodeDaemonHeight);
+                                        int activeHeight =
+                                            (activeNodeDaemonHeight >
+                                                    connectedNode.height)
+                                                ? activeNodeDaemonHeight
+                                                : connectedNode.height;
                                         return Text(
-                                            connectedNode.isActive == true ? "Daemon Height: $activeHeight" : "Inactive",
-                                            style: Theme.of(context).textTheme.bodySmall,
+                                            connectedNode.isActive == true
+                                                ? "Daemon Height: $activeHeight"
+                                                : "Inactive",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis);
                                       },
@@ -160,7 +181,8 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
               return Wrap(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
                     child: Card(
                       color: Colors.grey[900]?.withOpacity(0.6),
                       child: Container(
@@ -168,27 +190,36 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                         alignment: Alignment.center,
                         child: ListTile(
                           onTap: () {
-                            if(nodes[index].isActive != true){
+                            if (nodes[index].isActive != true) {
                               setAsCurrentNode(nodes[index]);
                             }
                           },
                           onLongPress: () {
                             showDialog(
-                                context: context,
-                                barrierColor: barrierColor,
-                                builder: (context) {
-                                  return NodeDetails(nodes[index]);
-                                }).then((value) => ref.refresh(_nodesListProvider));
+                                    context: context,
+                                    barrierColor: barrierColor,
+                                    builder: (context) {
+                                      return NodeDetails(nodes[index]);
+                                    })
+                                .then(
+                                    (value) => ref.refresh(_nodesListProvider));
                           },
-                          title: Text("${nodes[index].host}", maxLines: 1, overflow: TextOverflow.ellipsis),
+                          title: Text("${nodes[index].host}",
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
                           subtitle: Consumer(
                             builder: (context, ref, c) {
-                              int activeNodeDaemonHeight = ref.watch(walletNodeDaemonHeight);
-                              int activeHeight = (activeNodeDaemonHeight > nodes[index].height)
-                                  ? activeNodeDaemonHeight
-                                  : nodes[index].height;
-                              return Text(nodes[index].isActive == true ? "Height: $activeHeight" : "Inactive",
-                                  maxLines: 1, overflow: TextOverflow.ellipsis);
+                              int activeNodeDaemonHeight =
+                                  ref.watch(walletNodeDaemonHeight);
+                              int activeHeight =
+                                  (activeNodeDaemonHeight > nodes[index].height)
+                                      ? activeNodeDaemonHeight
+                                      : nodes[index].height;
+                              return Text(
+                                  nodes[index].isActive == true
+                                      ? "Height: $activeHeight"
+                                      : "Inactive",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis);
                             },
                           ),
                           trailing: nodes[index].isActive == true
@@ -201,11 +232,16 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                       width: 12,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: isConnected ? Colors.green : Colors.red,
+                                        color: isConnected
+                                            ? Colors.green
+                                            : Colors.red,
                                       ),
                                     ),
                                     const Padding(padding: EdgeInsets.all(4)),
-                                    Text("Active", style: Theme.of(context).textTheme.labelSmall)
+                                    Text("Active",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall)
                                   ],
                                 )
                               : IconButton(
@@ -215,8 +251,10 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                       barrierColor: barrierColor,
                                       builder: (context) {
                                         return AlertDialog(
-                                          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                                          content: const Text("Do you want to remove this node ?"),
+                                          backgroundColor: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          content: const Text(
+                                              "Do you want to remove this node ?"),
                                           actions: [
                                             TextButton(
                                                 onPressed: () {
@@ -226,10 +264,14 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                             TextButton(
                                                 onPressed: () async {
                                                   try {
-                                                    await NodeChannel().removeNode(nodes[index]);
-                                                    ref.refresh(_nodesListProvider);
+                                                    await NodeChannel()
+                                                        .removeNode(
+                                                            nodes[index]);
+                                                    ref.refresh(
+                                                        _nodesListProvider);
                                                   } catch (e) {
-                                                    ref.refresh(_nodesListProvider);
+                                                    ref.refresh(
+                                                        _nodesListProvider);
                                                     print(e);
                                                   }
                                                   Navigator.pop(context);
@@ -302,7 +344,8 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      contentPadding: const EdgeInsets.only(top: 2, left: 12, right: 12, bottom: 6),
+      contentPadding:
+          const EdgeInsets.only(top: 2, left: 12, right: 12, bottom: 6),
       content: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: 360,
@@ -323,10 +366,13 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(8),
                     width: double.infinity,
-                    child:
-                        Text("$error", style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 13,color: Colors.red),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 3),
+                    child: Text("$error",
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontSize: 13, color: Colors.red),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3),
                   ),
                 ),
                 ListTile(
@@ -368,7 +414,8 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
             onPressed: !loading
                 ? () {
                     if (node != null) {
-                      setAsCurrentNode(node!).then((value) => Navigator.pop(context));
+                      setAsCurrentNode(node!)
+                          .then((value) => Navigator.pop(context));
                     }
                   }
                 : null,
@@ -389,8 +436,8 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
         loading = true;
         error = null;
       });
-      Node? refreshedNode =
-          await NodeChannel().testRpc(widgetNode.host, widgetNode.port ?? 80, widgetNode.username, widgetNode.password);
+      Node? refreshedNode = await NodeChannel().testRpc(widgetNode.host,
+          widgetNode.port ?? 80, widgetNode.username, widgetNode.password);
       if (refreshedNode != null) {
         setState(() {
           loading = false;
@@ -427,7 +474,8 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
   }
 }
 
-final nodeRemoteConnectionProvider = StateNotifierProvider<ConnectToNodeState, Node?>((ref) {
+final nodeRemoteConnectionProvider =
+    StateNotifierProvider<ConnectToNodeState, Node?>((ref) {
   return ConnectToNodeState(ref);
 });
 
@@ -436,9 +484,12 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    TextEditingController nodeTextController = useTextEditingController(text: "");
-    TextEditingController userNameTextController = useTextEditingController(text: "");
-    TextEditingController passWordTextController = useTextEditingController(text: "");
+    TextEditingController nodeTextController =
+        useTextEditingController(text: "");
+    TextEditingController userNameTextController =
+        useTextEditingController(text: "");
+    TextEditingController passWordTextController =
+        useTextEditingController(text: "");
     var isLoading = useState(false);
     var nodeStatus = useState<String?>(null);
 
@@ -449,14 +500,18 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
           title: const Text("Add Node"),
           centerTitle: true,
           bottom: isLoading.value
-              ? const PreferredSize(preferredSize: Size.fromHeight(1), child: LinearProgressIndicator(minHeight: 1))
+              ? const PreferredSize(
+                  preferredSize: Size.fromHeight(1),
+                  child: LinearProgressIndicator(minHeight: 1))
               : null,
         ),
         SliverToBoxAdapter(
           child: ListTile(
             title: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text("NODE", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+              child: Text("NODE",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
             ),
             subtitle: TextField(
               controller: nodeTextController,
@@ -480,7 +535,9 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
           child: ListTile(
             title: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text("USERNAME", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+              child: Text("USERNAME",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
             ),
             subtitle: TextField(
               controller: userNameTextController,
@@ -502,7 +559,9 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
           child: ListTile(
             title: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text("PASSWORD", style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+              child: Text("PASSWORD",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
             ),
             subtitle: TextField(
               controller: passWordTextController,
@@ -530,15 +589,20 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    await connect(nodeTextController.text, userNameTextController.text, passWordTextController.text,
-                        isLoading, nodeStatus, context, ref);
+                    await connect(
+                        nodeTextController.text,
+                        userNameTextController.text,
+                        passWordTextController.text,
+                        isLoading,
+                        nodeStatus,
+                        context,
+                        ref);
                     await Future.delayed(Duration(milliseconds: 200));
                     ref.refresh(_nodesListProvider);
                   },
-                  style: Theme.of(context)
-                      .elevatedButtonTheme
-                      .style
-                      ?.copyWith(backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white)),
+                  style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                      backgroundColor: MaterialStateColor.resolveWith(
+                          (states) => Colors.white)),
                   child: const Text("Add Node"),
                 )
               ],
@@ -549,8 +613,14 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
     );
   }
 
-  Future connect(String host, String username, String password, ValueNotifier<bool> isLoading,
-      ValueNotifier<String?> nodeStatus, BuildContext context, WidgetRef ref) async {
+  Future connect(
+      String host,
+      String username,
+      String password,
+      ValueNotifier<bool> isLoading,
+      ValueNotifier<String?> nodeStatus,
+      BuildContext context,
+      WidgetRef ref) async {
     int port = 38081;
     Uri uri = Uri.parse(host);
     if (uri.hasPort) {
@@ -558,7 +628,8 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
     }
     try {
       isLoading.value = true;
-      Node? node = await NodeChannel().addNode(uri.host, port, username, password);
+      Node? node =
+          await NodeChannel().addNode(uri.host, port, username, password);
       if (node != null) {
         nodeStatus.value = "Connected to ${node.host}\nHeight : ${node.height}";
       }
@@ -567,7 +638,8 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
       ref.refresh(_nodesListProvider);
       Navigator.pop(context);
     } on PlatformException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${e.message}")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("${e.message}")));
       Navigator.pop(context);
     } catch (e) {
       print(e);

@@ -5,9 +5,11 @@ import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
 import 'package:anon_wallet/state/sub_addresses.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../models/transaction.dart';
 
 class SubAddressDetails extends ConsumerStatefulWidget {
@@ -53,7 +55,36 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                       return SubAddressEditDialog(subAddress);
                     });
               },
-              icon: const Icon(Icons.edit))
+              icon: const Icon(Icons.edit)),
+          Builder(builder: (context) {
+            return IconButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    useRootNavigator: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) {
+                      return Container(
+                        height: 400,
+                        alignment: Alignment.center,
+                        child: SizedBox.square(
+                          dimension: 280,
+                          child: Center(
+                            child: QrImage(
+                              size: 280,
+                              backgroundColor: Colors.black,
+                              foregroundColor: Colors.white,
+                              data: "monero:${subAddress.address}",
+                              version: QrVersions.auto,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                icon: const Icon(Icons.qr_code_2_outlined));
+          })
         ],
       ),
       body: CustomScrollView(
@@ -61,21 +92,27 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
           SliverToBoxAdapter(
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 6),
-              child: ListTile(
-                title: Text(
-                  subAddress.label ?? '',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: Theme.of(context).primaryColor),
-                ),
-                subtitle: Text(subAddress.address ?? ''),
-                trailing: Text(
-                  formatMonero(subAddress.totalAmount),
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: Theme.of(context).primaryColor),
+              child: Hero(
+                tag: "sub:${subAddress.squashedAddress}",
+                child: Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    title: Text(
+                      subAddress.label ?? '',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(color: Theme.of(context).primaryColor),
+                    ),
+                    subtitle: Text(subAddress.address ?? ''),
+                    trailing: Text(
+                      formatMonero(subAddress.totalAmount),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(color: Theme.of(context).primaryColor),
+                    ),
+                  ),
                 ),
               ),
             ),

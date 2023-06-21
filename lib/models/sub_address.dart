@@ -22,7 +22,7 @@ class SubAddress {
       address = json['address'];
       squashedAddress = json['squashedAddress'];
       addressIndex = json['addressIndex'];
-      totalAmount = json['totalAmount'];
+      totalAmount = json['totalAmount'] ?? 0;
       label = json['label'];
     } catch (e, s) {
       debugPrintStack(stackTrace: s);
