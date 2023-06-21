@@ -28,6 +28,9 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import lombok.Getter;
 import timber.log.Timber;
@@ -35,12 +38,19 @@ import android.util.Log;
 
 import android.util.Log;
 
+// import kotlin.Pair;
+import android.util.Pair;
+// Because fuck me. That's why.
+
+import com.m2049r.xmrwallet.model.UnsignedTransaction;
+
 public class Wallet {
     final static public long SWEEP_ALL = Long.MAX_VALUE;
 
     static {
         System.loadLibrary("monerujo");
     }
+    private Coins coins = null;
 
     static public class Status {
         Status(int status, String errorString) {
@@ -393,39 +403,66 @@ public class Wallet {
         }
     }
 
-    public PendingTransaction createTransaction(TxData txData) {
+    public PendingTransaction createTransaction(TxData txData, ArrayList<String> selectedUtxos) throws Exception {
         return createTransaction(
                 txData.getDestinationAddress(),
                 txData.getAmount(),
                 txData.getMixin(),
-                txData.getPriority());
+                txData.getPriority(),
+                selectedUtxos);
     }
 
     public PendingTransaction createTransaction(String dst_addr,
                                                 long amount, int mixin_count,
-                                                PendingTransaction.Priority priority) {
+                                                PendingTransaction.Priority priority,
+                                                ArrayList<String> selectedUtxos) throws Exception {
         disposePendingTransaction();
         int _priority = priority.getValue();
+        ArrayList<String> preferredInputs;
+        if (selectedUtxos.isEmpty()) {
+            // no inputs manually selected, we are sending from home screen most likely, or user somehow broke the app
+            preferredInputs = selectUtxos(amount, false);
+        } else {
+            preferredInputs = selectedUtxos;
+            checkSelectedAmounts(preferredInputs, amount, false);
+        }
         long txHandle =
                 (amount == SWEEP_ALL ?
                         createSweepTransaction(dst_addr, "", mixin_count, _priority,
                                 accountIndex) :
                         createTransactionJ(dst_addr, "", amount, mixin_count, _priority,
-                                accountIndex));
+                                accountIndex, preferredInputs));
         pendingTransaction = new PendingTransaction(txHandle);
         return pendingTransaction;
     }
 
-    public UnsignedTransaction loadUnsignedTx(File file) {
-        long txHandle =  loadUnsignedTx(file.getAbsolutePath());
-        return new UnsignedTransaction(txHandle);
+
+    private void checkSelectedAmounts(List<String> selectedUtxos, long amount, boolean sendAll) throws Exception {
+        if (!sendAll) {
+            long amountSelected = 0;
+            for (CoinsInfo coinsInfo : getUtxos()) {
+                if (selectedUtxos.contains(coinsInfo.getKeyImage())) {
+                    amountSelected += coinsInfo.getAmount();
+                }
+            }
+
+            if (amountSelected <= amount) {
+                throw new Exception("insufficient wallet balance");
+            }
+        }
     }
 
     private native long createTransactionJ(String dst_addr, String payment_id,
                                            long amount, int mixin_count,
-                                           int priority, int accountIndex);
+                                           int priority, int accountIndex, ArrayList<String> key_images);
 
-   private native long loadUnsignedTx(String inputFile);
+    public UnsignedTransaction loadUnsignedTxJ(String inputFile) {
+        long unsignedTx = loadUnsignedTx(inputFile);
+        return new UnsignedTransaction(unsignedTx);
+    }
+
+    public native long loadUnsignedTx(String inputFile);
+
 
     private native long createSweepTransaction(String dst_addr, String payment_id,
                                                int mixin_count,
@@ -466,6 +503,70 @@ public class Wallet {
     public native boolean exportOutputs(String filename, boolean all);
     public native String importKeyImages(String filename);
     public native String submitTransaction(String filename);
+
+    public Coins getCoins() {
+        if (coins == null) {
+            coins = new Coins(getCoinsJ());
+        }
+        coins.refresh();
+        return coins;
+    }
+
+    private native long getCoinsJ();
+
+    public List<CoinsInfo> getUtxos() {
+        return getCoins().getAll();
+    }
+
+    private long calculateBasicFee(long amount) {
+        ArrayList<Pair<String, Long>> destinations = new ArrayList<>();
+        destinations.add(new Pair<>("87MRtZPrWUCVUgcFHdsVb5MoZUcLtqfD3FvQVGwftFb8eSdMnE39JhAJcbuSW8X2vRaRsB9RQfuCpFciybJFHaz3QYPhCLw", amount));
+        // destination string doesn't actually matter here, so i'm using the donation address. amount also technically doesn't matter
+        // priority also isn't accounted for in the Monero C++ code. maybe this is a bug by the core Monero team, or i'm using an outdated method.
+        return WalletManager.getInstance().getWallet().estimateTransactionFee(destinations, PendingTransaction.Priority.Priority_Low);
+    }
+
+    public long estimateTransactionFee(List<Pair<String, Long>> destinations, PendingTransaction.Priority priority) {
+        int _priority = priority.getValue();
+        return estimateTransactionFee(destinations, _priority);
+    }
+
+    private native long estimateTransactionFee(List<Pair<String, Long>> destinations, int priority);
+
+
+    public ArrayList<String> selectUtxos(long amount, boolean sendAll) throws Exception {
+        final long basicFeeEstimate = calculateBasicFee(amount);
+        final long amountWithBasicFee = amount + basicFeeEstimate;
+        ArrayList<String> selectedUtxos = new ArrayList<>();
+        ArrayList<String> seenTxs = new ArrayList<>();
+        List<CoinsInfo> utxos = getUtxos();
+        long amountSelected = 0;
+        Collections.sort(utxos);
+        //loop through each utxo
+        for (CoinsInfo coinsInfo : utxos) {
+            if (!coinsInfo.isSpent() && coinsInfo.isUnlocked()) { //filter out spent and locked outputs
+                if (sendAll) {
+                    // if send all, add all utxos and set amount to send all
+                    selectedUtxos.add(coinsInfo.getKeyImage());
+                    amountSelected = Wallet.SWEEP_ALL;
+                } else {
+                    //if amount selected is still less than amount needed, and the utxos tx hash hasn't already been seen, add utxo
+                    if (amountSelected <= amountWithBasicFee && !seenTxs.contains(coinsInfo.getHash())) {
+                        selectedUtxos.add(coinsInfo.getKeyImage());
+                        // we don't want to spend multiple utxos from the same transaction, so we prevent that from happening here.
+                        seenTxs.add(coinsInfo.getHash());
+                        amountSelected += coinsInfo.getAmount();
+                    }
+                }
+            }
+        }
+
+        if (amountSelected < amountWithBasicFee && !sendAll) {
+            throw new Exception("insufficient wallet balance");
+        }
+
+        return selectedUtxos;
+    }
 
     public void refreshHistory() {
         getHistory().refreshWithNotes(this);

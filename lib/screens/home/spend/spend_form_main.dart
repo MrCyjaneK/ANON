@@ -17,7 +17,17 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class AnonSpendForm extends ConsumerStatefulWidget {
   final UrType? scannedType;
 
-  const AnonSpendForm({Key? key, this.scannedType}) : super(key: key);
+  const AnonSpendForm({
+    Key? key,
+    this.scannedType,
+    required this.outputs,
+    required this.maxAmount,
+    this.addAppBar = false,
+  }) : super(key: key);
+
+  final List<String> outputs;
+  final num maxAmount;
+  final bool addAppBar;
 
   @override
   ConsumerState<AnonSpendForm> createState() => _SpendFormState();
@@ -79,7 +89,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
   }
 
   Future _init() async {
-    final _context = context;
+    // final context = context;
     final navigator = Navigator.of(context);
     if (widget.scannedType != null) {
       if (widget.scannedType == UrType.xmrTxUnsigned) {
@@ -117,7 +127,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
           ],
         );
         showDialog(
-          context: _context,
+          context: context,
           barrierDismissible: false,
           useRootNavigator: true,
           builder: (context) => alert,
@@ -184,6 +194,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
         });
       },
       child: Scaffold(
+        appBar: widget.addAppBar ? AppBar() : null,
         body: CustomScrollView(
           slivers: [
             SliverFillRemaining(
@@ -327,6 +338,9 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                           builder: (context, ref, c) {
                             num amount =
                                 ref.watch(walletAvailableBalanceProvider);
+                            if (widget.maxAmount != 0) {
+                              amount = widget.maxAmount;
+                            }
                             return Text(
                               "Available Balance  : ${formatMonero(amount, minimumFractions: 8)} XMR",
                               style: Theme.of(context).textTheme.bodySmall,
@@ -396,7 +410,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
           try {
             ref
                 .read(transactionStateProvider.notifier)
-                .composeAndSave(amountStr, address, notes);
+                .composeAndSave(amountStr, address, notes, widget.outputs);
             navigator.push(MaterialPageRoute(
               builder: (context) => AnonSpendReview(
                 onActionClicked: () {
@@ -417,7 +431,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
         } else {
           ref
               .read(transactionStateProvider.notifier)
-              .createPreview(amountStr, address, notes);
+              .createPreview(amountStr, address, notes, widget.outputs);
           navigator.push(MaterialPageRoute(
             builder: (context) => const AnonSpendReview(),
           ));
@@ -426,7 +440,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
     }
   }
 
-  onScanSignedTxPressed(BuildContext _c) async {
+  onScanSignedTxPressed(BuildContext c) async {
     final navigator = Navigator.of(context);
     final value =
         await scanURPayload(UrType.xmrTxSigned, context, "IMPORT SIGNED TX");
@@ -508,7 +522,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
             navigatorState.pushNamed("/loading-tx-construct");
             await ref
                 .read(transactionStateProvider.notifier)
-                .composeAndSave(amountStr, address, "");
+                .composeAndSave(amountStr, address, "", widget.outputs);
             navigatorState.push(MaterialPageRoute(
               builder: (context) => ExportQRScreen(
                 exportType: UrType.xmrTxSigned,
@@ -531,7 +545,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
           String notes = ref.read(notesStateProvider);
           ref
               .read(transactionStateProvider.notifier)
-              .createPreview(amountStr, address, notes);
+              .createPreview(amountStr, address, notes, widget.outputs);
           navigatorState.push(MaterialPageRoute(
             builder: (context) {
               return AnonSpendReview(
@@ -539,7 +553,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                   navigatorState.pushNamed("/loading-broadcast-tx");
                   await ref
                       .read(transactionStateProvider.notifier)
-                      .broadcast(amountStr, address, notes);
+                      .broadcast(amountStr, address, notes, widget.outputs);
                   ref.read(amountStateProvider.notifier).state = "";
                   ref.read(addressStateProvider.notifier).state = "";
                   ref.read(notesStateProvider.notifier).state = "";

@@ -38,6 +38,15 @@ class ThemeProvider extends ChangeNotifier {
         colorScheme: colorScheme,
         appBarTheme: const AppBarTheme(color: Colors.transparent),
         primaryColor: colorScheme.primary,
+        checkboxTheme: CheckboxThemeData(
+          fillColor: MaterialStateProperty.resolveWith<Color?>(
+              (Set<MaterialState> states) {
+            if (states.contains(MaterialState.selected)) {
+              return colorScheme.primary;
+            }
+            return null;
+          }),
+        ),
         fontFamily: 'RobotoMono',
         scaffoldBackgroundColor: Colors.black,
         elevatedButtonTheme: ElevatedButtonThemeData(

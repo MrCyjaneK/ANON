@@ -8,6 +8,7 @@ import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/spend/airgap_export_screen.dart';
 import 'package:anon_wallet/screens/home/spend/spend_form_main.dart';
+import 'package:anon_wallet/screens/home/outputs/outputs_screen.dart';
 import 'package:anon_wallet/screens/home/transactions/sticky_progress.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_details.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
@@ -31,6 +32,34 @@ class TransactionsList extends StatefulWidget {
 }
 
 class _TransactionsListState extends State<TransactionsList> {
+  List<String>? outputs;
+  num maxAmount = 0;
+  @override
+  void initState() {
+    WalletChannel().getUtxos().then((value) {
+      final tmpval = [];
+      value.forEach((key, value) {
+        if (!value["spent"]) {
+          tmpval.add(value);
+        }
+      });
+      List<String> outs = [];
+      num maxAmt = 0;
+      for (var output in tmpval) {
+        if (output["is_selected"] == true) {
+          outs.add(output["keyImage"]);
+          maxAmt += output["amount"];
+        }
+      }
+      setState(() {
+        outputs = outs;
+        maxAmount = maxAmt;
+      });
+    });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -81,20 +110,32 @@ class _TransactionsListState extends State<TransactionsList> {
                   icon: const Icon(Icons.crop_free)),
               isViewOnly ? _buildViewOnlyMenu(context) : _buildMenu(context),
             ],
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              collapseMode: CollapseMode.pin,
-              background: Container(
-                margin: const EdgeInsets.only(top: 80),
-                alignment: Alignment.center,
-                child: Consumer(
-                  builder: (context, ref, c) {
-                    var amount = ref.watch(walletBalanceProvider);
-                    return Text(
-                      "${formatMonero(amount)} XMR",
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    );
-                  },
+            flexibleSpace: InkWell(
+              onLongPress: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const OutputsScreen(),
+                  ),
+                );
+              },
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              enableFeedback: false,
+              child: FlexibleSpaceBar(
+                centerTitle: true,
+                collapseMode: CollapseMode.pin,
+                background: Container(
+                  margin: const EdgeInsets.only(top: 80),
+                  alignment: Alignment.center,
+                  child: Consumer(
+                    builder: (context, ref, c) {
+                      var amount = ref.watch(walletBalanceProvider);
+                      return Text(
+                        "${formatMonero(amount)} XMR",
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -251,7 +292,11 @@ class _TransactionsListState extends State<TransactionsList> {
     if (impResult) {
       navigator.push(MaterialPageRoute(
         builder: (context) {
-          return const AnonSpendForm(scannedType: UrType.xmrTxUnsigned);
+          return AnonSpendForm(
+            scannedType: UrType.xmrTxUnsigned,
+            outputs: outputs!,
+            maxAmount: maxAmount,
+          );
         },
       ));
     }
@@ -270,7 +315,11 @@ class _TransactionsListState extends State<TransactionsList> {
     if (impResult) {
       navigator.push(MaterialPageRoute(
         builder: (context) {
-          return const AnonSpendForm(scannedType: UrType.xmrTxSigned);
+          return AnonSpendForm(
+            scannedType: UrType.xmrTxSigned,
+            maxAmount: maxAmount,
+            outputs: outputs!,
+          );
         },
       ));
     }

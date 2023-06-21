@@ -38,7 +38,7 @@ class ProgressSliverWidget extends ConsumerWidget {
           builder: (context) {
             if (sync != null && sync['remaining'] != 0) {
               double progress = sync['progress']?.toDouble() ?? 0.0;
-              return Container(
+              return SizedBox(
                 height: 28,
                 child: Column(
                   children: [
@@ -57,7 +57,7 @@ class ProgressSliverWidget extends ConsumerWidget {
                             "${sync['remaining']} blocks remaining",
                             style: Theme.of(context)
                                 .textTheme
-                                .caption
+                                .bodySmall
                                 ?.copyWith(
                                     fontSize: 11, fontWeight: FontWeight.bold),
                           ),
@@ -65,7 +65,7 @@ class ProgressSliverWidget extends ConsumerWidget {
                             "${(progress * 100).toInt()}%",
                             style: Theme.of(context)
                                 .textTheme
-                                .caption
+                                .bodySmall
                                 ?.copyWith(
                                     fontSize: 11, fontWeight: FontWeight.bold),
                           )

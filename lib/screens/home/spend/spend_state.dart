@@ -1,12 +1,9 @@
-import 'dart:io';
-
-import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/spend_channel.dart';
+import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/broadcast_tx_state.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 
 class SpendValidationNotifier extends ChangeNotifier {
   bool? validAddress;
@@ -31,65 +28,76 @@ class SpendValidationNotifier extends ChangeNotifier {
 class TransactionStateNotifier extends StateNotifier<TxState> {
   TransactionStateNotifier() : super(TxState());
 
-  createPreview(String amount, String address, String notes) async {
+  createPreview(String amount, String address, String notes,
+      List<String> keyImages) async {
+    if (keyImages.isEmpty) {
+      print("WARN: keyImages is empty. Filling with all keys");
+      final value = await WalletChannel().getUtxos();
+      final tmpval = [];
+      value.forEach((key, value) {
+        if (!value["spent"]) {
+          tmpval.add(value);
+        }
+      });
+      print("${value.length} vs ${tmpval.length}");
+      List<String> outs = [];
+      // num maxAmt = 0;
+      for (var output in tmpval) {
+        outs.add(output["keyImage"]);
+        // maxAmt += output["amount"];
+      }
+      print(outs);
+      keyImages = outs;
+    }
+    if (kDebugMode) {
+      print('createPreview(');
+      print('\tamount: $amount');
+      print('\taddress: $address');
+      print('\tnotes: $notes');
+      print("\tkeyImages: $keyImages");
+      print(")");
+    }
     var broadcastState = TxState();
     broadcastState.state = "waiting";
     state = broadcastState;
     try {
       var returnValue =
-          await SpendMethodChannel().compose(amount, address, notes);
-      final newState = TxState.fromJson(returnValue);
-      state = newState;
+          await SpendMethodChannel().compose(amount, address, notes, keyImages);
+      print(returnValue);
+      if (returnValue["errorString"] != null &&
+          returnValue["errorString"] != "") {
+        // Apparently setting only errorString doesn't cause state to properly
+        // reload.
+        state = TxState()..errorString = returnValue["errorString"];
+      } else {
+        state = TxState.fromJson(returnValue);
+        print(state);
+      }
     } catch (e, s) {
       debugPrintStack(stackTrace: s);
       print(e);
     }
   }
 
-  Future broadcast(String amount, String address, String notes) async {
-    var broadcastState = TxState();
-
-    if (isViewOnly) {
-      broadcastState.state = "unsignedtx-waiting";
-      state = broadcastState;
-
-      final appDocumentsDir = await getApplicationDocumentsDirectory();
-      final fpath = "${appDocumentsDir.path}/unsigned_monero_tx";
-      if (await File(fpath).exists()) {
-        await File(fpath).delete();
-      }
-      var returnValue =
-          await SpendMethodChannel().composeAndSave(amount, address, notes);
-      state = TxState.fromJson(returnValue);
-      AppHaptics.mediumImpact();
-    } else {
-      broadcastState.state = "waiting";
-      state = broadcastState;
-
-      var returnValue = await SpendMethodChannel()
-          .composeAndBroadcast(amount, address, notes);
-      state = TxState.fromJson(returnValue);
-      AppHaptics.mediumImpact();
-    }
-    //AppHaptics.mediumImpact();
-  }
-
-  Future broadcastSigned() async {
+  broadcast(String amount, String address, String notes,
+      List<String> keyImages) async {
     var broadcastState = TxState();
     broadcastState.state = "waiting";
     state = broadcastState;
-    var returnValue = await SpendMethodChannel().broadcastSigned();
+    var returnValue = await SpendMethodChannel()
+        .composeAndBroadcast(amount, address, notes, keyImages);
     state = TxState.fromJson(returnValue);
     AppHaptics.mediumImpact();
     AppHaptics.mediumImpact();
   }
 
-  Future composeAndSave(String amount, String address, String notes) async {
+  Future composeAndSave(String amount, String address, String notes,
+      List<String> keyImages) async {
     var broadcastState = TxState();
     broadcastState.state = "waiting";
     state = broadcastState;
-    var returnValue =
-        await SpendMethodChannel().composeAndSave(amount, address, notes);
+    var returnValue = await SpendMethodChannel()
+        .composeAndSave(amount, address, notes, keyImages);
     state = TxState.fromJson(returnValue);
   }
 

@@ -115,6 +115,10 @@ class WalletChannel {
         "signAndExportJ", {"inputFile": inputFile, "outputFile": outputFile});
   }
 
+  Future<Map> getUtxos() async {
+    return await platform.invokeMethod("getUtxos", {});
+  }
+
   Future lock() async {
     dynamic value = await platform.invokeMethod("lock");
   }

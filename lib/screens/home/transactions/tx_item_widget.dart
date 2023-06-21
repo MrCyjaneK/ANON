@@ -32,13 +32,13 @@ class TransactionItem extends StatelessWidget {
           children: [
             getStats(transaction, context),
             Text(
-              formatMonero(transaction.amount),
+              formatMonero(transaction.amount, minimumFractions: 4),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             Column(
               children: [
                 Text(formatTime(transaction.timeStamp),
-                    style: Theme.of(context).textTheme.caption)
+                    style: Theme.of(context).textTheme.bodySmall)
               ],
             )
           ],

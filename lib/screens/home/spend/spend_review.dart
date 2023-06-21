@@ -1,8 +1,10 @@
-import 'package:anon_wallet/anon_wallet.dart';
+import 'dart:convert';
+
 import 'package:anon_wallet/models/broadcast_tx_state.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -98,6 +100,11 @@ class AnonSpendReview extends ConsumerWidget {
                       width: 160, child: Image.asset("assets/anon_logo.png")),
                 )),
           ),
+          if (kDebugMode)
+            SliverToBoxAdapter(
+              child: SelectableText(
+                  const JsonEncoder.withIndent('    ').convert(txState)),
+            ),
           SliverToBoxAdapter(
             child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -216,10 +223,10 @@ class SpendListItem extends StatelessWidget {
       trailing: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: isLoading
-            ? Container(
+            ? const SizedBox(
                 width: 12,
                 height: 12,
-                child: const CircularProgressIndicator(strokeWidth: 1),
+                child: CircularProgressIndicator(strokeWidth: 1),
               )
             : Text(
                 subTitle,

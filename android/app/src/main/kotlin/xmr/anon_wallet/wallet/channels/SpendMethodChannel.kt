@@ -13,6 +13,8 @@ import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.AnonWallet.ONE_XMR
 import xmr.anon_wallet.wallet.model.UrRegistryTypes
 import java.io.File
+import java.util.Arrays
+import android.util.Log
 
 class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
 
@@ -126,12 +128,16 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
         scope.launch {
             withContext(Dispatchers.IO) {
                 val txFile = File(AnonWallet.getAppContext().cacheDir, AnonWallet.IMPORT_UNSIGNED_TX_FILE)
+                Log.d("SpendMethodChannel.kt", "txFile: "+txFile.path)
                 if (txFile.exists()) {
-                    val unsignedTransaction = WalletManager.getInstance().wallet.loadUnsignedTx(txFile)
+                    Log.d("SpendMethodChannel.kt", "loadUnsignedTx: start")
+                    val unsignedTransaction = WalletManager.getInstance().wallet.loadUnsignedTxJ(txFile.path)
+                    Log.d("SpendMethodChannel.kt", "loadUnsignedTx: end")
+                    Log.d("SpendMethodChannel.kt", "address: "+unsignedTransaction.address)
                     withContext(Dispatchers.Main) {
                         if (unsignedTransaction != null) {
                             result.success(
-                                hashMapOf(
+                                hashMapOf( 
                                     "fee" to unsignedTransaction.fee,
                                     "amount" to unsignedTransaction.amount,
                                     "address" to unsignedTransaction.address,
@@ -159,39 +165,44 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
         val address = call.argument<String?>("address")
         val amount = call.argument<String>("amount")
         val notes = call.argument<String>("notes")
+        val rawKeyImages = call.argument<String>("keyImages")
+        val keyImages = arrayListOf<String>()
+        keyImages.addAll(rawKeyImages!!.split(","))
         val amountNumeric = Wallet.getAmountFromString(amount)
         if (address == null || amount == null) {
             return result.error("1", "invalid args", null)
         }
         this.scope.launch {
-            withContext(Dispatchers.IO) {
+                withContext(Dispatchers.IO) {
                 val wallet = WalletManager.getInstance().wallet
-                val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default);
-                val txId = pendingTx.firstTxIdJ;
+                val selectedUtxos = keyImages
                 var error = "";
+                var txId = "";
+                var pendingTx : PendingTransaction?;
+                pendingTx = null;
                 var success = false;
                 try {
+                    pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default, selectedUtxos)
+                    txId = pendingTx.firstTxIdJ;
                     success = pendingTx.commit("", true)
                     if (success) {
                         wallet.refreshHistory()
                         wallet.setUserNote(txId, notes)
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    error = e.message ?: "";
+                    error = e.message?: "failed to create transaction";
                 }
-
                 wallet.store()
                 withContext(Dispatchers.IO) {
                     result.success(
                         hashMapOf(
-                            "fee" to pendingTx.fee,
-                            "amount" to pendingTx.amount,
+                            "fee" to pendingTx?.fee,
+                            "amount" to pendingTx?.amount,
                             "state" to if (success) "success" else "error",
-                            "status" to pendingTx.status.toString(),
-                            "txId" to (txId ?: ""),
-                            "txCount" to pendingTx.txCount,
-                            "errorString" to error.ifEmpty { pendingTx.errorString },
+                            "status" to pendingTx?.status.toString(),
+                            "txId" to txId,
+                            "txCount" to pendingTx?.txCount,
+                            "errorString" to error //.ifEmpty { pendingTx?.errorString },
                         )
                     )
                 }
@@ -202,7 +213,9 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
     private fun composeTransaction(call: MethodCall, result: Result) {
         val address = call.argument<String?>("address")
         val amount = call.argument<String>("amount")
-        val notes = call.argument<String>("notes")
+        val rawKeyImages = call.argument<String>("keyImages")
+        val keyImages = arrayListOf<String>()
+        keyImages.addAll(rawKeyImages!!.split(","))
         val amountNumeric = Wallet.getAmountFromString(amount)
         if (address == null || amount == null) {
             return result.error("1", "invalid args", null)
@@ -211,7 +224,8 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
             withContext(Dispatchers.IO) {
                 try {
                     val wallet = WalletManager.getInstance().wallet
-                    val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default)
+                    val selectedUtxos = keyImages
+                    val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default, selectedUtxos)
                     result.success(
                         hashMapOf(
                             "fee" to pendingTx.fee,
@@ -224,7 +238,11 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
                         )
                     )
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    result.success(
+                        hashMapOf(
+                            "errorString" to e.message, //.ifEmpty { pendingTx?.errorString },
+                        )
+                    )
                 }
             }
         }
@@ -233,16 +251,18 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
     private fun composeAndSave(call: MethodCall, result: Result) {
         val address = call.argument<String?>("address")
         val amount = call.argument<String>("amount")
-        val notes = call.argument<String>("notes")
         val sign = call.argument<Boolean?>("sign") ?: true
         val amountNumeric = Wallet.getAmountFromString(amount)
         if (address == null || amount == null) {
             return result.error("1", "invalid args", null)
         }
+        val rawKeyImages = call.argument<String>("keyImages")
+        val keyImages = arrayListOf<String>()
+        keyImages.addAll(rawKeyImages!!.split(","))
         this.scope.launch {
             withContext(Dispatchers.IO) {
                 val wallet = WalletManager.getInstance().wallet
-                val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default);
+                val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default, keyImages);
                 val txId = pendingTx.firstTxIdJ;
                 var error = "";
                 var success = false

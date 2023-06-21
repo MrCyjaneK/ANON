@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/receive_screen.dart';
 import 'package:anon_wallet/screens/home/settings/settings_main.dart';
@@ -27,15 +28,41 @@ class WalletHomeState extends ConsumerState<WalletHome> {
   final PageController _pageController = PageController();
   GlobalKey scaffoldState = GlobalKey<ScaffoldState>();
   PersistentBottomSheetController? _bottomSheetController;
-
+  List<String>? outputs;
+  num maxAmount = 0;
   @override
   void initState() {
-    // TODO: implement initState
+    WalletChannel().getUtxos().then((value) {
+      final tmpval = [];
+      value.forEach((key, value) {
+        if (!value["spent"]) {
+          tmpval.add(value);
+        }
+      });
+      List<String> outs = [];
+      num maxAmt = 0;
+      for (var output in tmpval) {
+        if (output["is_selected"] == true) {
+          outs.add(output["keyImage"]);
+          maxAmt += output["amount"];
+        }
+      }
+      setState(() {
+        outputs = outs;
+        maxAmount = maxAmt;
+      });
+    });
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (outputs == null) {
+      return const Scaffold(
+        body: LinearProgressIndicator(),
+      );
+    }
     return WillPopScope(
       onWillPop: () async {
         if (_bottomSheetController != null) {
@@ -74,65 +101,64 @@ class WalletHomeState extends ConsumerState<WalletHome> {
       },
       child: Scaffold(
         key: scaffoldState,
-        body: Consumer(
-          builder: (context, ref, child) {
-            bool lock = ref.watch(lockPageViewScroll);
-            return PageView(
-              controller: _pageController,
-              physics: lock
-                  ? const NeverScrollableScrollPhysics()
-                  : const AlwaysScrollableScrollPhysics(),
-              children: [
-                Builder(
-                  builder: (context) {
-                    return TransactionsList(
-                      onScanClick: () async {
-                        showModalScanner(context);
-                      },
-                    );
-                  },
-                ),
-                ReceiveWidget(() {
-                  _pageController.animateToPage(0,
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.ease);
-                }),
-                Scaffold(
-                  appBar: AppBar(
-                    leading: BackButton(
-                      onPressed: () {
-                        _pageController.animateToPage(0,
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.ease);
-                      },
-                    ),
+        body: Consumer(builder: (context, ref, child) {
+          bool lock = ref.watch(lockPageViewScroll);
+          return PageView(
+            controller: _pageController,
+            physics: lock
+                ? const NeverScrollableScrollPhysics()
+                : const AlwaysScrollableScrollPhysics(),
+            children: [
+              Builder(
+                builder: (context) {
+                  return TransactionsList(
+                    onScanClick: () async {
+                      showModalScanner(context);
+                    },
+                  );
+                },
+              ),
+              ReceiveWidget(() {
+                _pageController.animateToPage(0,
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.ease);
+              }),
+              Scaffold(
+                appBar: AppBar(
+                  leading: BackButton(
+                    onPressed: () {
+                      _pageController.animateToPage(0,
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.ease);
+                    },
                   ),
-                  body: AnonSpendForm(),
                 ),
-                Scaffold(
-                  appBar: AppBar(
-                    title: Text("Settings"),
-                    leading: BackButton(
-                      onPressed: () {
-                        _pageController.animateToPage(0,
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.ease);
-                      },
-                    ),
+                body:
+                    AnonSpendForm(outputs: outputs ?? [], maxAmount: maxAmount),
+              ),
+              Scaffold(
+                appBar: AppBar(
+                  title: const Text("Settings"),
+                  leading: BackButton(
+                    onPressed: () {
+                      _pageController.animateToPage(0,
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.ease);
+                    },
                   ),
-                  body: SettingsScreen(),
                 ),
-              ],
-              onPageChanged: (index) {
-                if (_bottomSheetController != null) {
-                  _bottomSheetController!.close();
-                  _bottomSheetController = null;
-                }
-                setState(() => _currentView = index);
-              },
-            );
-          },
-        ),
+                body: const SettingsScreen(),
+              ),
+            ],
+            onPageChanged: (index) {
+              if (_bottomSheetController != null) {
+                _bottomSheetController!.close();
+                _bottomSheetController = null;
+              }
+              setState(() => _currentView = index);
+            },
+          );
+        }),
         floatingActionButton: Consumer(
           builder: (context, ref, child) {
             ref.listen<String?>(nodeErrorState,
@@ -161,7 +187,8 @@ class WalletHomeState extends ConsumerState<WalletHome> {
           onTap: (int index) {
             setState(() => _currentView = index);
             _pageController.animateToPage(index,
-                duration: Duration(milliseconds: 120), curve: Curves.ease);
+                duration: const Duration(milliseconds: 120),
+                curve: Curves.ease);
           },
           items: <BottomBarItem>[
             BottomBarItem(
@@ -193,17 +220,17 @@ class WalletHomeState extends ConsumerState<WalletHome> {
   void showModalScanner(BuildContext context) {
     final messenger = ScaffoldMessenger.of(context);
     final theme = Theme.of(context);
-    PersistentBottomSheetController? _bottomSheetController;
+    PersistentBottomSheetController? bottomSheetController;
 
     QRResult? result;
-    _bottomSheetController = showQRBottomSheet(
+    bottomSheetController = showQRBottomSheet(
       context,
       onScanCallback: (value) {
         result = value;
       },
     );
     final navigator = Navigator.of(context);
-    _bottomSheetController.closed.then((value) async {
+    bottomSheetController.closed.then((value) async {
       await Future.delayed(const Duration(milliseconds: 200));
       if (result != null && result!.type == QRResultType.text) {
         _pageController.animateToPage(2,
@@ -247,14 +274,20 @@ class WalletHomeState extends ConsumerState<WalletHome> {
             case UrType.xmrTxUnsigned:
               navigator.push(MaterialPageRoute(
                 builder: (context) {
-                  return const AnonSpendForm(scannedType: UrType.xmrTxUnsigned);
+                  return AnonSpendForm(
+                      scannedType: UrType.xmrTxUnsigned,
+                      outputs: outputs ?? [],
+                      maxAmount: maxAmount);
                 },
               ));
               break;
             case UrType.xmrTxSigned:
               navigator.push(MaterialPageRoute(
                 builder: (context) {
-                  return const AnonSpendForm(scannedType: UrType.xmrTxSigned);
+                  return AnonSpendForm(
+                      scannedType: UrType.xmrTxSigned,
+                      outputs: outputs ?? [],
+                      maxAmount: maxAmount);
                 },
               ));
               break;

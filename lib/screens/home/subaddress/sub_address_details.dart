@@ -3,10 +3,8 @@ import 'package:anon_wallet/screens/home/subaddress/edit_sub_address.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_details.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
 import 'package:anon_wallet/state/sub_addresses.dart';
-import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -34,8 +32,8 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
           Builder(builder: (context) {
             return IconButton(
                 onPressed: () {
-                  Clipboard.setData(
-                      ClipboardData(text: subAddress.address.toString()));
+                  if (subAddress.address == null) return;
+                  Clipboard.setData(ClipboardData(text: subAddress.address!));
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text("address copied",
                         style: Theme.of(context)

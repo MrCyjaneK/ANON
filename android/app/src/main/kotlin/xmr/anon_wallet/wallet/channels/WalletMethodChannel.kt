@@ -65,6 +65,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "signAndExportJ" -> signAndExportJ(call, result)
             "setTrustedDaemon" -> setTrustedDaemon(call, result)
             "lock" -> lock(call, result)
+            "getUtxos" -> getUtxos(call, result)
         }
     }
 
@@ -231,6 +232,36 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     } else {
                         result.error("1", "Invalid passphrase", "")
                     }
+                } catch (e: Exception) {
+                    result.error("2", e.message, "")
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun getUtxos(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    val wallet = WalletManager.getInstance().wallet
+                    val utxos = wallet.getUtxos()
+                    // List<CoinsInfo>
+                    val hm : HashMap<Int, HashMap<String, Any>> = hashMapOf();
+                    var i = 0;
+                    for (utxo in utxos) {
+                        hm[i] = hashMapOf();
+                        hm[i]!!["globalOutputIndex"] = utxo.globalOutputIndex
+                        hm[i]!!["spent"] = utxo.isSpent()
+                        hm[i]!!["keyImage"] = utxo.keyImage
+                        hm[i]!!["amount"] = utxo.amount
+                        hm[i]!!["hash"] = utxo.hash
+                        hm[i]!!["pubKey"] = utxo.pubKey
+                        hm[i]!!["unlocked"] = utxo.isUnlocked()
+                        hm[i]!!["localOutputIndex"] = utxo.localOutputIndex
+                        i++
+                    }
+                    result.success(hm)
                 } catch (e: Exception) {
                     result.error("2", e.message, "")
                     e.printStackTrace()

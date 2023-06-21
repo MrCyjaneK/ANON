@@ -1,4 +1,5 @@
 import 'package:anon_wallet/anon_wallet.dart';
+import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:flutter/services.dart';
 
@@ -35,25 +36,66 @@ class SpendMethodChannel {
     return value;
   }
 
-  dynamic compose(String amount, String address, String notes) async {
-    return await platform.invokeMethod("composeTransaction",
-        {"amount": amount, "address": address, "notes": notes});
+  dynamic compose(
+    String amount,
+    String address,
+    String notes,
+    List<String> keyImages,
+  ) async {
+    return await platform.invokeMethod("composeTransaction", {
+      "amount": amount,
+      "address": address,
+      "notes": notes,
+      "keyImages": keyImages.join(",")
+    });
   }
 
-  dynamic composeAndBroadcast(
-      String amount, String address, String notes) async {
-    return await platform.invokeMethod("composeAndBroadcast",
-        {"amount": amount, "address": address, "notes": notes});
+  Future<dynamic> composeAndBroadcast(
+    String amount,
+    String address,
+    String notes,
+    List<String> keyImages,
+  ) async {
+    if (keyImages.isEmpty) {
+      keyImages = await getAllKeyImages();
+    }
+    return await platform.invokeMethod("composeAndBroadcast", {
+      "amount": amount,
+      "address": address,
+      "notes": notes,
+      "keyImages": keyImages.join(",")
+    });
   }
 
-  Future<Map> composeAndSave(
-      String amount, String address, String notes) async {
+  Future<List<String>> getAllKeyImages() async {
+    final value = await WalletChannel().getUtxos();
+    final tmpval = [];
+    value.forEach((key, value) {
+      if (!value["spent"]) {
+        tmpval.add(value);
+      }
+    });
+    List<String> outs = [];
+    // num maxAmt = 0;
+    for (var output in tmpval) {
+      outs.add(output["keyImage"]);
+      // maxAmt += output["amount"];
+    }
+    return outs;
+  }
+
+  Future<Map> composeAndSave(String amount, String address, String notes,
+      List<String> keyImages) async {
+    if (keyImages.isEmpty) {
+      keyImages = await getAllKeyImages();
+    }
     return await platform.invokeMethod(
       "composeAndSave",
       {
         "amount": amount,
         "sign": (!isViewOnly && isAirgapEnabled),
         "address": address,
+        "keyImages": keyImages.join(","),
         "notes": notes
       },
     );

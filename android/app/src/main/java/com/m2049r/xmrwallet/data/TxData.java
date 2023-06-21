@@ -19,13 +19,33 @@ package com.m2049r.xmrwallet.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.m2049r.utils.Helper;
 import com.m2049r.xmrwallet.model.PendingTransaction;
 import com.m2049r.xmrwallet.model.Wallet;
+// import com.m2049r.xmrwallet.util.Helper;
 
+import java.util.ArrayList;
 
 // https://stackoverflow.com/questions/2139134/how-to-send-an-object-from-one-android-activity-to-another-using-intents
 public class TxData implements Parcelable {
+    static public final int XMR_DECIMALS = 12;
+    static public final long ONE_XMR = Math.round(Math.pow(10, TxData.XMR_DECIMALS));
+    
+    // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
+    public static final Parcelable.Creator<TxData> CREATOR = new Parcelable.Creator<TxData>() {
+        public TxData createFromParcel(Parcel in) {
+            return new TxData(in);
+        }
+
+        public TxData[] newArray(int size) {
+            return new TxData[size];
+        }
+    };
+    private String dstAddr;
+    private long amount;
+    private int mixin;
+    private PendingTransaction.Priority priority;
+    private UserNotes userNotes;
+    private ArrayList<String> preferredInputs;
 
     public TxData() {
     }
@@ -35,40 +55,39 @@ public class TxData implements Parcelable {
         this.amount = txData.amount;
         this.mixin = txData.mixin;
         this.priority = txData.priority;
+        this.preferredInputs = txData.preferredInputs;
     }
 
     public TxData(String dstAddr,
                   long amount,
                   int mixin,
-                  PendingTransaction.Priority priority) {
+                  PendingTransaction.Priority priority,
+                  ArrayList<String> preferredInputs) {
         this.dstAddr = dstAddr;
         this.amount = amount;
         this.mixin = mixin;
         this.priority = priority;
+        this.preferredInputs = preferredInputs;
+    }
+
+    protected TxData(Parcel in) {
+        dstAddr = in.readString();
+        amount = in.readLong();
+        mixin = in.readInt();
+        priority = PendingTransaction.Priority.fromInteger(in.readInt());
+        in.readStringList(preferredInputs);
     }
 
     public String getDestinationAddress() {
         return dstAddr;
     }
 
-    public long getAmount() {
-        return amount;
-    }
-
-    public double getAmountAsDouble() {
-        return 1.0 * amount / Helper.ONE_XMR;
-    }
-
-    public int getMixin() {
-        return mixin;
-    }
-
-    public PendingTransaction.Priority getPriority() {
-        return priority;
-    }
-
     public void setDestinationAddress(String dstAddr) {
         this.dstAddr = dstAddr;
+    }
+
+    public long getAmount() {
+        return amount;
     }
 
     public void setAmount(long amount) {
@@ -79,8 +98,24 @@ public class TxData implements Parcelable {
         this.amount = Wallet.getAmountFromDouble(amount);
     }
 
+    public double getAmountAsDouble() {
+        return 1.0 * amount / TxData.ONE_XMR;
+    }
+
+    public ArrayList<String> getPreferredInputs() {
+        return preferredInputs;
+    }
+
+    public int getMixin() {
+        return mixin;
+    }
+
     public void setMixin(int mixin) {
         this.mixin = mixin;
+    }
+
+    public PendingTransaction.Priority getPriority() {
+        return priority;
     }
 
     public void setPriority(PendingTransaction.Priority priority) {
@@ -95,38 +130,12 @@ public class TxData implements Parcelable {
         this.userNotes = userNotes;
     }
 
-    private String dstAddr;
-    private long amount;
-    private int mixin;
-    private PendingTransaction.Priority priority;
-
-    private UserNotes userNotes;
-
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(dstAddr);
         out.writeLong(amount);
         out.writeInt(mixin);
         out.writeInt(priority.getValue());
-    }
-
-    // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
-    public static final Creator<TxData> CREATOR = new Creator<TxData>() {
-        public TxData createFromParcel(Parcel in) {
-            return new TxData(in);
-        }
-
-        public TxData[] newArray(int size) {
-            return new TxData[size];
-        }
-    };
-
-    protected TxData(Parcel in) {
-        dstAddr = in.readString();
-        amount = in.readLong();
-        mixin = in.readInt();
-        priority = PendingTransaction.Priority.fromInteger(in.readInt());
-
     }
 
     @Override

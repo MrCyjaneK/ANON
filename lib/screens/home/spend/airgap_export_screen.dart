@@ -199,7 +199,7 @@ class _ImportFromQRScreenState extends ConsumerState<ExportQRScreen> {
             );
           },
           error: (error, stackTrace) {
-            var errorMessage = "${error}";
+            var errorMessage = "$error";
             try {
               var errorMessage =
                   (error as PlatformException).message ?? "Unable to process";
@@ -276,6 +276,9 @@ Future<QRResult?> scanURPayload(
                   onScanCallback: (value) async {
                     if (value.urType != null && value.urResult.isNotEmpty) {
                       if (!completer.isCompleted) {
+                        if (kDebugMode) {
+                          print("airgap_export_screen.dart: onScanCallback");
+                        }
                         completer.complete(value);
                         Navigator.pop(context);
                       }

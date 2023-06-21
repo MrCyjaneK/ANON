@@ -172,6 +172,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         }
                     }
                     // No, I'm not going to fix testRpcService now.
+                    val testSuccess = node.testRpcService()
 
                     // val testSuccess = node.testRpcService()
                     if (true) {
@@ -208,7 +209,6 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                             "connection_error" to "Failed to connect to remote node"
                         )
                     )
-                    e.printStackTrace()
                     result.error("2", "${e.message}", e.cause)
                     throw CancellationException(e.message)
                 }
