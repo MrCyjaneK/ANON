@@ -1,5 +1,6 @@
 package xmr.anon_wallet.wallet.channels
 
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.data.Subaddress
 import com.m2049r.xmrwallet.model.WalletManager
@@ -84,7 +85,7 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
         private fun getAllSubAddresses(): List<Subaddress> {
             val wallet = WalletManager.getInstance().wallet
             val subaddrs = arrayListOf<Subaddress>()
-            for (i in 1 until wallet.numSubaddresses) {
+            for (i in 0 until wallet.numSubaddresses) {
                 subaddrs.add(wallet.getSubaddressObject(i))
             }
             if (wallet != null) {
@@ -101,7 +102,11 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             wallet.getLatestSubaddress()?.let {
                 if (subaddrs.indexOf(it) == -1) subaddrs.add(it)
             }
-            return subaddrs.distinctBy { it.address }.reversed()
+            return subaddrs
+                .apply {
+                    this.removeIf { it.addressIndex == 0 && it.totalAmount == 0L }
+                }
+                .distinctBy { it.address }.sortedBy { it.addressIndex }.reversed()
         }
     }
 }
