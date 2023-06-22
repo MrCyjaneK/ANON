@@ -1,5 +1,7 @@
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/models/node.dart';
+import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
+import 'package:anon_wallet/screens/home/settings/settings_state.dart';
 import 'package:anon_wallet/screens/onboard/onboard_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
@@ -44,17 +46,13 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
               title: const Text("Nodes"),
               actions: [
                 TextButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                          context: context,
-                          barrierColor: barrierColor,
-                          builder: (context) {
-                            return const SizedBox(
-                              child: Scaffold(
-                                body: RemoteNodeAddSheet(),
-                              ),
-                            );
-                          }).then((value) => ref.refresh(_nodesListProvider));
+                    onPressed: () async {
+                      await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RemoteNodeAddSheet(),
+                          ));
+                      ref.refresh(_nodesListProvider);
                     },
                     child: const Text("Add Node"))
               ],
@@ -71,9 +69,9 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
             const SliverPadding(padding: EdgeInsets.all(12)),
             SliverAppBar(
               automaticallyImplyLeading: false,
-              toolbarHeight: 120,
+              toolbarHeight: 80,
               flexibleSpace: Card(
-                  elevation: _settingCurrentNode == null ? 28 : 0,
+                  elevation: 0,
                   borderOnForeground: true,
                   shadowColor: isConnected
                       ? Colors.green.withOpacity(0.4)
@@ -81,7 +79,7 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                   surfaceTintColor: Colors.white,
                   color: Colors.grey[900],
                   margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 14),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 600),
                     child: _settingCurrentNode != null
@@ -107,12 +105,40 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                             children: [
                               const Padding(padding: EdgeInsets.all(4)),
                               ListTile(
+                                onLongPress: () {
+                                  showDialog(
+                                          context: context,
+                                          barrierColor: barrierColor,
+                                          builder: (context) {
+                                            return NodeDetails(connectedNode);
+                                          })
+                                      .then((value) =>
+                                          ref.refresh(_nodesListProvider));
+                                },
                                 title: Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8),
                                   child: Text("${connectedNode.host}"),
                                 ),
-                                subtitle: Text("Port : ${connectedNode.port}"),
+                                subtitle: Consumer(
+                                  builder: (context, ref, c) {
+                                    int activeNodeDaemonHeight =
+                                        ref.watch(walletNodeDaemonHeight);
+                                    int activeHeight = (activeNodeDaemonHeight >
+                                            connectedNode.height)
+                                        ? activeNodeDaemonHeight
+                                        : connectedNode.height;
+                                    return Text(
+                                        connectedNode.isActive == true
+                                            ? "Daemon Height: $activeHeight"
+                                            : "Inactive",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis);
+                                  },
+                                ),
                                 trailing: Container(
                                   height: 12,
                                   width: 12,
@@ -123,47 +149,12 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                   ),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Proxy : ${connectedNode.proxyServer ?? "Not Set"}",
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                    Consumer(
-                                      builder: (context, ref, c) {
-                                        int activeNodeDaemonHeight =
-                                            ref.watch(walletNodeDaemonHeight);
-                                        int activeHeight =
-                                            (activeNodeDaemonHeight >
-                                                    connectedNode.height)
-                                                ? activeNodeDaemonHeight
-                                                : connectedNode.height;
-                                        return Text(
-                                            connectedNode.isActive == true
-                                                ? "Daemon Height: $activeHeight"
-                                                : "Inactive",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
                               const Padding(padding: EdgeInsets.all(4)),
                             ],
                           ),
                   )),
             ),
-            const SliverPadding(padding: EdgeInsets.all(12)),
+            const SliverPadding(padding: EdgeInsets.all(8)),
             const SliverToBoxAdapter(
               child: Divider(),
             ),
@@ -493,123 +484,192 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
     var isLoading = useState(false);
     var nodeStatus = useState<String?>(null);
 
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          automaticallyImplyLeading: false,
-          title: const Text("Add Node"),
-          centerTitle: true,
-          bottom: isLoading.value
-              ? const PreferredSize(
-                  preferredSize: Size.fromHeight(1),
-                  child: LinearProgressIndicator(minHeight: 1))
-              : null,
-        ),
-        SliverToBoxAdapter(
-          child: ListTile(
-            title: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text("NODE",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Container(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              automaticallyImplyLeading: true,
+              title: const Text("Add Node"),
+              centerTitle: false,
+              bottom: isLoading.value
+                  ? const PreferredSize(
+                      preferredSize: Size.fromHeight(1),
+                      child: LinearProgressIndicator(minHeight: 1))
+                  : null,
             ),
-            subtitle: TextField(
-              controller: nodeTextController,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.white, width: 1),
+            SliverToBoxAdapter(
+              child: ListTile(
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text("NODE",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary)),
                 ),
-                helperText: nodeStatus.value,
-                helperMaxLines: 3,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                subtitle: TextField(
+                  controller: nodeTextController,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          const BorderSide(color: Colors.white, width: 1),
+                    ),
+                    helperText: nodeStatus.value,
+                    helperMaxLines: 3,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    hintText: 'http://address.onion:port',
+                  ),
                 ),
-                hintText: 'http://address.onion:port',
               ),
             ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: ListTile(
-            title: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text("USERNAME",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
-            ),
-            subtitle: TextField(
-              controller: userNameTextController,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.white, width: 1),
+            SliverToBoxAdapter(
+              child: ListTile(
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text("USERNAME",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary)),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                subtitle: TextField(
+                  controller: userNameTextController,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          const BorderSide(color: Colors.white, width: 1),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    hintText: '(optional)',
+                  ),
                 ),
-                hintText: '(optional)',
               ),
             ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: ListTile(
-            title: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text("PASSWORD",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
-            ),
-            subtitle: TextField(
-              controller: passWordTextController,
-              textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.white, width: 1),
+            SliverToBoxAdapter(
+              child: ListTile(
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text("PASSWORD",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary)),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                subtitle: TextField(
+                  controller: passWordTextController,
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          const BorderSide(color: Colors.white, width: 1),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    hintText: '(optional)',
+                  ),
                 ),
-                hintText: '(optional)',
               ),
             ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            padding: const EdgeInsets.only(top: 24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    await connect(
-                        nodeTextController.text,
-                        userNameTextController.text,
-                        passWordTextController.text,
-                        isLoading,
-                        nodeStatus,
-                        context,
-                        ref);
-                    await Future.delayed(Duration(milliseconds: 200));
-                    ref.refresh(_nodesListProvider);
-                  },
-                  style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                      backgroundColor: MaterialStateColor.resolveWith(
-                          (states) => Colors.white)),
-                  child: const Text("Add Node"),
-                )
-              ],
+            SliverToBoxAdapter(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                padding: const EdgeInsets.only(top: 18),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Text(
+                      "ΛNON will only connect\nto the node specified above\n",
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        )
-      ],
+            SliverToBoxAdapter(
+              child: HookConsumer(
+                builder: (c, ref, child) {
+                  Proxy proxy = ref.watch(proxyStateProvider);
+                  useEffect(() {
+                    ref.read(proxyStateProvider.notifier).getState();
+                    return null;
+                  }, []);
+                  return Container(
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.only(top: 8),
+                    child: TextButton.icon(
+                      style: ButtonStyle(
+                          foregroundColor: proxy.isConnected()
+                              ? MaterialStateColor.resolveWith(
+                                  (states) => Colors.green)
+                              : MaterialStateColor.resolveWith(
+                                  (states) => Theme.of(context).primaryColor)),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) {
+                            return const ProxySettings();
+                          },
+                        ));
+                      },
+                      label: const Text("Proxy Settings"),
+                      icon: const Icon(Icons.shield_outlined),
+                    ),
+                  );
+                },
+              ),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              fillOverscroll: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                          side:
+                              const BorderSide(width: 1.0, color: Colors.white),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  width: 12, color: Colors.white),
+                              borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 6)),
+                      onPressed: () async {
+                        await connect(
+                            nodeTextController.text,
+                            userNameTextController.text,
+                            passWordTextController.text,
+                            isLoading,
+                            nodeStatus,
+                            context,
+                            ref);
+                        await Future.delayed(const Duration(milliseconds: 200));
+                        ref.refresh(_nodesListProvider);
+                      },
+                      child: Text("Connect",
+                          style: Theme.of(context).textTheme.labelLarge),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 

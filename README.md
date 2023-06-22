@@ -3,21 +3,14 @@
 
 ## BUILD INSTRUCTIONS
 
-        - Install Flutter
-        - Connect device & enable USB Debugging
-        - Clone ANON repo: 
+     - Install Flutter & torsocks
+     - Connect device & enable USB Debugging
+     - Clone ANON repo:
 
-                git clone https://gitea.com/anonero/anon.git &&
-                cd /anon/android/external-libs
+             torsocks git clone http://git.anonero5wmhraxqsvzq2ncgptq6gq45qoto6fnkfwughfl4gbt44swad.onion/ANONERO/ANON.git && cd ANON/android/external-libs
 
-        - Clone Monero repo:
-         
-                git clone https://gitea.com/anonero/monero.git &&
-                cd monero &&
-                git checkout release-v0.18.0.0-monerujo &&
-                git submodule update --init --force &&
-                cd ../ &&
-                make &&
-                cd ../../
+     - Clone Monero repo:
 
-        - Install & run APK: flutter run --flavor MainNet --release
+             torsocks git clone http://git.anonero5wmhraxqsvzq2ncgptq6gq45qoto6fnkfwughfl4gbt44swad.onion/ANONERO/monero.git && cd monero && git submodule update --init --force && cd ../ && sudo make && cd ../../
+
+     - Install & run ANON: flutter run --flavor mainnet --release
