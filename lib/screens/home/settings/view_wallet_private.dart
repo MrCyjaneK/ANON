@@ -74,7 +74,7 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                                   margin: const EdgeInsets.all(4),
                                   decoration: const BoxDecoration(
                                       color: Colors.white10),
-                                  child: Text("${e}",
+                                  child: Text(e,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium),

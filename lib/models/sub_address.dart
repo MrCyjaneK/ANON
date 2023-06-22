@@ -72,12 +72,12 @@ class SubAdress {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['accountIndex'] = this.accountIndex;
-    data['address'] = this.address;
-    data['squashedAddress'] = this.squashedAddress;
-    data['addressIndex'] = this.addressIndex;
-    data['label'] = this.label;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['accountIndex'] = accountIndex;
+    data['address'] = address;
+    data['squashedAddress'] = squashedAddress;
+    data['addressIndex'] = addressIndex;
+    data['label'] = label;
     return data;
   }
 }

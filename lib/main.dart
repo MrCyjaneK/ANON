@@ -48,7 +48,7 @@ class _AnonAppState extends State<AnonApp> {
       child: MaterialApp(
         title: 'anon',
         theme: ThemeProvider().getTheme(),
-        home: AppMain(this.widget.state),
+        home: AppMain(widget.state),
       ),
     );
   }
@@ -105,7 +105,7 @@ class LockScreen extends HookWidget {
               error.value ?? "",
               style: Theme.of(context)
                   .textTheme
-                  .subtitle2
+                  .titleSmall
                   ?.copyWith(color: Colors.red),
             ),
           ),

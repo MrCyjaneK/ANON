@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 String formatMonero(num? value, {int minimumFractions = 4}) {
@@ -13,7 +14,9 @@ String formatMonero(num? value, {int minimumFractions = 4}) {
   try {
     return formatter.format(value / 1e12);
   } catch (e) {
-    print(e);
+    if (kDebugMode) {
+      print(e);
+    }
     return "";
   }
 }

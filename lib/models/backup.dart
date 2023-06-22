@@ -97,15 +97,15 @@ class WalletBackupModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['address'] = this.address;
-    data['seed'] = this.seed;
-    data['restoreHeight'] = this.restoreHeight;
-    data['balanceAll'] = this.balanceAll;
-    data['numSubaddresses'] = this.numSubaddresses;
-    data['numAccounts'] = this.numAccounts;
-    data['isWatchOnly'] = this.isWatchOnly;
-    data['isSynchronized'] = this.isSynchronized;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['address'] = address;
+    data['seed'] = seed;
+    data['restoreHeight'] = restoreHeight;
+    data['balanceAll'] = balanceAll;
+    data['numSubaddresses'] = numSubaddresses;
+    data['numAccounts'] = numAccounts;
+    data['isWatchOnly'] = isWatchOnly;
+    data['isSynchronized'] = isSynchronized;
     return data;
   }
 }

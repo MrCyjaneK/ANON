@@ -7,6 +7,7 @@ import 'package:anon_wallet/screens/onboard/remote_node_setup.dart';
 import 'package:anon_wallet/screens/onboard/wallet_passphrase.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:anon_wallet/state/node_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -58,7 +59,9 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
       ref.read(walletSeedPhraseProvider.notifier).state = "";
       ref.read(walletLockPin.notifier).state = "";
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
     super.dispose();
   }
@@ -114,7 +117,7 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                                   strokeWidth: 1,
                                 ))),
                         Container(
-                            padding: EdgeInsets.symmetric(vertical: 24),
+                            padding: const EdgeInsets.symmetric(vertical: 24),
                             child: const Text(
                                 "Creating your wallet please wait..."))
                       ],
@@ -156,7 +159,8 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                       const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(primary: Colors.white),
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.white),
                     onPressed: value
                         ? () async {
                             onNext(context);
@@ -196,7 +200,7 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
               },
-              child: Text("Close"))
+              child: const Text("Close"))
         ]));
       }
       return;
@@ -231,15 +235,5 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
         return;
       }
     }
-  }
-
-  _navigateToHome() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (c) {
-        return const WalletHome();
-      }),
-      (route) => false,
-    );
   }
 }

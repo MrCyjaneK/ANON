@@ -104,8 +104,8 @@ class _LandingScreenState extends State<LandingScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (c) => OnboardScreen(),
-                                  settings: RouteSettings()));
+                                  builder: (c) => const OnboardScreen(),
+                                  settings: const RouteSettings()));
                         } catch (e, s) {
                           debugPrintStack(stackTrace: s);
                         }
@@ -179,7 +179,7 @@ class _LandingScreenState extends State<LandingScreen> {
                           child: SizedBox(
                               width: 84,
                               child: Image.asset("assets/anon_logo.png"))),
-                      Text("Restore"),
+                      const Text("Restore"),
                     ],
                   ),
                   actions: [

@@ -1,9 +1,6 @@
-import 'dart:math';
-
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_events_channel.dart';
 import 'package:anon_wallet/models/node.dart';
-import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -41,7 +38,7 @@ final connectingToNodeStateProvider = Provider<bool>((ref) {
 
 final syncProgressStateProvider = Provider<Map<String, num>?>((ref) {
   var connectionState = ref.watch(nodeConnectionState).value;
-  Wallet? wallet = ref.watch(walletStateStreamProvider).value;
+  ref.watch(walletStateStreamProvider).value;
   if (connectionState != null) {
     num blockChainHeight = connectionState.blockchainHeight;
     if (connectionState.syncBlock != 0 && blockChainHeight != 0) {

@@ -1,10 +1,14 @@
 package xmr.anon_wallet.wallet.services
 
+import android.util.Log
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.m2049r.xmrwallet.data.NodeInfo
-
 import com.m2049r.xmrwallet.model.WalletManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel
 import xmr.anon_wallet.wallet.utils.AnonPreferences
@@ -15,6 +19,7 @@ object NodeManager {
     private var isConfigured = false
     private var currentNode: NodeInfo? = null
     private var nodes = arrayListOf<NodeInfo>()
+    private val gson = Gson()
 
     fun isNodeConfigured(): Boolean {
         return isConfigured
@@ -50,6 +55,7 @@ object NodeManager {
                     put("status", "connecting")
                 })
                 currentNode = node
+                WalletManager.getInstance().setProxy(getProxy())
                 WalletManager.getInstance().setDaemon(node)
                 isConfigured = true
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {
@@ -109,6 +115,97 @@ object NodeManager {
                 return@withContext false
             }
         }
+    }
+
+
+    suspend fun storeNodesList() {
+        withContext(Dispatchers.IO) {
+            val nodeListFile = AnonWallet.nodesFile
+            if (!nodeListFile.exists()) {
+                nodeListFile.createNewFile()
+            }
+            val jsonObj: List<JSONObject> = nodes.map { JSONObject(it.toHashMap().toMap()) }
+            nodeListFile.writeText(JSONArray(jsonObj).toString())
+        }
+    }
+
+    private suspend fun readNodes() {
+        nodes = arrayListOf()
+        withContext(Dispatchers.IO) {
+            val nodeListFile = AnonWallet.nodesFile
+            if (!nodeListFile.exists()) {
+                nodeListFile.createNewFile()
+            }
+            val values = nodeListFile.readText()
+            if (values.isNotEmpty()) {
+                val jsonArray = JSONArray(values)
+                nodes = arrayListOf();
+                repeat(jsonArray.length()) {
+                    val item = jsonArray.getJSONObject(it)
+                    val nodeItem: NodeInfo = gson.fromJson(item.toString(), object : TypeToken<NodeInfo>() {}.type)
+                    nodes.add(nodeItem)
+                }
+            } else {
+                nodes = arrayListOf();
+            }
+        }
+    }
+
+    private fun getProxy(): String {
+        val prefs = AnonPreferences(AnonWallet.getAppContext());
+        return if (prefs.proxyPort.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
+            ""
+        } else {
+            "${prefs.proxyServer}:${prefs.proxyPort}"
+        }
+    }
+
+    suspend fun getNodes(): ArrayList<NodeInfo> {
+        return withContext(Dispatchers.IO) {
+            try {
+                readNodes()
+                //push if connected node is not in the list or update if it is in the list
+                nodes.find { it.host == currentNode?.host && it.rpcPort == currentNode?.rpcPort }
+                    .let {
+                        if (it == null && currentNode != null) {
+                            nodes.add(currentNode!!)
+                        }
+                    }
+                nodes = ArrayList(
+                    nodes.distinctBy { it.toString() }
+                )
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            return@withContext nodes
+        }
+    }
+
+    suspend fun addNode(node: NodeInfo) {
+        nodes.add(node)
+        storeNodesList()
+    }
+
+    suspend fun updateExistingNode(node: NodeInfo) {
+        val newList = arrayListOf<NodeInfo>()
+        nodes.forEach {
+            if (node.host == it.host && node.rpcPort == it.rpcPort) {
+                newList.add(node)
+            } else {
+                newList.add(it)
+            }
+        }
+        nodes = newList
+        storeNodesList()
+    }
+
+    suspend fun removeNode(host: String, port: Int, userName: String?, password: String?) {
+        nodes.removeIf {
+            it.host == host &&
+                    it.rpcPort == port
+        }
+        storeNodesList()
     }
 
 }

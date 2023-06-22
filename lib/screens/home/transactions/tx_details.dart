@@ -140,7 +140,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                       ),
                     ),
                   )
-                : SizedBox(),
+                : const SizedBox(),
           ),
           SliverToBoxAdapter(
             child: transaction.fee != null
@@ -160,7 +160,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                       ),
                     ),
                   )
-                : SizedBox(),
+                : const SizedBox(),
           ),
           SliverToBoxAdapter(
             child: Container(
@@ -307,8 +307,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
         setState(() {
           loading = true;
         });
-        bool key = await WalletChannel()
-            .setTxUserNotes(widget.transaction.hash!, notes);
+        await WalletChannel().setTxUserNotes(widget.transaction.hash!, notes);
         setState(() {
           loading = false;
           widget.transaction.notes = notes;

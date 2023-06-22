@@ -39,7 +39,7 @@ class _PolySeedEntryState extends State<PolySeedEntry> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Text('${index + 1}.'),
-                      Container(
+                      SizedBox(
                         width: 120,
                         child: TextField(
                           style: Theme.of(context)
@@ -65,8 +65,8 @@ class _PolySeedEntryState extends State<PolySeedEntry> {
           SliverToBoxAdapter(
             child: Container(
               alignment: Alignment.center,
-              padding: EdgeInsets.only(top: 24),
-              child: Text("Enter your seed phrase"),
+              padding: const EdgeInsets.only(top: 24),
+              child: const Text("Enter your seed phrase"),
             ),
           )
         ],
