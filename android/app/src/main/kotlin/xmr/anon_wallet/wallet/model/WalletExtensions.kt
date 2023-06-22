@@ -20,12 +20,12 @@ fun Wallet.getLastUnusedIndex(): Int {
     for (info in this.history.all) {
         if (info.addressIndex > lastUsedSubaddress) lastUsedSubaddress = info.addressIndex
     }
-    return lastUsedSubaddress + 1
+    return lastUsedSubaddress
 }
 
 fun Wallet.getLatestSubaddress(): Subaddress? {
     val lastUsedSubaddress = getLastUnusedIndex()
-    val address = this.getSubaddressObject(lastUsedSubaddress)
+    val address = this.getSubaddressObject(lastUsedSubaddress + 1)
     if (lastUsedSubaddress == this.numSubaddresses) {
         this.addSubaddress(accountIndex, "Subaddress #${address.addressIndex}")
     }

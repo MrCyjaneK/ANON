@@ -36,7 +36,7 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
             withContext(Dispatchers.IO) {
                 try {
                     WalletManager.getInstance().wallet?.let {
-                        it.addSubaddress(it.accountIndex, "Subaddress #${it.numSubaddresses + 1}")
+                        it.addSubaddress(it.accountIndex, "Subaddress #${it.numSubaddresses}")
                         sendEvent(getSubAddressesEvent())
                         sendEvent(it.walletToHashMap())
                         result.success(true)
@@ -84,10 +84,7 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
         private fun getAllSubAddresses(): List<Subaddress> {
             val wallet = WalletManager.getInstance().wallet
             val subaddrs = arrayListOf<Subaddress>()
-            wallet.getLatestSubaddress()?.let {
-                subaddrs.add(it)
-            }
-            for (i in 0 until wallet.numSubaddresses) {
+            for (i in 1 until wallet.numSubaddresses) {
                 subaddrs.add(wallet.getSubaddressObject(i))
             }
             if (wallet != null) {
@@ -101,7 +98,10 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     }
                 }
             }
-            return subaddrs.reversed()
+            wallet.getLatestSubaddress()?.let {
+                if (subaddrs.indexOf(it) == -1) subaddrs.add(it)
+            }
+            return subaddrs.distinctBy { it.address }.reversed()
         }
     }
 }

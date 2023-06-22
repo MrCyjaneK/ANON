@@ -28,6 +28,13 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("SubAddresses"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                AddressChannel().deriveNewSubAddress();
+              },
+              icon: const Icon(Icons.add))
+        ],
       ),
       body: value.map(
           data: (data) {
@@ -39,33 +46,15 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
                 .toList();
             return CustomScrollView(
               slivers: [
-                SliverToBoxAdapter(
-                    child: used.isNotEmpty
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 16),
-                            color: Colors.grey[900],
-                            child: Text("Used Addresses",
-                                style: Theme.of(context).textTheme.titleSmall))
-                        : const SizedBox()),
-                SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                  childCount: used.length,
-                  (context, index) => SubAddressItem(used[index]),
-                )),
-                SliverToBoxAdapter(
-                    child: unUsed.isNotEmpty
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 16),
-                            color: Colors.grey[900],
-                            child: Text("Unused Addresses",
-                                style: Theme.of(context).textTheme.titleSmall))
-                        : const SizedBox()),
                 SliverList(
                     delegate: SliverChildBuilderDelegate(
                   childCount: unUsed.length,
                   (context, index) => SubAddressItem(unUsed[index]),
+                )),
+                SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                  childCount: used.length,
+                  (context, index) => SubAddressItem(used[index]),
                 )),
                 const SliverPadding(padding: EdgeInsets.all(44))
               ],
@@ -79,18 +68,6 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
                   child: CircularProgressIndicator(),
                 ),
               )),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          AddressChannel().deriveNewSubAddress();
-        },
-        backgroundColor: Theme.of(context).primaryColor,
-        label: Text("New SubAddress",
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
     );
   }
 }
@@ -107,6 +84,8 @@ class SubAddressItem extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
           onTap: () {
             Navigator.push(context, MaterialPageRoute(builder: (c) {
               return SubAddressDetails(
@@ -132,7 +111,9 @@ class SubAddressItem extends StatelessWidget {
           subtitle: Text("${subAddress.squashedAddress}"),
           trailing: Text(
             formatMonero(subAddress.totalAmount),
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).primaryColor,
+                ),
           ),
         ),
       ),
