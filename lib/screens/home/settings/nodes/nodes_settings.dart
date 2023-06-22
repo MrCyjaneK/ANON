@@ -96,6 +96,14 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                             children: [
                               const Padding(padding: EdgeInsets.all(4)),
                               ListTile(
+                                onLongPress: () {
+                                  showDialog(
+                                      context: context,
+                                      barrierColor: barrierColor,
+                                      builder: (context) {
+                                        return NodeDetails(connectedNode);
+                                      }).then((value) => ref.refresh(_nodesListProvider));
+                                },
                                 title: Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 8),
                                   child: Text("${connectedNode.host}"),
