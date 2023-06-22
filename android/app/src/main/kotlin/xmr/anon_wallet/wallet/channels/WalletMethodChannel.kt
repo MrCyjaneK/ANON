@@ -221,7 +221,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             return@withContext
                         }
                         val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword)
-                        wallet.setProxy(getProxy())
                         result.success(wallet.walletToHashMap())
                         sendEvent(wallet.walletToHashMap())
                         wallet.refreshHistory()
@@ -237,6 +236,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                     wallet.restoreHeight = it
                                 Prefs.restoreHeight = 0L
                             }
+                            wallet.setProxy(getProxy())
 //                            if (WalletEventsChannel.initialized) {
 //                                wallet.refreshHistory()
 //                            }
@@ -334,7 +334,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     )
                     val wallet = WalletManager.getInstance()
                         .createWallet(newWalletFile, walletPin, default, restoreHeight)
-                    wallet.setProxy(getProxy())
                     AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), seedPhrase)
                     val map = wallet.walletToHashMap()
                     map["seed"] = wallet.getSeed(seedPhrase ?: "")
@@ -349,6 +348,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().daemonAddress?.let {
                             WalletEventsChannel.initialized = wallet.init(0)
+                            wallet.setProxy(getProxy())
                             sendEvent(wallet.walletToHashMap())
                         }
                         wallet.refreshHistory()
