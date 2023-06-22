@@ -372,14 +372,6 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
 
 
 
-    private fun getProxy(): String {
-        val prefs = AnonPreferences(AnonWallet.getAppContext());
-        return if (prefs.proxyPort.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
-            ""
-        } else {
-            "${prefs.proxyServer}:${prefs.proxyPort}"
-        }
-    }
     companion object {
         const val CHANNEL_NAME = "node.channel"
         private const val TAG = "NodeMethodChannel"
