@@ -160,13 +160,13 @@ object NodeManager {
     }
 
     suspend fun getNodes(): ArrayList<NodeInfo> {
-        val allNodes = arrayListOf<NodeInfo>()
+        val allNodes = arrayListOf<NodeInfo?>()
         return withContext(Dispatchers.IO) {
             try {
                 readNodes()
                 allNodes.addAll(nodes)
                 //push if connected node is not in the list or update if it is in the list
-                allNodes.find { it.host == currentNode?.host && it.rpcPort == currentNode?.rpcPort }
+                allNodes.filterNotNull().find { it.host == currentNode?.host && it.rpcPort == currentNode?.rpcPort }
                     .let {
                         if (it == null && currentNode != null) {
                             allNodes.add(currentNode!!)
@@ -175,7 +175,7 @@ object NodeManager {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            return@withContext ArrayList(allNodes.distinctBy { it.toString() })
+            return@withContext ArrayList(allNodes.filterNotNull().distinctBy { it.toString() })
         }
     }
 

@@ -69,7 +69,7 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
             const SliverPadding(padding: EdgeInsets.all(12)),
             SliverAppBar(
               automaticallyImplyLeading: false,
-              toolbarHeight: 80,
+              toolbarHeight: 88,
               flexibleSpace: Card(
                   elevation: 0,
                   borderOnForeground: true,
@@ -94,9 +94,14 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                       Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const Divider(),
-                                Text("${_settingCurrentNode?.host}",
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Text("${_settingCurrentNode?.host}",
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis ,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall),
+                                )
                               ],
                             ),
                           )
@@ -118,7 +123,9 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                 title: Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8),
-                                  child: Text("${connectedNode.host}"),
+                                  child: Text("${connectedNode.host}",
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis),
                                 ),
                                 subtitle: Consumer(
                                   builder: (context, ref, c) {
