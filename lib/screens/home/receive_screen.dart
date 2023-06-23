@@ -50,7 +50,7 @@ class ReceiveWidget extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Padding(padding: EdgeInsets.all(8)),
-                  QrImage(
+                  QrImageView(
                     backgroundColor: Colors.black,
                     gapless: true,
                     dataModuleStyle: const QrDataModuleStyle(

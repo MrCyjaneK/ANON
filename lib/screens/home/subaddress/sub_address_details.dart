@@ -71,10 +71,9 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                         child: SizedBox.square(
                           dimension: 280,
                           child: Center(
-                            child: QrImage(
+                            child: QrImageView(
                               size: 280,
                               backgroundColor: Colors.black,
-                              foregroundColor: Colors.white,
                               data: "monero:${subAddress.address}",
                               version: QrVersions.auto,
                             ),
