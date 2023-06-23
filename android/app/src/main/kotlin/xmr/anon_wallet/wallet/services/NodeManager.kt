@@ -1,6 +1,5 @@
 package xmr.anon_wallet.wallet.services
 
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.m2049r.xmrwallet.data.NodeInfo
@@ -161,24 +160,22 @@ object NodeManager {
     }
 
     suspend fun getNodes(): ArrayList<NodeInfo> {
+        val allNodes = arrayListOf<NodeInfo?>()
         return withContext(Dispatchers.IO) {
             try {
                 readNodes()
+                allNodes.addAll(nodes)
                 //push if connected node is not in the list or update if it is in the list
-                nodes.find { it.host == currentNode?.host && it.rpcPort == currentNode?.rpcPort }
+                allNodes.filterNotNull().find { it.host == currentNode?.host && it.rpcPort == currentNode?.rpcPort }
                     .let {
                         if (it == null && currentNode != null) {
-                            nodes.add(currentNode!!)
+                            allNodes.add(currentNode!!)
                         }
                     }
-                nodes = ArrayList(
-                    nodes.distinctBy { it.toString() }
-                )
-
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            return@withContext nodes
+            return@withContext ArrayList(allNodes.filterNotNull().distinctBy { it.toString() })
         }
     }
 

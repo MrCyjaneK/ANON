@@ -4,21 +4,28 @@ import android.util.Log
 import com.m2049r.xmrwallet.data.Subaddress
 import com.m2049r.xmrwallet.model.Wallet
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel
-import xmr.anon_wallet.wallet.channels.WalletEventsChannel.initialized
 
-fun Wallet.getLastSubAddressIndex(): Int {
-    //index starts from 1 to ignore primary 0 address
+fun Wallet.getLastUnusedIndex(): Int {
     var lastUsedSubaddress = 0
+    val subaddress = arrayListOf<Subaddress>()
+    for (i in 0 until this.numSubaddresses) {
+        subaddress.add(this.getSubaddressObject(i))
+    }
+    subaddress.forEach {
+        //Skip primary and find unused subaddress
+        if (it.totalAmount == 0L && subaddress.indexOf(it)!= 0) {
+            return subaddress.indexOf(it)
+        }
+    }
     for (info in this.history.all) {
         if (info.addressIndex > lastUsedSubaddress) lastUsedSubaddress = info.addressIndex
     }
-    return lastUsedSubaddress;
+    return lastUsedSubaddress
 }
 
 fun Wallet.getLatestSubaddress(): Subaddress? {
-    var lastUsedSubaddress = getLastSubAddressIndex()
-    lastUsedSubaddress++
-    val address = this.getSubaddressObject(lastUsedSubaddress);
+    val lastUsedSubaddress = getLastUnusedIndex()
+    val address = this.getSubaddressObject(lastUsedSubaddress + 1)
     if (lastUsedSubaddress == this.numSubaddresses) {
         this.addSubaddress(accountIndex, "Subaddress #${address.addressIndex}")
     }
@@ -41,14 +48,14 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
     val nextAddress = if (this.getLatestSubaddress() != null) this.getLatestSubaddress()?.toHashMap()!! else hashMapOf<String, String>()
     var connection = "disconnected";
     var error = "";
-    if(WalletEventsChannel.initialized){
+    if (WalletEventsChannel.initialized) {
         connection = "${this.fullStatus}"
         error = this.fullStatus.errorString
     }
     Log.i("Wallet", "Wallet FullStatus: ${connection} $error")
     return hashMapOf(
-        "connection" to (connection) ,
-        "connectionError" to (error) ,
+        "connection" to (connection),
+        "connectionError" to (error),
         "name" to this.name,
         "address" to this.address,
         "secretViewKey" to this.secretViewKey,

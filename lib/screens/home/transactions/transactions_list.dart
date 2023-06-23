@@ -70,7 +70,6 @@ class _TransactionsListState extends State<TransactionsList> {
                   },
                   icon: const Icon(Icons.crop_free)),
               PopupMenuButton<int>(
-                color: Colors.grey[900],
                 onSelected: (item) {
                   if (item == 0) {
                     WalletChannel().rescan();

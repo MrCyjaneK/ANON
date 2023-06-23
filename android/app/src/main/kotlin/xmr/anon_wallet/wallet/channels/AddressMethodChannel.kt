@@ -8,6 +8,7 @@ import io.flutter.plugin.common.MethodCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import xmr.anon_wallet.wallet.channels.WalletEventsChannel.sendEvent
 import xmr.anon_wallet.wallet.model.getLatestSubaddress
 import xmr.anon_wallet.wallet.model.toHashMap
 import xmr.anon_wallet.wallet.model.walletToHashMap
@@ -20,12 +21,31 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
         when (call.method) {
             "renameAddress" -> renameAddress(call, result)
             "getSubAddresses" -> getSubAddresses(result)
+            "deriveNewSubAddress" -> deriveNewSubAddress(call, result)
         }
     }
 
     private fun getSubAddresses(result: Result) {
-        WalletEventsChannel.sendEvent(getSubAddressesEvent())
+        sendEvent(getSubAddressesEvent())
         result.success(null);
+    }
+
+
+    private fun deriveNewSubAddress(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    WalletManager.getInstance().wallet?.let {
+                        it.addSubaddress(it.accountIndex, "Subaddress #${it.numSubaddresses}")
+                        sendEvent(getSubAddressesEvent())
+                        sendEvent(it.walletToHashMap())
+                        result.success(true)
+                    }
+                } catch (e: Exception) {
+                    result.error("0", "Unable to derive new subaddress ${e.message}", null)
+                }
+            }
+        }
     }
 
     private fun renameAddress(call: MethodCall, result: Result) {
@@ -45,8 +65,8 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     )
                     wallet.refreshHistory()
                     wallet.store()
-                    WalletEventsChannel.sendEvent(wallet.walletToHashMap())
-                    WalletEventsChannel.sendEvent(getSubAddressesEvent())
+                    sendEvent(wallet.walletToHashMap())
+                    sendEvent(getSubAddressesEvent())
                 }
             }
         }
@@ -60,24 +80,26 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                 "addresses" to getAllSubAddresses().map { it.toHashMap() }.toList()
             )
         }
+
         private fun getAllSubAddresses(): List<Subaddress> {
             val wallet = WalletManager.getInstance().wallet
-            val subaddrs = arrayListOf<Subaddress>()
-            wallet.getLatestSubaddress()?.let {
-                subaddrs.add(it)
+            val subAddresses = arrayListOf<Subaddress>()
+            for (i in 0 until wallet.numSubaddresses) {
+                subAddresses.add(wallet.getSubaddressObject(i))
             }
-            if (wallet != null) {
-                for (info in wallet.history.all) {
-                    val address = wallet.getSubaddressObject(info.addressIndex)
-                    val existItem = (subaddrs.find { it.address == address.address });
-                    if (existItem != null) {
-                        existItem.setAmount(existItem.totalAmount + info.amount)
-                    } else {
-                        subaddrs.add(address.apply { setAmount(info.amount) })
+            wallet.getLatestSubaddress()?.let {
+                if (subAddresses.indexOf(it) == -1) subAddresses.add(it)
+            }
+            return subAddresses
+                .apply {
+                    this.removeIf { it.addressIndex == 0 && it.totalAmount != 0L }
+                }
+                .onEach { item ->
+                    if (item.label.isNullOrEmpty()) {
+                        item.label = "Subaddress #${item.addressIndex}"
                     }
                 }
-            }
-            return subaddrs;
+                .distinctBy { it.address }.sortedBy { it.addressIndex }.reversed()
         }
     }
 }

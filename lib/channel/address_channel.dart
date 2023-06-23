@@ -14,6 +14,10 @@ class AddressChannel {
     await platform.invokeMethod("getSubAddresses");
   }
 
+  Future deriveNewSubAddress() async {
+    await platform.invokeMethod("deriveNewSubAddress");
+  }
+
   Future openBackupFile() async {
     await platform.invokeMethod("openBackupFile");
   }

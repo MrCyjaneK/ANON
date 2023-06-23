@@ -1,6 +1,7 @@
 package xmr.anon_wallet.wallet.channels
 
 import android.app.NotificationManager
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import anon.xmr.app.anon_wallet.R
 import com.m2049r.xmrwallet.model.Wallet

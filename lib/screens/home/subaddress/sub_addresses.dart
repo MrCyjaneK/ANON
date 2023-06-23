@@ -26,32 +26,49 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
   Widget build(BuildContext context) {
     var value = ref.watch(getSubAddressesProvider);
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("SubAddresses"),
-        ),
-        body: value.map(
-            data: (data) {
-              return CustomScrollView(
-                slivers: [
-                  SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                    childCount: data.value.length,
-                    (context, index) {
-                      SubAddress addr = data.value[index];
-                      return SubAddressItem(addr);
-                    },
-                  ))
-                ],
-              );
-            },
-            error: (error) => Center(child: Text("Error $error")),
-            loading: (c) => const Center(
-                  child: SizedBox(
-                    height: 12,
-                    width: 12,
-                    child: CircularProgressIndicator(),
-                  ),
-                )));
+      appBar: AppBar(
+        title: const Text("SubAddresses"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                AddressChannel().deriveNewSubAddress();
+              },
+              icon: const Icon(Icons.add))
+        ],
+      ),
+      body: value.map(
+          data: (data) {
+            List<SubAddress> used = data.value
+                .where((element) => element.totalAmount != 0)
+                .toList();
+            List<SubAddress> unUsed = data.value
+                .where((element) => element.totalAmount == 0)
+                .toList();
+            return CustomScrollView(
+              slivers: [
+                SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                  childCount: unUsed.length,
+                  (context, index) => SubAddressItem(unUsed[index]),
+                )),
+                SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                  childCount: used.length,
+                  (context, index) => SubAddressItem(used[index]),
+                )),
+                const SliverPadding(padding: EdgeInsets.all(44))
+              ],
+            );
+          },
+          error: (error) => Center(child: Text("Error $error")),
+          loading: (c) => const Center(
+                child: SizedBox(
+                  height: 12,
+                  width: 12,
+                  child: CircularProgressIndicator(),
+                ),
+              )),
+    );
   }
 }
 
@@ -64,33 +81,40 @@ class SubAddressItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Hero(
       tag: "sub:${subAddress.squashedAddress}",
-      child: ListTile(
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (c) {
-            return SubAddressDetails(
-              subAddress: subAddress,
-            );
-          }));
-        },
-        onLongPress: () {
-          showDialog(
-              barrierColor: barrierColor,
-              context: context,
-              builder: (context) {
-                return SubAddressEditDialog(subAddress);
-              });
-        },
-        title: Text(
-          subAddress.getLabel(),
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(color: Theme.of(context).primaryColor),
-        ),
-        subtitle: Text("${subAddress.squashedAddress}"),
-        trailing: Text(
-          formatMonero(subAddress.totalAmount),
-          style: Theme.of(context).textTheme.titleMedium,
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (c) {
+              return SubAddressDetails(
+                subAddress: subAddress,
+              );
+            }));
+          },
+          onLongPress: () {
+            showDialog(
+                barrierColor: barrierColor,
+                context: context,
+                builder: (context) {
+                  return SubAddressEditDialog(subAddress);
+                });
+          },
+          title: Text(
+            subAddress.getLabel(),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(color: Theme.of(context).primaryColor),
+          ),
+          subtitle: Text("${subAddress.squashedAddress}"),
+          trailing: Text(
+            formatMonero(subAddress.totalAmount),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).primaryColor,
+                ),
+          ),
         ),
       ),
     );
