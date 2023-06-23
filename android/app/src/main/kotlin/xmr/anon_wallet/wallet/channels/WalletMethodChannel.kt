@@ -518,7 +518,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             }
         }
     }
-    
     private fun getTxKey(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
