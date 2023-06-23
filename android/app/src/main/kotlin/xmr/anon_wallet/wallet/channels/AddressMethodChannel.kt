@@ -1,6 +1,5 @@
 package xmr.anon_wallet.wallet.channels
 
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.data.Subaddress
 import com.m2049r.xmrwallet.model.WalletManager
@@ -84,27 +83,21 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
 
         private fun getAllSubAddresses(): List<Subaddress> {
             val wallet = WalletManager.getInstance().wallet
-            val subaddrs = arrayListOf<Subaddress>()
+            val subAddresses = arrayListOf<Subaddress>()
             for (i in 0 until wallet.numSubaddresses) {
-                subaddrs.add(wallet.getSubaddressObject(i))
-            }
-            if (wallet != null) {
-                for (info in wallet.history.all) {
-                    val address = wallet.getSubaddressObject(info.addressIndex)
-                    val existItem = (subaddrs.find { it.address == address.address });
-                    if (existItem != null) {
-                        existItem.setAmount(existItem.totalAmount + info.amount)
-                    } else {
-                        subaddrs.add(address.apply { setAmount(info.amount) })
-                    }
-                }
+                subAddresses.add(wallet.getSubaddressObject(i))
             }
             wallet.getLatestSubaddress()?.let {
-                if (subaddrs.indexOf(it) == -1) subaddrs.add(it)
+                if (subAddresses.indexOf(it) == -1) subAddresses.add(it)
             }
-            return subaddrs
+            return subAddresses
                 .apply {
-                    this.removeIf { it.addressIndex == 0 && it.totalAmount == 0L }
+                    this.removeIf { it.addressIndex == 0 && it.totalAmount != 0L }
+                }
+                .onEach { item ->
+                    if (item.label.isNullOrEmpty()) {
+                        item.label = "Subaddress #${item.addressIndex}"
+                    }
                 }
                 .distinctBy { it.address }.sortedBy { it.addressIndex }.reversed()
         }

@@ -16,7 +16,6 @@
 package com.m2049r.xmrwallet.data
 
 import lombok.EqualsAndHashCode
-import lombok.RequiredArgsConstructor
 import lombok.ToString
 import java.util.regex.Pattern
 
@@ -26,7 +25,7 @@ data class Subaddress(
     val accountIndex: Int,
     val addressIndex: Int,
     val address: String?,
-    val label: String? = null
+    var label: String? = null
 ) : Comparable<Subaddress> {
     private var amount: Long = 0
 
