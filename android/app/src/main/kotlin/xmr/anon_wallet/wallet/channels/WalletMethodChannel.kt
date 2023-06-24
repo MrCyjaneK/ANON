@@ -159,7 +159,8 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                 "address" to wallet.address,
                                 "secretViewKey" to wallet.secretViewKey,
                                 "seed" to wallet.getSeed(seedPassphrase),
-                                "spendKey" to wallet.secretSpendKey
+                                "spendKey" to wallet.secretSpendKey,
+                                "restoreHeight" to wallet.restoreHeight
                             )
                         )
                     } else {

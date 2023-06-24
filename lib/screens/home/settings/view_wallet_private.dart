@@ -114,6 +114,22 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                               style: Theme.of(context).textTheme.bodyLarge),
                         ),
                       ),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: Divider(
+                        color: Colors.white54,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: ListTile(
+                        title: Text("RESTORE HEIGHT", style: titleStyle),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: SelectableText(
+                              "${wallet.restoreHeight ?? "N/A"} ",
+                              style: Theme.of(context).textTheme.bodyLarge),
+                        ),
+                      ),
                     )
                   ],
                 ),
