@@ -53,7 +53,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "getTxKey" -> getTxKey(call, result)
             "exportOutputs" -> exportOutputs(call, result)
             "importKeyImages" -> importKeyImages(call, result)
-            "setTrustedDaemon" -> setTrustedDaemon(call, result)
             "submitTransaction" -> submitTransaction(call, result)
             "setTxUserNotes" -> setTxUserNotes(call, result)
             "wipeWallet" -> wipeWallet(call, result)
@@ -147,25 +146,6 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     result.success(BuildConfig.VIEW_ONLY)
                 } catch (e: Exception) {
                     result.success(false)
-                }
-            }
-        }
-    }
-
-    private fun setTrustedDaemon(call: MethodCall, result: Result) {
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                if (call.hasArgument("arg")) {
-                    try {
-                        val arg = call.argument<Boolean>("arg") as Boolean
-                        val eo = WalletManager.getInstance().wallet.setTrustedDaemon(arg)
-                        result.success(eo)
-                    } catch (e: Exception) {
-                        result.error("1", e.message, "")
-                        throw CancellationException(e.message)
-                    }
-                } else {
-                    result.error("0", "invalid params", null)
                 }
             }
         }

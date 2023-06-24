@@ -39,8 +39,7 @@ class BackUpRestoreChannel {
     return value;
   }
 
-  Future restoreFromSeed(
-      String seed, num height, String passPhrase, String pin) async {
+  Future restoreFromSeed(String seed, num height, String passPhrase, String pin) async {
     return platform.invokeMethod("restoreFromSeed", {
       "seed": seed,
       "restoreHeight": height.toInt(),
@@ -49,7 +48,7 @@ class BackUpRestoreChannel {
     });
   }
 
-      String primaryAddress, String privateViewKey, num num, String pin) async {
+  Future restoreViewOnly(String primaryAddress, String privateViewKey, num num, String pin) async {
     return platform.invokeMethod("restoreViewOnly", {
       "primaryAddress": primaryAddress,
       "privateViewKey": privateViewKey,

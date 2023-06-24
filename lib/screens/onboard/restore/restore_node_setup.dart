@@ -215,7 +215,7 @@ class RestoreNodeSetup extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 6)),
                   onPressed: () async {
-                    } else if (node != null) {
+                    if (node != null) {
                       onButtonPressed();
                       return;
                     }

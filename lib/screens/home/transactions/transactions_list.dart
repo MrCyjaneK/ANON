@@ -242,10 +242,6 @@ void doImportStuff(BuildContext context) async {
   scLog(context, resp.toString());
 }
 
-void scLog(BuildContext context, String txt) async {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(txt)));
-}
-
 void doBroadcastStuff(BuildContext context) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(
     dialogTitle: 'Pick file',

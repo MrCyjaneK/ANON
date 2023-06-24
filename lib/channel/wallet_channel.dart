@@ -116,10 +116,6 @@ class WalletChannel {
         "signAndExportJ", {"inputFile": inputFile, "outputFile": outputFile});
   }
 
-  Future<void> setTrustedDaemon(bool arg) async {
-    await platform.invokeMethod("setTrustedDaemon", {"arg": arg});
-  }
-
   Future lock() async {
     dynamic value = await platform.invokeMethod("lock");
   }
