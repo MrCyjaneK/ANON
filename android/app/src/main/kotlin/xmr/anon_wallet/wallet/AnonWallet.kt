@@ -11,7 +11,6 @@ import com.m2049r.xmrwallet.model.Wallet
 import com.m2049r.xmrwallet.model.WalletManager
 import com.m2049r.xmrwallet.util.KeyStoreHelper
 import io.flutter.embedding.android.FlutterActivity
-import io.flutter.embedding.android.FlutterFragmentActivity
 import kotlinx.coroutines.*
 import timber.log.Timber
 import xmr.anon_wallet.wallet.utils.AnonPreferences
@@ -22,6 +21,9 @@ import kotlin.math.roundToInt
 
 
 object AnonWallet {
+
+    const val UR_MIN_FRAGMENT_LENGTH = 10
+    const val UR_MAX_FRAGMENT_LENGTH = 200
     const val NOCRAZYPASS_FLAGFILE = ".nocrazypass"
     const val NOTIFICATION_CHANNEL_ID = "new_tx"
     private lateinit var application: Application

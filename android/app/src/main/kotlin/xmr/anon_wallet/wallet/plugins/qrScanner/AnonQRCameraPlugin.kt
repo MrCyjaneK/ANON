@@ -19,6 +19,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import anon.xmr.app.anon_wallet.BuildConfig
 import com.google.common.util.concurrent.ListenableFuture
+import com.sparrowwallet.hummingbird.ResultType
+import com.sparrowwallet.hummingbird.UR
+import com.sparrowwallet.hummingbird.URDecoder
+import com.sparrowwallet.hummingbird.UREncoder
+import com.sparrowwallet.hummingbird.registry.RegistryType
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
@@ -29,10 +34,13 @@ import io.flutter.view.TextureRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import xmr.anon_wallet.wallet.AnonWallet.UR_MAX_FRAGMENT_LENGTH
+import xmr.anon_wallet.wallet.AnonWallet.UR_MIN_FRAGMENT_LENGTH
 import xmr.anon_wallet.wallet.MainActivity
-
 import xmr.anon_wallet.wallet.channels.AnonMethodChannel
+import java.io.File
 import java.util.concurrent.Executors
+
 
 class AnonQRCameraPlugin(
     private val activity: MainActivity, messenger: BinaryMessenger, lifecycle: Lifecycle
@@ -51,6 +59,7 @@ class AnonQRCameraPlugin(
     private var preview: Preview? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var textureEntry: TextureRegistry.SurfaceTextureEntry? = null
+    private var decoder = URDecoder()
 
 
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
@@ -68,6 +77,7 @@ class AnonQRCameraPlugin(
             "stopCam" -> stopCamera()
             "checkPermissionState" -> checkPermissionState(call, result)
             "requestPermission" -> requestPermission()
+            "createUR" -> createURFrames(call, result)
         }
     }
 
@@ -108,7 +118,97 @@ class AnonQRCameraPlugin(
         }
     }
 
+    private fun createURFrames(call: MethodCall, result: Result) {
+        val filePath: String
+        val type: String = "crypto-output"
+        if (call.hasArgument("fpath") && call.argument<String>("fpath") != null) {
+            filePath = call.argument<String>("fpath")!!
+        } else {
+            result.error("0", "NO FILE PATH", null)
+            return;
+        }
+        val frames = arrayListOf<String>()
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                val data = File(filePath).readBytes();
+                val ur = UR.fromBytes("crypto-output", data)
+                val encoder = UREncoder(ur, UR_MIN_FRAGMENT_LENGTH, UR_MAX_FRAGMENT_LENGTH, 0)
+                while (!encoder.isComplete) {
+                    val frame = encoder.nextPart()
+                    frames.add(frame)
+                }
+                result.success(frames)
+            }
+        }
+    }
+
+    private val qrAnalyzer = QrCodeAnalyzer { qrResult ->
+        scope.launch(Dispatchers.IO) {
+            val resultQR = qrResult.text
+
+            if (resultQR.lowercase().startsWith("ur:")) {
+                if (decoder.result == null) {
+                    val decoded = decoder.receivePart(resultQR)
+                    if (decoded) {
+                        //Loop adding QR fragments to the decoder until it has a result
+                        if (decoder.expectedPartCount != 0) {
+                            withContext(Dispatchers.Main) {
+                                eventSink?.success(
+                                    hashMapOf(
+                                        "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                                        "expectedPartCount" to decoder.expectedPartCount,
+                                        "processedPartsCount" to decoder.processedPartsCount,
+                                        "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                                    )
+                                )
+                            }
+                        }
+
+                    }
+                } else {
+                    val urResult = decoder.result
+                    if (urResult != null && urResult.type == ResultType.SUCCESS) {
+                        withContext(Dispatchers.Main) {
+                            eventSink?.success(
+                                hashMapOf(
+                                    "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                                    "expectedPartCount" to decoder.expectedPartCount,
+                                    "processedPartsCount" to decoder.processedPartsCount,
+                                    "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                                )
+                            )
+                        }
+                        //TODO: Handle different types of URs
+                        when (urResult.ur.type) {
+                            RegistryType.CRYPTO_OUTPUT.type -> {
+
+                            }
+
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            eventSink?.success(
+                                hashMapOf(
+                                    "result" to qrResult.text
+                                )
+                            )
+                        }
+                    }
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    eventSink?.success(
+                        hashMapOf(
+                            "result" to qrResult.text
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     private fun startCamera() {
+        decoder = URDecoder()
         cameraProviderFuture.addListener({
             cameraProvider = cameraProviderFuture.get()
             cameraProvider!!.unbindAll()
@@ -130,17 +230,7 @@ class AnonQRCameraPlugin(
             preview = previewBuilder.build().apply { setSurfaceProvider(surfaceProvider) }
 
             val imageAnalysis = ImageAnalysis.Builder().setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build().also {
-                it.setAnalyzer(cameraExecutor, QrCodeAnalyzer { qrResult ->
-                    scope.launch {
-                        withContext(Dispatchers.Main) {
-                            eventSink?.success(
-                                hashMapOf(
-                                    "result" to qrResult.text
-                                )
-                            )
-                        }
-                    }
-                })
+                it.setAnalyzer(cameraExecutor, qrAnalyzer)
             }
 
             camera = cameraProvider?.bindToLifecycle(
