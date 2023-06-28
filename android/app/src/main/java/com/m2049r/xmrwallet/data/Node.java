@@ -284,12 +284,19 @@ public class Node {
     public void setDefaultName() {
         if (name != null) return;
         String nodeName = hostAddress.getHostName();
-        if (hostAddress.isOnion()) {
+        if (hostAddress.isOnion() && nodeName.contains(".onion")) {
             nodeName = nodeName.substring(0, nodeName.length() - ".onion".length());
             if (nodeName.length() > 16) {
                 nodeName = nodeName.substring(0, 8) + "…" + nodeName.substring(nodeName.length() - 6);
             }
             nodeName = nodeName + ".onion";
+        }
+        if (hostAddress.isOnion() && nodeName.contains(".i2p")) {
+            nodeName = nodeName.substring(0, nodeName.length() - ".i2p".length());
+            if (nodeName.length() > 16) {
+                nodeName = nodeName.substring(0, 8) + "…" + nodeName.substring(nodeName.length() - 6);
+            }
+            nodeName = nodeName + ".i2p";
         }
         this.name = nodeName;
     }

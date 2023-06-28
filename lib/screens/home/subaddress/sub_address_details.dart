@@ -33,7 +33,8 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
           Builder(builder: (context) {
             return IconButton(
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(text: subAddress.address));
+                  Clipboard.setData(
+                      ClipboardData(text: subAddress.address.toString()));
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text("address copied",
                         style: Theme.of(context)
@@ -44,7 +45,7 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                     behavior: SnackBarBehavior.floating,
                   ));
                 },
-                icon: Icon(Icons.copy));
+                icon: const Icon(Icons.copy));
           }),
           IconButton(
               onPressed: () {
@@ -148,7 +149,7 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                               ?.copyWith(color: Colors.white70)),
                     ),
                   )
-                : SizedBox(),
+                : const SizedBox(),
           )
         ],
       ),
