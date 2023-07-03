@@ -1,4 +1,5 @@
 import 'package:anon_wallet/anon_wallet.dart';
+import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/channel/wallet_events_channel.dart';
 import 'package:anon_wallet/models/wallet.dart';
@@ -139,6 +140,8 @@ class LockScreen extends HookWidget {
     try {
       error.value = null;
       loading.value = true;
+      var proxy = await NodeChannel().getProxy();
+      await NodeChannel().setProxy(proxy.serverUrl, proxy.port);
       Wallet? wallet = await WalletChannel().openWallet(pin);
       WalletChannel().startSync();
       WalletEventsChannel().initEventChannel();

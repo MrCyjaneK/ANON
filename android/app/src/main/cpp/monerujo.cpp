@@ -298,7 +298,6 @@ Java_com_m2049r_xmrwallet_model_WalletManager_openWalletJ(JNIEnv *env, jobject i
     const char *_path = env->GetStringUTFChars(path, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
-
     Monero::Wallet *wallet =
             Monero::WalletManagerFactory::getWalletManager()->openWallet(
                     std::string(_path),
@@ -717,17 +716,23 @@ JNIEXPORT jboolean JNICALL
 Java_com_m2049r_xmrwallet_model_Wallet_initJ(JNIEnv *env, jobject instance,
                                              jstring daemon_address,
                                              jlong upper_transaction_size_limit,
-                                             jstring daemon_username, jstring daemon_password) {
+                                             jstring daemon_username, jstring daemon_password,
+                                             jstring proxy_address) {
     const char *_daemon_address = env->GetStringUTFChars(daemon_address, nullptr);
     const char *_daemon_username = env->GetStringUTFChars(daemon_username, nullptr);
     const char *_daemon_password = env->GetStringUTFChars(daemon_password, nullptr);
+    const char *_proxy_address = env->GetStringUTFChars(proxy_address, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     bool status = wallet->init(_daemon_address, (uint64_t) upper_transaction_size_limit,
                                _daemon_username,
-                               _daemon_password);
+                               _daemon_password,
+                               false,
+                               false,
+                               _proxy_address);
     env->ReleaseStringUTFChars(daemon_address, _daemon_address);
     env->ReleaseStringUTFChars(daemon_username, _daemon_username);
     env->ReleaseStringUTFChars(daemon_password, _daemon_password);
+    env->ReleaseStringUTFChars(daemon_password, _proxy_address);
     return static_cast<jboolean>(status);
 }
 

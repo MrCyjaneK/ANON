@@ -43,7 +43,7 @@ class WalletEventsChannel {
       try {
         var type = event['EVENT_TYPE'];
         if (kDebugMode) {
-          print("Sync:${type} ${event}");
+          print("walletEventsChannel: Sync:${type} ${event}");
         }
         switch (type) {
           case "NODE":

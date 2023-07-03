@@ -1,4 +1,4 @@
-FROM debian:stable
+FROM debian:oldstable
 
 RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python libtool libtinfo5
 

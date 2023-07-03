@@ -50,8 +50,8 @@ class WalletChannel {
     return value;
   }
 
-  void startSync() async {
-    dynamic value = await platform.invokeMethod("startSync");
+  Future startSync() async {
+    await platform.invokeMethod("startSync");
   }
 
   Future<WalletState> getWalletState() async {
