@@ -238,7 +238,11 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             NodeManager.setNode()
                         }
                         WalletManager.getInstance().daemonAddress?.let {
-                            WalletEventsChannel.initialized = wallet.init(0, getProxy())
+                            if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
+                                WalletEventsChannel.initialized = wallet.init(0, getProxyI2p())
+                            } else {
+                                WalletEventsChannel.initialized = wallet.init(0, getProxyTor())
+                            }
                             Prefs.restoreHeight?.let {
                                 if (it != 0L)
                                     wallet.restoreHeight = it
@@ -358,11 +362,13 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         wallet.refresh()
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().daemonAddress?.let {
-                            WalletEventsChannel.initialized = wallet.init(0)
+                            // WalletEventsChannel.initialized = wallet.init(0)
                             if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
-                                wallet.setProxy(getProxyI2p())
+                                WalletEventsChannel.initialized = wallet.init(0, getProxyI2p())
+                                // wallet.setProxy(getProxyI2p())
                             } else {
-                                wallet.setProxy(getProxyTor())
+                                WalletEventsChannel.initialized = wallet.init(0, getProxyTor())
+                                // wallet.setProxy(getProxyTor())
                             }
                             sendEvent(wallet.walletToHashMap())
                         }
