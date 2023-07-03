@@ -130,7 +130,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     password?.let {
                         node.password = it
                     }
-                    if(host.contains(".onion")){
+                    if(host.contains(".onion") || host.contains(".i2p")){
                         if(AnonPreferences(AnonWallet.getAppContext()).proxyServer.isNullOrEmpty()){
                             WalletEventsChannel.sendEvent(node.toHashMap().apply {
                                 put("status", "not-connected")

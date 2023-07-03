@@ -316,7 +316,7 @@ class NodeInfo : Node {
                             response.request.newBuilder().header("Authorization", credential).build()
                         }
                     }
-                    if(request.url.host.contains(".onion")){
+                    if(request.url.host.contains(".onion") || request.url.host.contains(".i2p")){
                         // Create a trust manager that does not validate certificate chains
                         val trustAllCerts = arrayOf<TrustManager>(
                             object : X509TrustManager {
@@ -395,7 +395,7 @@ class NodeInfo : Node {
                 return@Comparator 1
             }
         }
-        private const val HTTP_TIMEOUT = 1000 //ms
+        private const val HTTP_TIMEOUT = 15000 //ms
         const val PING_GOOD = HTTP_TIMEOUT / 3.0 //ms
         const val PING_MEDIUM = 2 * PING_GOOD //ms
         const val PING_BAD = HTTP_TIMEOUT.toDouble()

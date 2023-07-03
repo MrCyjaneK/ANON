@@ -19,6 +19,6 @@ package com.m2049r.utils;
 public class OnionHelper {
 
     public static boolean isOnionHost(String hostname) {
-        return hostname.endsWith(".onion");
+        return hostname.endsWith(".onion") || hostname.endsWith(".i2p");
     }
 }

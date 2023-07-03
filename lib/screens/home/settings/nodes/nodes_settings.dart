@@ -50,7 +50,7 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                       await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => RemoteNodeAddSheet(),
+                            builder: (context) => const RemoteNodeAddSheet(),
                           ));
                       ref.refresh(_nodesListProvider);
                     },
@@ -95,12 +95,14 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                 ),
                                 const Divider(),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                   child: Text("${_settingCurrentNode?.host}",
                                       maxLines: 2,
-                                      overflow: TextOverflow.ellipsis ,
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall),
                                 )
                               ],
                             ),
@@ -124,8 +126,8 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8),
                                   child: Text("${connectedNode.host}",
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis),
                                 ),
                                 subtitle: Consumer(
                                   builder: (context, ref, c) {
@@ -445,7 +447,7 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
     } catch (e) {
       setState(() {
         loading = false;
-        error = "${e}";
+        error = "$e";
       });
       print(e);
     }
@@ -466,7 +468,7 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
     } catch (e) {
       setState(() {
         loading = false;
-        error = "${e}";
+        error = "$e";
       });
     }
   }

@@ -37,8 +37,8 @@ import java.util.concurrent.Callable;
 import timber.log.Timber;
 
 public class PeerRetriever implements Callable<PeerRetriever> {
-    static final public int CONNECT_TIMEOUT = 500; //ms
-    static final public int SOCKET_TIMEOUT = 500; //ms
+    static final public int CONNECT_TIMEOUT = 5000; //ms
+    static final public int SOCKET_TIMEOUT = 5000; //ms
     static final public long PEER_ID = new Random().nextLong();
     static final private byte[] HANDSHAKE = handshakeRequest().asByteArray();
     static final private byte[] FLAGS_RESP = flagsResponse().asByteArray();
