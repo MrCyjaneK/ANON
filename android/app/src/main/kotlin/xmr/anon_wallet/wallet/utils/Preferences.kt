@@ -159,7 +159,8 @@ val Prefs get() = AnonPreferences.get
 
 class AnonPreferences(context: Context) : Preferences(context, "AnonPreferences") {
     var proxyServer by stringPref()
-    var proxyPort by stringPref()
+    var proxyPortTor by stringPref()
+    var proxyPortI2p by stringPref()
     var serverPort by intPref()
     var firstRun by booleanPref(defaultValue = true)
     var serverUrl by stringPref()

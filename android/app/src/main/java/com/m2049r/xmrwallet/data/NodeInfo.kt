@@ -292,11 +292,66 @@ class NodeInfo : Node {
         }
 
         private fun newCall(): Call {
-            return client!!.newCall(request)
+            if (request.url.host.toString().endsWith(".i2p")) {
+                return clientI2p!!.newCall(request)
+            } else {
+                return clientTor!!.newCall(request)
+            }
         }
 
         // Unit-test mode
-        private val client:
+        private val clientI2p:
+        //            if ((username != null) && (!username.isEmpty())) {
+        //TODO: DO OKHTTP AUTH AND TOR PROXY
+//                final DigestAuthenticator authenticator = new DigestAuthenticator(new Credentials(username, password));
+//                final Map<String, CachingAuthenticator> authCache = new ConcurrentHashMap<>();
+//                return client.newBuilder()
+//                        .authenticator(new CachingAuthenticatorDecorator(authenticator, authCache))
+//                        .addInterceptor(new AuthenticationCacheInterceptor(authCache))
+//                        .build();
+        // TODO: maybe cache & reuse the client for these credentials?
+//            } else {
+//                return client;
+//            }
+                OkHttpClient?
+            private get() = if (mockClient != null) mockClient else OkHttpClient.Builder().apply {
+                    val preferences = AnonPreferences(AnonWallet.getAppContext())
+                    if (!preferences.proxyServer.isNullOrEmpty() && !preferences.proxyPortI2p.isNullOrEmpty()) {
+                        val iSock = InetSocketAddress(
+                            preferences.proxyServer, preferences.proxyPortI2p!!.trim().toInt()
+                        )
+                        this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
+                    }
+                    if(!preferences.serverUserName.isNullOrEmpty() && !preferences.serverPassword.isNullOrEmpty()){
+                        this.authenticator { _, response ->
+                            val credential = Credentials.basic(preferences.serverUserName!!, preferences.serverPassword!!)
+                            response.request.newBuilder().header("Authorization", credential).build()
+                        }
+                    }
+                    if(request.url.host.contains(".onion") || request.url.host.contains(".i2p")){
+                        // Create a trust manager that does not validate certificate chains
+                        val trustAllCerts = arrayOf<TrustManager>(
+                            object : X509TrustManager {
+                                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+                                override fun getAcceptedIssuers(): Array<X509Certificate> {
+                                    return arrayOf()
+                                }
+                            }
+                        )
+                        // Install the all-trusting trust manager
+                        val sslContext = SSLContext.getInstance("SSL")
+                        sslContext.init(null, trustAllCerts, SecureRandom())
+
+                        // Create an ssl socket factory with our all-trusting manager
+                        val sslSocketFactory = sslContext.socketFactory
+
+                        this.sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+                        this.hostnameVerifier { _, _ -> true }
+                    }
+                }.build() // Unit-test mode
+        
+                private val clientTor:
         //            if ((username != null) && (!username.isEmpty())) {
         //TODO: DO OKHTTP AUTH AND TOR PROXY
         //                final DigestAuthenticator authenticator = new DigestAuthenticator(new Credentials(username, password));
@@ -312,9 +367,9 @@ class NodeInfo : Node {
                 OkHttpClient?
             private get() = if (mockClient != null) mockClient else OkHttpClient.Builder().apply {
                     val preferences = AnonPreferences(AnonWallet.getAppContext())
-                    if (!preferences.proxyServer.isNullOrEmpty() && !preferences.proxyPort.isNullOrEmpty()) {
+                    if (!preferences.proxyServer.isNullOrEmpty() && !preferences.proxyPortTor.isNullOrEmpty()) {
                         val iSock = InetSocketAddress(
-                            preferences.proxyServer, preferences.proxyPort!!.trim().toInt()
+                            preferences.proxyServer, preferences.proxyPortTor!!.trim().toInt()
                         )
                         this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
                     }

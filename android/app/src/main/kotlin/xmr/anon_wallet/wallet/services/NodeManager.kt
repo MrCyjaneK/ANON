@@ -54,6 +54,11 @@ object NodeManager {
                     put("status", "connecting")
                 })
                 currentNode = node
+                if (node.host.endsWith(".i2p")) {
+                    WalletManager.getInstance().setProxy(getProxyI2p())
+                } else {
+                    WalletManager.getInstance().setProxy(getProxyTor())
+                }
                 WalletManager.getInstance().setDaemon(node)
                 isConfigured = true
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {
@@ -149,12 +154,21 @@ object NodeManager {
         }
     }
 
-    private fun getProxy(): String {
+    private fun getProxyTor(): String {
         val prefs = AnonPreferences(AnonWallet.getAppContext());
-        return if (prefs.proxyPort.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
+        return if (prefs.proxyPortTor.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
             ""
         } else {
-            "${prefs.proxyServer}:${prefs.proxyPort}"
+            "${prefs.proxyServer}:${prefs.proxyPortTor}"
+        }
+    }
+
+    private fun getProxyI2p(): String {
+        val prefs = AnonPreferences(AnonWallet.getAppContext());
+        return if (prefs.proxyPortI2p.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
+            ""
+        } else {
+            "${prefs.proxyServer}:${prefs.proxyPortI2p}"
         }
     }
 

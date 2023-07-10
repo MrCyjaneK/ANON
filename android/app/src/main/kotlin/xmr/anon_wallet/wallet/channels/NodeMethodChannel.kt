@@ -34,7 +34,8 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
         return result.success(
             hashMapOf(
                 "proxyServer" to preferences.proxyServer,
-                "proxyPort" to preferences.proxyPort,
+                "proxyPortTor" to preferences.proxyPortTor,
+                "proxyPortI2p" to preferences.proxyPortI2p,
             )
         )
     }
@@ -59,32 +60,45 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
 
     private fun setProxy(call: MethodCall, result: Result) {
         val proxyServer = call.argument<String?>("proxyServer")
-        val proxyPort = call.argument<String?>("proxyPort")
+        val proxyPortTor = call.argument<String?>("proxyPortTor")
+        val proxyPortI2p = call.argument<String?>("proxyPortI2p")
         val preferences = AnonPreferences(AnonWallet.getAppContext());
         this.scope.launch {
             withContext(Dispatchers.IO){
               try {
-                  if (!proxyServer.isNullOrEmpty() && !proxyPort.isNullOrEmpty()) {
+                  if (!proxyServer.isNullOrEmpty() && !proxyPortTor.isNullOrEmpty() && !proxyPortI2p.isNullOrEmpty()) {
                       if (!Patterns.IP_ADDRESS.matcher(proxyServer).matches()) {
                           result.error("1", "Invalid server IP", "")
                           return@withContext
                       }
-                      val port = try {
-                          proxyPort.toInt()
+                      val portTor = try {
+                          proxyPortTor.toInt()
                       } catch (e: Exception) {
                           -1
                       }
-                      if (1 > port || port > 65535) {
+                      if (1 > portTor || portTor > 65535) {
+                          result.error("1", "Invalid port", "")
+                          return@withContext;
+                      }
+                      val portI2p = try {
+                          proxyPortI2p.toInt()
+                      } catch (e: Exception) {
+                          -1
+                      }
+                      if (1 > portI2p || portI2p > 65535) {
                           result.error("1", "Invalid port", "")
                           return@withContext;
                       }
                       preferences.proxyServer = proxyServer
-                      preferences.proxyPort = proxyPort
-                      WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPort}")
-                      WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPort}")
-                  }else if (proxyServer.isNullOrEmpty() || proxyPort.isNullOrEmpty()) {
+                      preferences.proxyPortTor = proxyPortTor
+                      preferences.proxyPortI2p = proxyPortI2p
+                      // TODO: set proxy based on node selected
+                      WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPortTor}")
+                      WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPortTor}")
+                  } else if (proxyServer.isNullOrEmpty() || proxyPortTor.isNullOrEmpty()|| proxyPortI2p.isNullOrEmpty()) {
                       preferences.proxyServer = proxyServer
-                      preferences.proxyPort = proxyPort
+                      preferences.proxyPortTor = proxyPortTor
+                      preferences.proxyPortI2p = proxyPortI2p
                       WalletManager.getInstance()?.wallet?.setProxy("")
                       WalletManager.getInstance()?.setProxy("")
                   }
@@ -299,7 +313,9 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         return@withContext
                     }
                     val node = NodeInfo(/**/)
+                    Log.d("NodeMethodChannel.kt", host.toString())
                     node.host = host
+                    Log.d("NodeMethodChannel.kt", node.host.toString())
                     node.rpcPort = port
                     userName?.let {
                         node.username = it

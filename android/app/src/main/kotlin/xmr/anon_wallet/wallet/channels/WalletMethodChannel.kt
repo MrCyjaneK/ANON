@@ -236,7 +236,12 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                     wallet.restoreHeight = it
                                 Prefs.restoreHeight = 0L
                             }
-                            wallet.setProxy(getProxy())
+                            Log.d("WalletMethodChannel.kt", WalletManager.getInstance().daemonAddress.toString())
+                            if (WalletManager.getInstance().daemonAddress.toString().endsWith(".i2p")) {
+                                wallet.setProxy(getProxyI2p())
+                            } else {
+                                wallet.setProxy(getProxyTor())
+                            }
 //                            if (WalletEventsChannel.initialized) {
 //                                wallet.refreshHistory()
 //                            }
@@ -315,7 +320,10 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     val default = "English"
                     //Close if wallet is already open
                     WalletManager.getInstance().wallet?.close()
-                    WalletManager.getInstance().setProxy(getProxy())
+                    // NOTE: I don't think that we really need to set proxy here?
+                    // TODO: check for leaks
+                    // WalletManager.getInstance().setProxy(getProxy())
+                    Log.d("WalletMethodChannel.kt", "Do we leak, checkpoint 1")
                     if (AnonWallet.getNetworkType() == NetworkType.NetworkType_Mainnet) {
                         if (NodeManager.getNode() != null && NodeManager.getNode()?.getHeight() != null) {
                             restoreHeight = NodeManager.getNode()?.getHeight()!!
@@ -347,8 +355,12 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         wallet.refresh()
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().daemonAddress?.let {
-                            WalletEventsChannel.initialized = wallet.init(0, getProxy())
-                            wallet.setProxy(getProxy())
+                            WalletEventsChannel.initialized = wallet.init(0)
+                            if (WalletManager.getInstance().daemonAddress.toString().endsWith(".i2p")) {
+                                wallet.setProxy(getProxyI2p())
+                            } else {
+                                wallet.setProxy(getProxyTor())
+                            }
                             sendEvent(wallet.walletToHashMap())
                         }
                         wallet.refreshHistory()
@@ -377,12 +389,23 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         }
     }
 
-    private fun getProxy(): String {
+    private fun getProxyTor(): String {
         val prefs = AnonPreferences(AnonWallet.getAppContext());
-        return if (prefs.proxyPort.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
+        Log.d("WalletMethodChannel.kt", "getProxyTor(): ${prefs.proxyServer}:${prefs.proxyPortTor}")
+        return if (prefs.proxyPortTor.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
             ""
         } else {
-            "${prefs.proxyServer}:${prefs.proxyPort}"
+            "${prefs.proxyServer}:${prefs.proxyPortTor}"
+        }
+    }
+
+    private fun getProxyI2p(): String {
+        val prefs = AnonPreferences(AnonWallet.getAppContext());
+        Log.d("WalletMethodChannel.kt", "getProxyI2p(): ${prefs.proxyServer}:${prefs.proxyPortI2p}")
+        return if (prefs.proxyPortI2p.isNullOrEmpty() || prefs.proxyServer.isNullOrEmpty()) {
+            ""
+        } else {
+            "${prefs.proxyServer}:${prefs.proxyPortI2p}"
         }
     }
 

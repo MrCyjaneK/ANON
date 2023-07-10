@@ -72,7 +72,8 @@ class MainActivity : FlutterActivity() {
         val prefs = AnonPreferences(this)
         if (prefs.firstRun == true) {
             prefs.proxyServer = "127.0.0.1"
-            prefs.proxyPort = "9050"
+            prefs.proxyPortTor = "9050"
+            prefs.proxyPortI2p = "4447"
             prefs.firstRun = false
         }
     }

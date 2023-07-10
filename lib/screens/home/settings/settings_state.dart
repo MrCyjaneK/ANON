@@ -7,17 +7,20 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class Proxy {
   String serverUrl = "";
-  String port = "";
+  String portTor = "";
+  String portI2p = "";
 
   Proxy();
 
   Proxy.fromJson(value) {
     serverUrl = value['proxyServer'] ?? "";
-    port = value['proxyPort'] ?? "";
+    portTor = value['proxyPortTor'] ?? "";
+    portI2p = value['proxyPortI2p'] ?? "";
   }
 
   isConnected() {
-    return serverUrl.isNotEmpty && port.isNotEmpty;
+    // TODO: this should actually check if you are connected.....
+    return serverUrl.isNotEmpty && portI2p.isNotEmpty && portTor.isNotEmpty;
   }
 }
 
@@ -28,8 +31,8 @@ class ProxyStateNotifier extends StateNotifier<Proxy> {
     state = await NodeChannel().getProxy();
   }
 
-  Future setProxy(String proxy, String port) async {
-    await NodeChannel().setProxy(proxy, port);
+  Future setProxy(String proxy, String portTor, String portI2p) async {
+    await NodeChannel().setProxy(proxy, portTor, portI2p);
     state = await NodeChannel().getProxy();
   }
 }

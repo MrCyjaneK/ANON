@@ -76,7 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProxySettings()));
+                              builder: (context) => const ProxySettings()));
                     },
                     title: const Text("Proxy"),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 34),
@@ -96,8 +96,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         fontSize: 11,
                                         wordSpacing: 0),
                                 isConnected
-                                    ? "Connected : ${proxy.serverUrl}:${proxy.port}"
-                                    : "Disconnected : ${proxy.serverUrl}:${proxy.port}",
+                                    ? "Connected : ${proxy.serverUrl}:${proxy.portTor}/${proxy.portI2p}"
+                                    : "Disconnected : ${proxy.serverUrl}:${proxy.portTor}/${proxy.portI2p}",
                               ),
                             ],
                           )
@@ -276,7 +276,7 @@ class WipeDialog extends HookWidget {
                 debugPrintStack(stackTrace: s);
                 error.value = e.message;
                 loading.value = false;
-              } catch (e, s) {
+              } catch (e) {
                 loading.value = false;
                 error.value = "Error $e";
               }

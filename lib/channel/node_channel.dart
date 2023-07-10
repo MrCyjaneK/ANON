@@ -21,9 +21,16 @@ class NodeChannel {
     return Wallet.fromJson(value);
   }
 
-  Future setProxy(String proxy, String port) async {
-    await platform
-        .invokeMethod("setProxy", {"proxyServer": proxy, "proxyPort": port});
+  Future setProxy(
+    String proxy,
+    String portTor,
+    String portI2p,
+  ) async {
+    await platform.invokeMethod("setProxy", {
+      "proxyServer": proxy,
+      "proxyPortTor": portTor,
+      "proxyPortI2p": portI2p
+    });
   }
 
   Future<Proxy> getProxy() async {
@@ -44,6 +51,7 @@ class NodeChannel {
 
   Future addNode(
       String host, int port, String? username, String? password) async {
+    print("host:$host\nport:$port\nuser:$username\npass:$password");
     dynamic value = await platform.invokeMethod("addNewNode", {
       "host": host,
       "port": port,
