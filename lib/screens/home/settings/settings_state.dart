@@ -28,7 +28,7 @@ class ProxyStateNotifier extends StateNotifier<Proxy> {
     state = await NodeChannel().getProxy();
   }
 
-  setProxy(String proxy, String port) async {
+  Future setProxy(String proxy, String port) async {
     await NodeChannel().setProxy(proxy, port);
     state = await NodeChannel().getProxy();
   }

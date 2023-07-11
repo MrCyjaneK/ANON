@@ -54,7 +54,6 @@ object NodeManager {
                     put("status", "connecting")
                 })
                 currentNode = node
-                WalletManager.getInstance().setProxy(getProxy())
                 WalletManager.getInstance().setDaemon(node)
                 isConfigured = true
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {

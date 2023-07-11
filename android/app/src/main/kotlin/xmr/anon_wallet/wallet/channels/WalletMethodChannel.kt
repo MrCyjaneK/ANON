@@ -230,7 +230,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             NodeManager.setNode()
                         }
                         WalletManager.getInstance().daemonAddress?.let {
-                            WalletEventsChannel.initialized = wallet.init(0)
+                            WalletEventsChannel.initialized = wallet.init(0, getProxy())
                             Prefs.restoreHeight?.let {
                                 if (it != 0L)
                                     wallet.restoreHeight = it
@@ -347,7 +347,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         wallet.refresh()
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().daemonAddress?.let {
-                            WalletEventsChannel.initialized = wallet.init(0)
+                            WalletEventsChannel.initialized = wallet.init(0, getProxy())
                             wallet.setProxy(getProxy())
                             sendEvent(wallet.walletToHashMap())
                         }

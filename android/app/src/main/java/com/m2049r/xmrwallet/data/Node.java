@@ -70,7 +70,8 @@ public class Node {
         }
 
         static Address of(String host) throws UnknownHostException {
-            if (OnionHelper.isOnionHost(host)) {
+            // todo: set if proxy here
+            if (OnionHelper.isOnionHost(host) || true) {
                 return new Address(null, host);
             } else {
                 return new Address(InetAddress.getByName(host), null);
