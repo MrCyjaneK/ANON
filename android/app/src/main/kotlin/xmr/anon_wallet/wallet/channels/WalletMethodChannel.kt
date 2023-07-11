@@ -237,7 +237,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                 Prefs.restoreHeight = 0L
                             }
                             Log.d("WalletMethodChannel.kt", WalletManager.getInstance().daemonAddress.toString())
-                            if (WalletManager.getInstance().daemonAddress.toString().endsWith(".i2p")) {
+                            if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
                                 wallet.setProxy(getProxyI2p())
                             } else {
                                 wallet.setProxy(getProxyTor())
@@ -356,7 +356,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         sendEvent(wallet.walletToHashMap())
                         WalletManager.getInstance().daemonAddress?.let {
                             WalletEventsChannel.initialized = wallet.init(0)
-                            if (WalletManager.getInstance().daemonAddress.toString().endsWith(".i2p")) {
+                            if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
                                 wallet.setProxy(getProxyI2p())
                             } else {
                                 wallet.setProxy(getProxyTor())

@@ -29,6 +29,7 @@ import java.util.Locale;
 
 import lombok.Getter;
 import timber.log.Timber;
+import android.util.Log;
 
 public class Wallet {
     final static public long SWEEP_ALL = Long.MAX_VALUE;
@@ -257,8 +258,20 @@ public class Wallet {
 //TODO virtual void setTrustedDaemon(bool arg) = 0;
 //TODO virtual bool trustedDaemon() const = 0;
 
-    public native boolean setProxy(String address);
+     public native boolean setProxyJ(String address);
 
+    public boolean setProxy(String address) {
+        Log.d("WalletManager.java", "setProxy("+address+")");
+        if (setProxyJ(address)) {
+            Log.d("WalletManager.java", "setProxy(): success");
+            Log.d("WalletManager.java", getStatus().errorString);
+            return true;
+        } else {
+            Log.d("WalletManager.java", "setProxy(): failure");
+            Log.d("WalletManager.java", getStatus().errorString);
+            return true;
+        }
+    }
     public long getBalance() {
         return getBalance(accountIndex);
     }

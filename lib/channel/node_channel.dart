@@ -40,6 +40,8 @@ class NodeChannel {
 
   Future setNode(
       String host, int port, String? username, String? password) async {
+    print(
+        "node_channel.dart: setNode($host, $port, '[redacted]', '[redacted]')");
     dynamic value = await platform.invokeMethod("setNode", {
       "host": host,
       "port": port,
@@ -51,7 +53,7 @@ class NodeChannel {
 
   Future addNode(
       String host, int port, String? username, String? password) async {
-    print("host:$host\nport:$port\nuser:$username\npass:$password");
+    print("addNode($host, $port, $username, $password");
     dynamic value = await platform.invokeMethod("addNewNode", {
       "host": host,
       "port": port,
@@ -95,6 +97,7 @@ class NodeChannel {
   }
 
   Future setCurrentNode(Node node) async {
+    print("setCurrentNode($node)");
     dynamic value = await platform.invokeMethod("setCurrentNode", {
       "host": node.host,
       "port": node.port,

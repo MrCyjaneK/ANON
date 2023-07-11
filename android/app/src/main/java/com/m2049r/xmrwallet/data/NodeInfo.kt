@@ -292,7 +292,7 @@ class NodeInfo : Node {
         }
 
         private fun newCall(): Call {
-            if (request.url.host.toString().endsWith(".i2p")) {
+            if (request.url.host.toString().contains(".i2p")) {
                 return clientI2p!!.newCall(request)
             } else {
                 return clientTor!!.newCall(request)

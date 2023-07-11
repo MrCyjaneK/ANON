@@ -11,6 +11,7 @@ import kotlinx.coroutines.*
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
+import kotlin.text.endsWith
 
 class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
     AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
@@ -92,16 +93,27 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                       preferences.proxyServer = proxyServer
                       preferences.proxyPortTor = proxyPortTor
                       preferences.proxyPortI2p = proxyPortI2p
-                      // TODO: set proxy based on node selected
-                      WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPortTor}")
-                      WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPortTor}")
+                      val preferences = AnonPreferences(AnonWallet.getAppContext());
+                      if(preferences.serverUrl.isNullOrEmpty() || preferences.serverPort == null){
+                          result.error("0","No node found",null);
+                      }
+                      if (preferences.serverUrl.toString().contains(".i2p")) {
+                          Log.d("NodeMethodCHannel.kt", "proxy type: i2p")
+                          WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPortI2p}")
+                          WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPortI2p}")
+                      } else {
+                          Log.d("NodeMethodCHannel.kt", "proxy type: tor")
+                          WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPortTor}")
+                          WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPortTor}")
+                      }
                   } else if (proxyServer.isNullOrEmpty() || proxyPortTor.isNullOrEmpty()|| proxyPortI2p.isNullOrEmpty()) {
                       preferences.proxyServer = proxyServer
                       preferences.proxyPortTor = proxyPortTor
                       preferences.proxyPortI2p = proxyPortI2p
                       WalletManager.getInstance()?.wallet?.setProxy("")
                       WalletManager.getInstance()?.setProxy("")
-                  }
+                      Log.d("NodeMethodCHannel.kt", "proxy type: null")
+                    }
                   result.success(true)
               }catch (e:Exception){
                   result.error("0",e.message,"")
@@ -144,6 +156,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     password?.let {
                         node.password = it
                     }
+                    // here
                     if(host.contains(".onion") || host.contains(".i2p")){
                         if(AnonPreferences(AnonWallet.getAppContext()).proxyServer.isNullOrEmpty()){
                             WalletEventsChannel.sendEvent(node.toHashMap().apply {
@@ -260,15 +273,26 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     }
                     AnonPreferences(AnonWallet.getAppContext()).serverUrl = host
                     AnonPreferences(AnonWallet.getAppContext()).serverPort = port
+                    NodeManager.setCurrentActiveNode(node)
+                    WalletManager.getInstance().setDaemon(node)
                     if (!node.username.isNullOrEmpty()) {
                         AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.username
                     }
                     if (!node.password.isNullOrEmpty()) {
                         AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.password
                     }
-
-                    NodeManager.setCurrentActiveNode(node)
-                    WalletManager.getInstance().setDaemon(node)
+                    val preferences = AnonPreferences(AnonWallet.getAppContext());
+                    Log.d("NodeMethodCHannel.kt", "node url: ${preferences.serverUrl}")
+                    if (preferences.serverUrl.toString().contains(".i2p")) {
+                        Log.d("NodeMethodCHannel.kt", "proxy type: i2p")
+                        WalletManager.getInstance()?.setProxy("${preferences.proxyServer}:${preferences.proxyPortI2p}")
+                        WalletManager.getInstance().wallet?.setProxy("${preferences.proxyServer}:${preferences.proxyPortI2p}")
+                    } else {
+                        Log.d("NodeMethodCHannel.kt", "proxy type: tor")
+                        WalletManager.getInstance()?.setProxy("${preferences.proxyServer}:${preferences.proxyPortTor}")
+                        WalletManager.getInstance().wallet?.setProxy("${preferences.proxyServer}:${preferences.proxyPortTor}")
+                    }
+                    Log.d("NodeMethodCHannel.kt", "setting node")
                     result.success(node.toHashMap())
                     try {
                         WalletManager.getInstance().wallet?.let {

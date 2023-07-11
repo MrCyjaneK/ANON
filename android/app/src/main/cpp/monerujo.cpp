@@ -547,7 +547,7 @@ Java_com_m2049r_xmrwallet_model_WalletManager_resolveOpenAlias(JNIEnv *env, jobj
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_m2049r_xmrwallet_model_WalletManager_setProxy(JNIEnv *env, jobject instance,
+Java_com_m2049r_xmrwallet_model_WalletManager_setProxyJ(JNIEnv *env, jobject instance,
                                                        jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     bool rc =
@@ -763,7 +763,7 @@ Java_com_m2049r_xmrwallet_model_Wallet_getConnectionStatusJ(JNIEnv *env, jobject
 //TODO virtual bool trustedDaemon() const = 0;
 
 JNIEXPORT jboolean JNICALL
-Java_com_m2049r_xmrwallet_model_Wallet_setProxy(JNIEnv *env, jobject instance,
+Java_com_m2049r_xmrwallet_model_Wallet_setProxyJ(JNIEnv *env, jobject instance,
                                                 jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);

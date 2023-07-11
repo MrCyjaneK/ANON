@@ -54,7 +54,7 @@ object NodeManager {
                     put("status", "connecting")
                 })
                 currentNode = node
-                if (node.host.endsWith(".i2p")) {
+                if (node.host.contains(".i2p")) {
                     WalletManager.getInstance().setProxy(getProxyI2p())
                 } else {
                     WalletManager.getInstance().setProxy(getProxyTor())

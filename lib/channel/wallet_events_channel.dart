@@ -6,6 +6,9 @@ import 'package:anon_wallet/models/wallet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+bool debugWalletEventsChannel =
+    false; // NOTE: set this to true to get that spammy logs
+
 class WalletEventsChannel {
   static const channel = EventChannel("wallet.events");
   late StreamSubscription _events;
@@ -42,8 +45,8 @@ class WalletEventsChannel {
         channel.receiveBroadcastStream().asBroadcastStream().listen((event) {
       try {
         var type = event['EVENT_TYPE'];
-        if (kDebugMode) {
-          print("walletEventsChannel: Sync:${type} ${event}");
+        if (debugWalletEventsChannel) {
+          print("Sync:$type $event");
         }
         switch (type) {
           case "NODE":

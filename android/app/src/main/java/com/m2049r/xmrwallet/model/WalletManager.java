@@ -32,6 +32,7 @@ import kotlin.jvm.functions.Function0;
 import lombok.Getter;
 import timber.log.Timber;
 import xmr.anon_wallet.wallet.AnonWallet;
+import android.util.Log;
 
 
 public class WalletManager {
@@ -322,8 +323,20 @@ public class WalletManager {
 
     public native String resolveOpenAlias(String address, boolean dnssec_valid);
 
-    public native boolean setProxy(String address);
+    public native boolean setProxyJ(String address);
 
+    public boolean setProxy(String address) {
+        Log.d("WalletManager.java", "setProxy("+address+")");
+        if (setProxyJ(address)) {
+            Log.d("WalletManager.java", "setProxy(): success");
+            Log.d("WalletManager.java", "no logging here, yet.");
+            return true;
+        } else {
+            Log.d("WalletManager.java", "setProxy(): failure");
+            Log.d("WalletManager.java", "no logging here, yet.");
+            return true;
+        }
+    }
 //TODO static std::tuple<bool, std::string, std::string, std::string, std::string> checkUpdates(const std::string &software, const std::string &subdir);
 
     static public native void initLogger(String argv0, String defaultLogBaseName);
