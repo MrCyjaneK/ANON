@@ -40,7 +40,12 @@ import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
-
+import com.burgstaller.okhttp.AuthenticationCacheInterceptor;
+import com.burgstaller.okhttp.CachingAuthenticatorDecorator;
+import com.burgstaller.okhttp.digest.CachingAuthenticator;
+import com.burgstaller.okhttp.digest.Credentials;
+import com.burgstaller.okhttp.digest.DigestAuthenticator;
+import java.util.concurrent.ConcurrentHashMap;
 
 class NodeInfo : Node {
     private var height: Long = 0
@@ -186,6 +191,9 @@ class NodeInfo : Node {
                 Timber.d("%s: %s", response.code, response.request.url)
                 responseTime = (System.nanoTime() - ta) / 1000000.0
                 responseCode = response.code
+                Log.d("NodeInfo.kt", "code:" + response.code.toString());
+                Log.d("NodeInfo.kt", "message: " + response.message.toString());
+                Log.d("NodeInfo.kt", "body: " + response.body.toString());
                 if (response.isSuccessful) {
                     val respBody = response.body // closed through Response object
                     if (respBody != null && respBody.contentLength() < 2000) { // sanity check
@@ -291,16 +299,16 @@ class NodeInfo : Node {
         private val client:
         //            if ((username != null) && (!username.isEmpty())) {
         //TODO: DO OKHTTP AUTH AND TOR PROXY
-//                final DigestAuthenticator authenticator = new DigestAuthenticator(new Credentials(username, password));
-//                final Map<String, CachingAuthenticator> authCache = new ConcurrentHashMap<>();
-//                return client.newBuilder()
-//                        .authenticator(new CachingAuthenticatorDecorator(authenticator, authCache))
-//                        .addInterceptor(new AuthenticationCacheInterceptor(authCache))
-//                        .build();
+        //                final DigestAuthenticator authenticator = new DigestAuthenticator(new Credentials(username, password));
+        //                final Map<String, CachingAuthenticator> authCache = new ConcurrentHashMap<>();
+        //                return client.newBuilder()
+        //                        .authenticator(new CachingAuthenticatorDecorator(authenticator, authCache))
+        //                        .addInterceptor(new AuthenticationCacheInterceptor(authCache))
+        //                        .build();
         // TODO: maybe cache & reuse the client for these credentials?
-//            } else {
-//                return client;
-//            }
+        //            } else {
+        //                return client;
+        //            }
                 OkHttpClient?
             private get() = if (mockClient != null) mockClient else OkHttpClient.Builder().apply {
                     val preferences = AnonPreferences(AnonWallet.getAppContext())
@@ -310,12 +318,12 @@ class NodeInfo : Node {
                         )
                         this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
                     }
-                    if(!preferences.serverUserName.isNullOrEmpty() && !preferences.serverPassword.isNullOrEmpty()){
-                        this.authenticator { _, response ->
-                            val credential = Credentials.basic(preferences.serverUserName!!, preferences.serverPassword!!)
-                            response.request.newBuilder().header("Authorization", credential).build()
-                        }
-                    }
+                    // if(!preferences.serverUserName.isNullOrEmpty() && !preferences.serverPassword.isNullOrEmpty()){
+                    //     this.authenticator { _, response ->
+                    //         val credential = Credentials.basic(preferences.serverUserName!!, preferences.serverPassword!!)
+                    //         response.request.newBuilder().header("Authorization", credential).build()
+                    //     }
+                    // }
                     if(request.url.host.contains(".onion") || request.url.host.contains(".i2p")){
                         // Create a trust manager that does not validate certificate chains
                         val trustAllCerts = arrayOf<TrustManager>(
@@ -337,6 +345,13 @@ class NodeInfo : Node {
                         this.sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
                         this.hostnameVerifier { _, _ -> true }
                     }
+                    var authenticator = DigestAuthenticator(Credentials(username, password))
+                    var authCache = ConcurrentHashMap<String, CachingAuthenticator>()
+
+                    var decorator = CachingAuthenticatorDecorator(authenticator, authCache)
+                    var interceptor = AuthenticationCacheInterceptor(authCache)
+                    authenticator(decorator)
+                    addInterceptor(interceptor)
                 }.build() // Unit-test mode
 
         //            if ((username != null) && (!username.isEmpty())) {
@@ -354,6 +369,7 @@ class NodeInfo : Node {
         private val request: okhttp3.Request
             get() {
                 val builder: okhttp3.Request.Builder = okhttp3.Request.Builder().url(url!!).header("User-Agent", USER_AGENT)
+                
                 if (json != null) {
                     builder.post(json.toRequestBody("application/json".toMediaTypeOrNull()))
                 } else {
