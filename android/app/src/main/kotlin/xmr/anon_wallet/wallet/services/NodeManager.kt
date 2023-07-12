@@ -11,7 +11,7 @@ import org.json.JSONObject
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel
 import xmr.anon_wallet.wallet.utils.AnonPreferences
-
+import android.util.Log;
 
 object NodeManager {
 
@@ -25,10 +25,12 @@ object NodeManager {
     }
 
     suspend fun setNode() {
+        Log.d("NodeManager.kt", "setNode()")
         withContext(Dispatchers.IO) {
             val preferences = AnonPreferences(AnonWallet.getAppContext())
             val serverUrl = preferences.serverUrl
             val serverPort = preferences.serverPort
+            Log.d("NodeManager.kt", "setNode(): " + preferences.serverUrl + ":" + preferences.serverPort)
             if (serverUrl == null || serverUrl.isEmpty() || serverPort == null) {
                 isConfigured = false
                 WalletEventsChannel.sendEvent(
@@ -82,6 +84,7 @@ object NodeManager {
     }
 
     fun setCurrentActiveNode(node: NodeInfo) {
+        Log.d("NodeManager.kt", "setCurrenctActiveNode(node.host: "+node.host+")")
         currentNode = node
     }
 

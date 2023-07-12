@@ -467,7 +467,9 @@ JNIEXPORT void JNICALL
 Java_com_m2049r_xmrwallet_model_WalletManager_setDaemonAddressJ(JNIEnv *env, jobject instance,
                                                                 jstring address) {
     const char *_address = env->GetStringUTFChars(address, nullptr);
+    LOGD("setDaemonAddressJ(): start");
     Monero::WalletManagerFactory::getWalletManager()->setDaemonAddress(std::string(_address));
+    LOGD("setDaemonAddressJ(): end");
     env->ReleaseStringUTFChars(address, _address);
 }
 

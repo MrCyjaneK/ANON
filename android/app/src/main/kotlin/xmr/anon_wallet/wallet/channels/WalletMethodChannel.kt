@@ -226,6 +226,14 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         wallet.refreshHistory()
                         sendEvent(wallet.walletToHashMap())
                         WalletEventsChannel.initWalletListeners()
+                        val preferences = AnonPreferences(AnonWallet.getAppContext())
+                        val serverUrl = preferences.serverUrl
+                        Log.d("WalletMethodChannel.kt", WalletManager.getInstance().daemonAddress.toString())
+                        if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
+                            wallet.setProxy(getProxyI2p())
+                        } else {
+                            wallet.setProxy(getProxyTor())
+                        }
                         if (WalletManager.getInstance().daemonAddress == null) {
                             NodeManager.setNode()
                         }
@@ -236,12 +244,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                     wallet.restoreHeight = it
                                 Prefs.restoreHeight = 0L
                             }
-                            Log.d("WalletMethodChannel.kt", WalletManager.getInstance().daemonAddress.toString())
-                            if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
-                                wallet.setProxy(getProxyI2p())
-                            } else {
-                                wallet.setProxy(getProxyTor())
-                            }
+                            
 //                            if (WalletEventsChannel.initialized) {
 //                                wallet.refreshHistory()
 //                            }
