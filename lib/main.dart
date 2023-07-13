@@ -141,14 +141,17 @@ class LockScreen extends HookWidget {
       error.value = null;
       loading.value = true;
       var proxy = await NodeChannel().getProxy();
-      await NodeChannel().setProxy(proxy.serverUrl, proxy.port);
+      await NodeChannel()
+          .setProxy(proxy.serverUrl, proxy.portTor, proxy.portI2p);
       Wallet? wallet = await WalletChannel().openWallet(pin);
       WalletChannel().startSync();
       WalletEventsChannel().initEventChannel();
       loading.value = false;
       if (wallet != null) {
-        Navigator.pushAndRemoveUntil(context,
-            MaterialPageRoute(builder: (c) => WalletHome()), (route) => false);
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (c) => const WalletHome()),
+            (route) => false);
       }
     } on PlatformException catch (e) {
       error.value = e.message;

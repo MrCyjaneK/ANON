@@ -220,7 +220,12 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             result.error("1", "Invalid pin", "invalid pin")
                             return@withContext
                         }
-                        WalletManager.getInstance().proxy = getProxy()
+                        if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
+                            WalletManager.getInstance().proxy = getProxyI2p()
+                        } else {
+                            WalletManager.getInstance().proxy = getProxyTor()
+                        }
+                        Log.d("WalletMethodChannel.kt", "openWallet(${walletFile.path}, '****', true)")
                         val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword, true)
                         result.success(wallet.walletToHashMap())
                         sendEvent(wallet.walletToHashMap())
