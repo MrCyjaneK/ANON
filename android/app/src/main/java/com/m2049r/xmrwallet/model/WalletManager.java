@@ -81,9 +81,10 @@ public class WalletManager {
     }
 
     private void manageWallet(Wallet wallet) {
-        Timber.d("Managing %s", wallet.getName());
+        Log.d("WalletManager.java", "manageWallet(): Managing: " + wallet.getName());
         managedWallet = wallet;
         if (onManageCallback != null) {
+            Log.d("WalletManager.java", "manageWallet(): onManageCallback.invoke()");
             onManageCallback.invoke();
         }
     }
@@ -137,14 +138,17 @@ public class WalletManager {
 
     public String proxy = "";
 
-    public Wallet openWallet(String path, String password) {
+    public Wallet openWallet(String path, String password, boolean shouldManage) {
         Log.d("WalletManager.java", "openWallet(" + path + ", '****'): [" + proxy + "]");
         knownPath = path;
         knownPassword = password;
         long walletHandle = openWalletJ(path, password, getNetworkType().getValue());
         Wallet wallet = new Wallet(walletHandle);
         wallet.init(0, proxy);
-        manageWallet(wallet);
+
+        if (shouldManage) {
+            manageWallet(wallet);
+        }
         return wallet;
     }
 
@@ -204,12 +208,15 @@ public class WalletManager {
 
     public boolean reopen() {
         Log.d("WalletManager.java", "reopen()");
+        Wallet wallet = openWallet(knownPath, knownPassword, false);
+        manageWallet(wallet);
         if (managedWallet != null) {
             close(managedWallet);
         } else {
             Log.d("WalletManager.java", "reopen(): we are not going to close() a null managedWallet");
         }
-        openWallet(knownPath, knownPassword);
+        
+        // openWallet(knownPath, knownPassword);
         return true;
     }
 
