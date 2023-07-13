@@ -235,11 +235,11 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         val preferences = AnonPreferences(AnonWallet.getAppContext())
                         val serverUrl = preferences.serverUrl
                         Log.d("WalletMethodChannel.kt", WalletManager.getInstance().daemonAddress.toString())
-                        if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
-                            wallet.setProxy(getProxyI2p())
-                        } else {
-                            wallet.setProxy(getProxyTor())
-                        }
+                        // if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
+                        //     wallet.setProxy(getProxyI2p())
+                        // } else {
+                        //     wallet.setProxy(getProxyTor())
+                        // }
                         if (WalletManager.getInstance().daemonAddress == null) {
                             NodeManager.setNode()
                         }

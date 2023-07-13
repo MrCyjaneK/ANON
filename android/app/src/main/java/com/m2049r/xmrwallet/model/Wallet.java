@@ -272,15 +272,15 @@ public class Wallet {
      public native boolean setProxyJ(String address);
 
     public boolean setProxy(String address) {
-        Log.d("WalletManager.java", "setProxy("+address+")");
+        Log.d("Wallet.java", "setProxy("+address+")");
         if (setProxyJ(address)) {
-            Log.d("WalletManager.java", "setProxy(): success");
-            Log.d("WalletManager.java", getStatus().errorString);
+            Log.d("Wallet.java", "setProxy(): success");
+            Log.d("Wallet.java", getStatus().errorString);
             return true;
         } else {
-            Log.d("WalletManager.java", "setProxy(): failure");
-            Log.d("WalletManager.java", getStatus().errorString);
-            return true;
+            Log.d("Wallet.java", "setProxy(): failure");
+            Log.d("Wallet.java", getStatus().errorString);
+            return false;
         }
     }
     public long getBalance() {

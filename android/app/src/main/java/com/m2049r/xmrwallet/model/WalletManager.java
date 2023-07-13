@@ -87,12 +87,21 @@ public class WalletManager {
         managedWallet = wallet;
         if (closeAfter) {
             Log.d("WalletManager.java", "manageWallet(): Closing old wallet: " + oldWallet.getName());
-            closeJ(oldWallet);
+            Runnable r = new Runnable() {
+                public void run() {
+                    Log.d("WalletManager.java", "[T]: manageWallet(): close start");
+                    closeJ(oldWallet);
+                    Log.d("WalletManager.java", "[T]: manageWallet(): close end");
+                }
+            };
+
+            new Thread(r).start();
         }
         if (onManageCallback != null) {
             Log.d("WalletManager.java", "manageWallet(): onManageCallback.invoke()");
             onManageCallback.invoke();
         }
+        Log.d("WalletManager.java", "manageWallet(): end");
     }
 
     private void unmanageWallet(Wallet wallet) {
@@ -368,6 +377,7 @@ public class WalletManager {
 
     public boolean setProxy(String address) {
         Log.d("WalletManager.java", "setProxy("+address+")");
+        proxy = address;
         if (setProxyJ(address)) {
             Log.d("WalletManager.java", "setProxy(): success");
             Log.d("WalletManager.java", "no logging here, yet.");
