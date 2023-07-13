@@ -31,6 +31,8 @@ import lombok.Getter;
 import timber.log.Timber;
 import android.util.Log;
 
+import android.util.Log;
+
 public class Wallet {
     final static public long SWEEP_ALL = Long.MAX_VALUE;
 
@@ -228,9 +230,18 @@ public class Wallet {
 
     //    virtual std::string keysFilename() const = 0;
     public boolean init(long upper_transaction_size_limit, String proxy_address) {
-        return initJ(WalletManager.getInstance().getDaemonAddress(), upper_transaction_size_limit,
-                WalletManager.getInstance().getDaemonUsername(),
-                WalletManager.getInstance().getDaemonPassword(),
+        String daemon_address = WalletManager.getInstance().getDaemonAddress();
+        String daemon_username = WalletManager.getInstance().getDaemonUsername();
+        String daemon_password = WalletManager.getInstance().getDaemonPassword();
+        Log.d("Wallet.java", "init(");
+        Log.d("Wallet.java", daemon_address.toString());
+        Log.d("Wallet.java", "upper_transaction_size_limit = 0 (probably)");
+        Log.d("Wallet.java", daemon_username.toString());
+        Log.d("Wallet.java", daemon_password.toString());
+        Log.d("Wallet.java", proxy_address.toString());
+        Log.d("Wallet.java", ");");
+        return initJ(daemon_address, upper_transaction_size_limit,
+                daemon_username, daemon_password,
                 proxy_address);
     }
 

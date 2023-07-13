@@ -62,6 +62,13 @@ object NodeManager {
                     WalletManager.getInstance().setProxy(getProxyTor())
                 }
                 WalletManager.getInstance().setDaemon(node)
+                val usedProxy = if (node.host.contains(".i2p")) {
+                    getProxyI2p()
+                } else {
+                    getProxyTor()
+                }
+                Log.d("NodeManager.kt", "usedProxy:" + usedProxy)
+                WalletManager.getInstance().reopen()
                 isConfigured = true
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {
                     put("status", "connected")

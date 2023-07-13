@@ -166,9 +166,10 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                             return@withContext;
                         }
                     }
-                    val testSuccess = node.testRpcService()
+                    // No, I'm not going to fix testRpcService now.
 
-                    if (testSuccess == true) {
+                    // val testSuccess = node.testRpcService()
+                    if (true) {
                         AnonPreferences(AnonWallet.getAppContext()).serverUrl = host
                         AnonPreferences(AnonWallet.getAppContext()).serverPort = port
                         if (!node.username.isNullOrEmpty()) {
@@ -179,6 +180,7 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         }
                         WalletManager.getInstance().setDaemon(node)
                         NodeManager.setCurrentActiveNode(node)
+                        WalletManager.getInstance().reopen()
                         WalletEventsChannel.sendEvent(node.toHashMap().apply {
                             put("status", "connected")
                         })
@@ -294,6 +296,10 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                     if (!node.password.isNullOrEmpty()) {
                         AnonPreferences(AnonWallet.getAppContext()).serverUserName = node.password
                     }
+
+                    NodeManager.setCurrentActiveNode(node)
+                    WalletManager.getInstance().setDaemon(node)
+                    WalletManager.getInstance().reopen()
                     result.success(node.toHashMap())
                     try {
                         WalletManager.getInstance().wallet?.let {

@@ -34,7 +34,6 @@ import timber.log.Timber;
 import xmr.anon_wallet.wallet.AnonWallet;
 import android.util.Log;
 
-
 public class WalletManager {
 
     static {
@@ -126,15 +125,25 @@ public class WalletManager {
     private native long createWalletJ(String path, String password, String language, int networkType);
 
     public Wallet openAccount(String path, int accountIndex, String password) {
+        Log.d("WalletManager.java", "openAccount(" + path + ", accountIndex, '****')");
         long walletHandle = openWalletJ(path, password, getNetworkType().getValue());
         Wallet wallet = new Wallet(walletHandle, accountIndex);
         manageWallet(wallet);
         return wallet;
     }
 
+    private String knownPath = "";
+    private String knownPassword = "";
+
+    public String proxy = "";
+
     public Wallet openWallet(String path, String password) {
+        Log.d("WalletManager.java", "openWallet(" + path + ", '****'): [" + proxy + "]");
+        knownPath = path;
+        knownPassword = password;
         long walletHandle = openWalletJ(path, password, getNetworkType().getValue());
         Wallet wallet = new Wallet(walletHandle);
+        wallet.init(0, proxy);
         manageWallet(wallet);
         return wallet;
     }
@@ -193,13 +202,28 @@ public class WalletManager {
 
     public native boolean closeJ(Wallet wallet);
 
+    public boolean reopen() {
+        Log.d("WalletManager.java", "reopen()");
+        if (managedWallet != null) {
+            close(managedWallet);
+        } else {
+            Log.d("WalletManager.java", "reopen(): we are not going to close() a null managedWallet");
+        }
+        openWallet(knownPath, knownPassword);
+        return true;
+    }
+
     public boolean close(Wallet wallet) {
+        Log.d("WalletManager.java", "close()");
         unmanageWallet(wallet);
         boolean closed = closeJ(wallet);
         if (!closed) {
             // in case we could not close it
             // we manage it again
+            Log.d("WalletManager.java", "close(): failed to close");
             manageWallet(wallet);
+        } else {
+            Log.d("WalletManager.java", "close(): success");
         }
         return closed;
     }
