@@ -82,7 +82,13 @@ public class WalletManager {
 
     private void manageWallet(Wallet wallet) {
         Log.d("WalletManager.java", "manageWallet(): Managing: " + wallet.getName());
+        boolean closeAfter = (managedWallet != null);
+        Wallet oldWallet = managedWallet;
         managedWallet = wallet;
+        if (closeAfter) {
+            Log.d("WalletManager.java", "manageWallet(): Closing old wallet: " + oldWallet.getName());
+            closeJ(oldWallet);
+        }
         if (onManageCallback != null) {
             Log.d("WalletManager.java", "manageWallet(): onManageCallback.invoke()");
             onManageCallback.invoke();
@@ -209,13 +215,13 @@ public class WalletManager {
     public boolean reopen() {
         Log.d("WalletManager.java", "reopen()");
         Wallet wallet = openWallet(knownPath, knownPassword, false);
+        // NOTE: Closing logic moved to manageWallet.
+        // if (managedWallet != null) {
+        //     close(managedWallet);
+        // } else {
+        //     Log.d("WalletManager.java", "reopen(): we are not going to close() a null managedWallet");
+        // }
         manageWallet(wallet);
-        if (managedWallet != null) {
-            close(managedWallet);
-        } else {
-            Log.d("WalletManager.java", "reopen(): we are not going to close() a null managedWallet");
-        }
-        
         // openWallet(knownPath, knownPassword);
         return true;
     }
