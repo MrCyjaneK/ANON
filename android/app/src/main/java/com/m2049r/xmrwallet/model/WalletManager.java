@@ -146,8 +146,12 @@ public class WalletManager {
 
     public Wallet openWallet(String path, String password, boolean shouldManage) {
         Log.d("WalletManager.java", "openWallet(" + path + ", '****'): [" + proxy + "]");
-        knownPath = path;
-        knownPassword = password;
+        if (path != "") { 
+            knownPath = path;
+            knownPassword = password;
+        } else {
+            Log.d("WalletManager.java", "openWallet(): *not* updating knownPath, knownPassword - given path is \"\"");
+        }
         long walletHandle = openWalletJ(path, password, getNetworkType().getValue());
         Wallet wallet = new Wallet(walletHandle);
         wallet.init(0, proxy);

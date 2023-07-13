@@ -7,12 +7,17 @@ import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/screens/landing_screen.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() async {
+  // I kinda lose logs at the beginning..
+  if (kDebugMode) {
+    await Future.delayed(const Duration(seconds: 3));
+  }
   runApp(const SplashScreen());
   WalletState state = await WalletChannel().getWalletState();
   runApp(AnonApp(state));
