@@ -227,6 +227,9 @@ public class WalletManager {
 
     public boolean reopen() {
         Log.d("WalletManager.java", "reopen()");
+        if (knownPath == "") {
+            return false;
+        }
         Wallet wallet = openWallet(knownPath, knownPassword, false);
         // NOTE: Closing logic moved to manageWallet.
         // if (managedWallet != null) {

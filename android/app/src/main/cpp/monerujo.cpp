@@ -105,7 +105,7 @@ struct MyWalletListener : Monero::WalletListener {
     }
 
     ~MyWalletListener() {
-        LOGD("Destroyed  Listener");
+        LOGD("Destroyed Listener");
     };
 
     void deleteGlobalJavaRef(JNIEnv *env) {

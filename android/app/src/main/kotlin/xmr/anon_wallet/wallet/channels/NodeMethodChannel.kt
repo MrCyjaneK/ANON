@@ -12,6 +12,8 @@ import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.services.NodeManager
 import xmr.anon_wallet.wallet.utils.AnonPreferences
 import kotlin.text.endsWith
+import xmr.anon_wallet.wallet.channels.WalletEventsChannel
+
 
 class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
     AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
@@ -180,7 +182,9 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                         }
                         WalletManager.getInstance().setDaemon(node)
                         NodeManager.setCurrentActiveNode(node)
-                        WalletManager.getInstance().reopen()
+                        if (WalletManager.getInstance().reopen()) {
+                            WalletEventsChannel.initWalletListeners()
+                        }
                         WalletEventsChannel.sendEvent(node.toHashMap().apply {
                             put("status", "connected")
                         })
@@ -299,7 +303,9 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
 
                     NodeManager.setCurrentActiveNode(node)
                     WalletManager.getInstance().setDaemon(node)
-                    WalletManager.getInstance().reopen()
+                    if (WalletManager.getInstance().reopen()) {
+                        WalletEventsChannel.initWalletListeners()
+                    }
                     result.success(node.toHashMap())
                     try {
                         WalletManager.getInstance().wallet?.let {

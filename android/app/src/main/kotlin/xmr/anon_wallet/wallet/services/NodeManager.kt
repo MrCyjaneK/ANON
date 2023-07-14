@@ -68,7 +68,9 @@ object NodeManager {
                     getProxyTor()
                 }
                 Log.d("NodeManager.kt", "usedProxy:" + usedProxy)
-                WalletManager.getInstance().reopen()
+                if (WalletManager.getInstance().reopen()) {
+                    WalletEventsChannel.initWalletListeners()
+                }
                 isConfigured = true
                 WalletEventsChannel.sendEvent(node.toHashMap().apply {
                     put("status", "connected")
