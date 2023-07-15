@@ -3,6 +3,8 @@ import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/channel/wallet_events_channel.dart';
 import 'package:anon_wallet/models/wallet.dart';
+import 'package:anon_wallet/screens/home/spend/anon_progress.dart';
+import 'package:anon_wallet/screens/home/spend/spend_review_anon.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/screens/landing_screen.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
@@ -53,6 +55,41 @@ class _AnonAppState extends State<AnonApp> {
     return ProviderScope(
       child: MaterialApp(
         title: 'anon',
+        onGenerateRoute: (settings) {
+          if (settings.name == "/review") {
+            return MaterialPageRoute(
+                builder: (context) => const AnonSpendReview());
+          }
+          if (settings.name == "/loading-tx-construct") {
+            return MaterialPageRoute(
+                builder: (context) => const CircleProgressWidget(
+                      progressMessage: "Constructing Transaction...",
+                    ));
+          }
+          if (settings.name == "/loading-broadcast-tx") {
+            return MaterialPageRoute(
+                builder: (context) => const CircleProgressWidget(
+                      progressMessage: "Broadcasting Transaction...",
+                    ));
+          }
+          if (settings.name == "/loading-tx-signing") {
+            return MaterialPageRoute(
+                builder: (context) => const CircleProgressWidget(
+                      progressMessage: "Signing Transaction...",
+                    ));
+          }
+          if (settings.name == "/loading-tx") {
+            return MaterialPageRoute(
+                builder: (context) => const CircleProgressWidget(
+                      progressMessage: "Loading Transaction...",
+                    ));
+          }
+          if (settings.name == "/tx-success") {
+            return MaterialPageRoute(
+                builder: (context) => const SpendSuccessWidget());
+          }
+          return null;
+        },
         theme: ThemeProvider().getTheme(),
         home: AppMain(widget.state),
       ),
@@ -155,7 +192,9 @@ class LockScreen extends HookWidget {
       if (wallet != null) {
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (c) => const WalletHome()),
+            MaterialPageRoute(
+                builder: (c) => const WalletHome(),
+                settings: const RouteSettings(name: "/")),
             (route) => false);
       }
     } on PlatformException catch (e) {
