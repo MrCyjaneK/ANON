@@ -23,9 +23,24 @@ import kotlin.math.roundToInt
 object AnonWallet {
 
     const val UR_MIN_FRAGMENT_LENGTH = 10
-    const val UR_MAX_FRAGMENT_LENGTH = 200
+    const val UR_MAX_FRAGMENT_LENGTH = 130
     const val NOCRAZYPASS_FLAGFILE = ".nocrazypass"
     const val NOTIFICATION_CHANNEL_ID = "new_tx"
+
+    const val EXPORT_OUTPUT_FILE = "export_wallet_outputs"
+    const val IMPORT_OUTPUT_FILE = "import_wallet_outputs"
+
+    const val EXPORT_KEY_IMAGE_FILE = "export_key_images"
+    const val IMPORT_KEY_IMAGE_FILE = "import_key_images"
+
+    const val EXPORT_UNSIGNED_TX_FILE = "export_unsigned_tx"
+    const val IMPORT_UNSIGNED_TX_FILE = "import_unsigned_tx"
+
+
+    const val EXPORT_SIGNED_TX_FILE = "export_signed_tx"
+    const val IMPORT_SIGNED_TX_FILE = "import_signed_tx"
+
+
     private lateinit var application: Application
     lateinit var walletDir: File
     lateinit var nodesFile: File

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import android.view.Surface
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -19,11 +20,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import anon.xmr.app.anon_wallet.BuildConfig
 import com.google.common.util.concurrent.ListenableFuture
+import com.m2049r.xmrwallet.model.WalletManager
 import com.sparrowwallet.hummingbird.ResultType
 import com.sparrowwallet.hummingbird.UR
 import com.sparrowwallet.hummingbird.URDecoder
 import com.sparrowwallet.hummingbird.UREncoder
-import com.sparrowwallet.hummingbird.registry.RegistryType
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
@@ -34,10 +35,13 @@ import io.flutter.view.TextureRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import xmr.anon_wallet.wallet.AnonWallet
+import xmr.anon_wallet.wallet.AnonWallet.IMPORT_OUTPUT_FILE
 import xmr.anon_wallet.wallet.AnonWallet.UR_MAX_FRAGMENT_LENGTH
 import xmr.anon_wallet.wallet.AnonWallet.UR_MIN_FRAGMENT_LENGTH
 import xmr.anon_wallet.wallet.MainActivity
 import xmr.anon_wallet.wallet.channels.AnonMethodChannel
+import xmr.anon_wallet.wallet.model.UrRegistryTypes
 import java.io.File
 import java.util.concurrent.Executors
 
@@ -90,7 +94,7 @@ class AnonQRCameraPlugin(
                 activity, Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            startCamera()
+            startCamera(null)
         } else if (shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
             activity.startActivity(Intent().apply {
                 action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
@@ -103,7 +107,7 @@ class AnonQRCameraPlugin(
 
     fun onRequestPermissionsResult() {
         if (isPermissionGranted()) {
-            startCamera()
+            startCamera(null)
         } else {
 
         }
@@ -112,7 +116,8 @@ class AnonQRCameraPlugin(
 
     private fun startCam(call: MethodCall, result: Result) {
         if (isPermissionGranted()) {
-            startCamera()
+            decoder = URDecoder()
+            startCamera(result)
         } else {
             result.error("1", "PERMISSION", null)
         }
@@ -120,23 +125,35 @@ class AnonQRCameraPlugin(
 
     private fun createURFrames(call: MethodCall, result: Result) {
         val filePath: String
-        val type: String = "crypto-output"
+        val urType: UrRegistryTypes?
         if (call.hasArgument("fpath") && call.argument<String>("fpath") != null) {
             filePath = call.argument<String>("fpath")!!
         } else {
             result.error("0", "NO FILE PATH", null)
             return;
         }
+        if (call.hasArgument("type") && call.argument<String>("type") != null) {
+            urType = UrRegistryTypes.fromString(call.argument<String>("type")!!)
+            if (urType == null) {
+                result.error("0", "Invalid Type", null)
+                return
+            }
+        } else {
+            result.error("0", "No Type", null)
+            return
+        }
         val frames = arrayListOf<String>()
         scope.launch {
             withContext(Dispatchers.IO) {
-                val data = File(filePath).readBytes();
-                val ur = UR.fromBytes("crypto-output", data)
-                val encoder = UREncoder(ur, UR_MIN_FRAGMENT_LENGTH, UR_MAX_FRAGMENT_LENGTH, 0)
+                Log.i(TAG, "createURFrames: ${filePath}")
+                val data = File(filePath).readBytes()
+                val ur = UR.fromBytes(urType.type, data)
+                val encoder = UREncoder(ur, UR_MAX_FRAGMENT_LENGTH, UR_MIN_FRAGMENT_LENGTH, 0)
                 while (!encoder.isComplete) {
                     val frame = encoder.nextPart()
                     frames.add(frame)
                 }
+                Log.i(TAG, "createURFrames: $frames")
                 result.success(frames)
             }
         }
@@ -145,12 +162,10 @@ class AnonQRCameraPlugin(
     private val qrAnalyzer = QrCodeAnalyzer { qrResult ->
         scope.launch(Dispatchers.IO) {
             val resultQR = qrResult.text
-
             if (resultQR.lowercase().startsWith("ur:")) {
                 if (decoder.result == null) {
                     val decoded = decoder.receivePart(resultQR)
                     if (decoded) {
-                        //Loop adding QR fragments to the decoder until it has a result
                         if (decoder.expectedPartCount != 0) {
                             withContext(Dispatchers.Main) {
                                 eventSink?.success(
@@ -163,7 +178,32 @@ class AnonQRCameraPlugin(
                                 )
                             }
                         }
-
+                        val urResult = decoder.result
+                        if (urResult != null && urResult.type == ResultType.SUCCESS) {
+                            withContext(Dispatchers.Main) {
+                                eventSink?.success(
+                                    hashMapOf(
+                                        "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                                        "expectedPartCount" to decoder.expectedPartCount,
+                                        "processedPartsCount" to decoder.processedPartsCount,
+                                        "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                                    )
+                                )
+                            }
+                            val resultMap = hashMapOf(
+                                "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                                "expectedPartCount" to decoder.expectedPartCount,
+                                "processedPartsCount" to decoder.processedPartsCount,
+                                "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                                "urType" to urResult.ur.type,
+                                "urError" to null,
+                            );
+                            //TODO: Handle different types of URs
+                            if (decoder.processedPartsCount == decoder.expectedPartCount) {
+                                
+                                handleURTypes(urResult, resultMap)
+                            }
+                        }
                     }
                 } else {
                     val urResult = decoder.result
@@ -178,12 +218,17 @@ class AnonQRCameraPlugin(
                                 )
                             )
                         }
+                        val resultMap = hashMapOf(
+                            "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                            "expectedPartCount" to decoder.expectedPartCount,
+                            "processedPartsCount" to decoder.processedPartsCount,
+                            "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                            "urType" to urResult.ur.type,
+                            "urError" to null,
+                        );
                         //TODO: Handle different types of URs
-                        when (urResult.ur.type) {
-                            RegistryType.CRYPTO_OUTPUT.type -> {
-
-                            }
-
+                        if (decoder.processedPartsCount == decoder.expectedPartCount) {
+                            handleURTypes(urResult, resultMap)
                         }
                     } else {
                         withContext(Dispatchers.Main) {
@@ -207,7 +252,99 @@ class AnonQRCameraPlugin(
         }
     }
 
-    private fun startCamera() {
+    private suspend fun handleURTypes(urResult: URDecoder.Result, resultMap: HashMap<String, Any?>) = withContext(Dispatchers.IO) {
+
+        when (urResult.ur.type) {
+            UrRegistryTypes.XMR_OUTPUT.type -> {
+                val file = File(activity.cacheDir, IMPORT_OUTPUT_FILE)
+                if (!file.exists()) {
+                    file.createNewFile()
+                }
+                file.writeBytes(urResult.ur.toBytes())
+                withContext(Dispatchers.Main) {
+                    eventSink?.success(
+                        resultMap.apply {
+                            put("progress", true)
+                        }
+                    )
+                }
+                WalletManager.getInstance().wallet.setTrustedDaemon(true)
+                val outImportStatus = WalletManager.getInstance().wallet.importOutputsJ(file.absolutePath)
+                withContext(Dispatchers.Main) {
+                    eventSink?.success(
+                        resultMap.apply {
+                            put("progress", false)
+                            put("urResult", outImportStatus)
+                        }
+                    )
+                }
+            }
+            UrRegistryTypes.XMR_KEY_IMAGE.type -> {
+                val file = File(activity.cacheDir, AnonWallet.IMPORT_KEY_IMAGE_FILE)
+                if (!file.exists()) {
+                    file.createNewFile()
+                }
+                withContext(Dispatchers.Main) {
+                    eventSink?.success(
+                        resultMap.apply {
+                            put("progress", true)
+                        }
+                    )
+                }
+                file.writeBytes(urResult.ur.toBytes())
+                val keyImageImport = WalletManager.getInstance().wallet.importKeyImages(file.absolutePath)
+                withContext(Dispatchers.Main) {
+                    eventSink?.success(
+                        resultMap.apply {
+                            put("progress", false)
+                            put("urResult", keyImageImport)
+                        }
+                    )
+                }
+            }
+            UrRegistryTypes.XMR_TX_UNSIGNED.type -> {
+                Log.i(TAG, "handleURTypes: ${urResult.type}")
+                val file = File(activity.cacheDir, AnonWallet.IMPORT_UNSIGNED_TX_FILE)
+                if (!file.exists()) {
+                    file.createNewFile()
+                }
+                Log.i(TAG, "handleURTypes: ${file.absolutePath}")
+                file.writeBytes(urResult.ur.toBytes())
+                withContext(Dispatchers.Main) {
+                    eventSink?.success(
+                        resultMap.apply {
+                            put("urResult", file.absolutePath)
+                        }
+                    )
+                }
+            }
+            UrRegistryTypes.XMR_TX_SIGNED.type -> {
+                val file = File(activity.cacheDir, AnonWallet.IMPORT_SIGNED_TX_FILE)
+                if (!file.exists()) {
+                    file.createNewFile()
+                }
+                file.writeBytes(urResult.ur.toBytes())
+                withContext(Dispatchers.Main) {
+                    eventSink?.success(
+                        resultMap.apply {
+                            put("urResult", file.absolutePath)
+                        }
+                    )
+                }
+            }
+            else -> {
+                withContext(Dispatchers.Main) {
+                    eventSink?.success(
+                        resultMap.apply {
+                            put("urError", "Unsupported UR type")
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    private fun startCamera(result: Result?) {
         decoder = URDecoder()
         cameraProviderFuture.addListener({
             cameraProvider = cameraProviderFuture.get()
@@ -250,8 +387,13 @@ class AnonQRCameraPlugin(
                         "height" to if (portrait) height else width,
                     )
                 )
+                result?.success( hashMapOf(
+                    "id" to textureEntry!!.id(),
+                    "width" to if (portrait) width else height,
+                    "height" to if (portrait) height else width,
+                ))
             } else {
-
+                result?.error("0","Unable to get camera texture",null)
             }
 
         }, ContextCompat.getMainExecutor(activity))
@@ -282,5 +424,6 @@ class AnonQRCameraPlugin(
 
     companion object {
         const val REQUEST_CODE = 12;
+        private const val TAG = "AnonQRCameraPlugin"
     }
 }
