@@ -322,12 +322,12 @@ class NodeInfo : Node {
                         )
                         this.proxy(Proxy(Proxy.Type.SOCKS, iSock))
                     }
-                    if(!preferences.serverUserName.isNullOrEmpty() && !preferences.serverPassword.isNullOrEmpty()){
-                        this.authenticator { _, response ->
-                            val credential = Credentials.basic(preferences.serverUserName!!, preferences.serverPassword!!)
-                            response.request.newBuilder().header("Authorization", credential).build()
-                        }
-                    }
+                    // if(!preferences.serverUserName.isNullOrEmpty() && !preferences.serverPassword.isNullOrEmpty()){
+                    //     this.authenticator { _, response ->
+                    //         val credential = Credentials.basic(preferences.serverUserName!!, preferences.serverPassword!!)
+                    //         response.request.newBuilder().header("Authorization", credential).build()
+                    //     }
+                    // }
                     if(request.url.host.contains(".onion") || request.url.host.contains(".i2p")){
                         // Create a trust manager that does not validate certificate chains
                         val trustAllCerts = arrayOf<TrustManager>(
