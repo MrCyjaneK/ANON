@@ -292,6 +292,7 @@ class AnonQRCameraPlugin(
                     )
                 }
                 file.writeBytes(urResult.ur.toBytes())
+                WalletManager.getInstance().wallet.setTrustedDaemon(true)
                 val keyImageImport = WalletManager.getInstance().wallet.importKeyImages(file.absolutePath)
                 withContext(Dispatchers.Main) {
                     eventSink?.success(
@@ -303,12 +304,10 @@ class AnonQRCameraPlugin(
                 }
             }
             UrRegistryTypes.XMR_TX_UNSIGNED.type -> {
-                Log.i(TAG, "handleURTypes: ${urResult.type}")
                 val file = File(activity.cacheDir, AnonWallet.IMPORT_UNSIGNED_TX_FILE)
                 if (!file.exists()) {
                     file.createNewFile()
                 }
-                Log.i(TAG, "handleURTypes: ${file.absolutePath}")
                 file.writeBytes(urResult.ur.toBytes())
                 withContext(Dispatchers.Main) {
                     eventSink?.success(

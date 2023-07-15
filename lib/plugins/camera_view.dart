@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:anon_wallet/utils/app_haptics.dart';
@@ -6,7 +7,62 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 
-typedef QRCallBack = Function(String text);
+enum QRResultType { UR, text }
+
+enum UrType {
+  xmrOutPut("xmr-output"),
+  xmrKeyImage("xmr-keyimage"),
+  xmrTxUnsigned("xmr-txunsigned"),
+  xmrTxSigned("xmr-txsigned");
+
+  final String type;
+
+  const UrType(this.type);
+
+  static UrType fromType(String type) {
+    switch (type) {
+      case "xmr-output":
+        return UrType.xmrOutPut;
+      case "xmr-keyimage":
+        return UrType.xmrKeyImage;
+      case "xmr-txunsigned":
+        return UrType.xmrTxUnsigned;
+      case "xmr-txsigned":
+        return UrType.xmrTxSigned;
+      default:
+        throw Exception("Unknown UR type");
+    }
+  }
+}
+
+class QRResult {
+  final String text;
+  final QRResultType type;
+  final UrType? urType;
+  final String urResult;
+  final String? urError;
+
+  QRResult({this.text = "", this.type = QRResultType.text, this.urType, this.urResult = "", this.urError});
+
+  static fromMap(Map<String, dynamic> value) {
+    if (value['urType']) {
+      return QRResult(
+        text: value['text'],
+        type: QRResultType.UR,
+        urType: UrType.fromType(value['urType']),
+        urResult: value['urResult'],
+        urError: value['urError'],
+      );
+    } else {
+      return QRResult(
+        text: value['text'],
+        type: QRResultType.text,
+      );
+    }
+  }
+}
+
+typedef QRCallBack = Function(QRResult qrResult);
 
 class CameraView extends StatefulWidget {
   final QRCallBack callBack;
@@ -37,12 +93,14 @@ class URQrProgress {
 
 class _CameraViewState extends State<CameraView> {
   static const platform = MethodChannel('anon_camera');
-  static const eventChannel = EventChannel("anon_camera:events");
-  int? id;
-  bool? permissionGranted = null;
+  EventChannel eventChannel = const EventChannel("anon_camera:events");
+  int? id ;
+  bool? permissionGranted;
   double? width;
   double? height;
   URQrProgress? urQrProgress;
+  StreamSubscription? subscription;
+  bool importInProgress = false;
 
   @override
   void initState() {
@@ -58,11 +116,20 @@ class _CameraViewState extends State<CameraView> {
       permissionGranted = permission;
     });
     if (permission == true) {
-      platform.invokeMethod<Map>("startCam");
+       platform.invokeMethod<Map>("startCam").then((value){
+         if(value != null){
+           permissionGranted = true;
+           setState(() {
+             id = value["id"];
+             width = value["width"];
+             height = value["height"];
+           });
+         }
+       });
     } else {
       platform.invokeMethod<Map>("requestPermission");
     }
-    eventChannel.receiveBroadcastStream().listen((event) {
+    subscription =  eventChannel.receiveBroadcastStream().listen((event) {
       if (event['id'] != null) {
         permissionGranted = true;
         setState(() {
@@ -73,20 +140,39 @@ class _CameraViewState extends State<CameraView> {
       }
       if (event['expectedPartCount'] != null) {
         URQrProgress progress = URQrProgress(
-            event['expectedPartCount'],
-            event['processedPartsCount'],
+            event['expectedPartCount'] ?? -1,
+            event['processedPartsCount'] ?? 0,
             event['receivedPartIndexes'] != null ? List<int>.from(event['receivedPartIndexes']) : [],
             event['estimatedPercentComplete']);
+
         if (!progress.equals(urQrProgress)) {
           AppHaptics.lightImpact();
           setState(() {
             urQrProgress = progress;
           });
         }
-      }
-      if (event["result"] != null) {
+        if(event["progress"] != null ){
+          setState(() {
+            importInProgress = event["progress"];
+          });
+        }
+        if (progress.processedPartsCount == progress.expectedPartCount) {
+          if (event["urResult"] != null) {
+            platform.invokeMethod<Map>("stopCam");
+            widget.callBack(QRResult(
+              urResult: event["urResult"],
+              urError: event["urError"],
+              urType: UrType.fromType(event["urType"]),
+              type: QRResultType.UR,
+            ));
+          }
+        }
+      } else if (event["result"] != null) {
         platform.invokeMethod<Map>("stopCam");
-        widget.callBack(event["result"]);
+        widget.callBack(QRResult(
+          text: event["result"],
+          type: QRResultType.text,
+        ));
       }
     });
   }
@@ -163,10 +249,24 @@ class _CameraViewState extends State<CameraView> {
                 margin: const EdgeInsets.all(68),
                 alignment: Alignment.center,
                 child: SizedBox.square(
-                    dimension: 200, child: CustomPaint(painter: ProgressPainter(urQrProgress: urQrProgress!))),
+                    dimension: 200,
+                    child: importInProgress ?   Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 140,
+                          height: 140,
+                          child: CircularProgressIndicator(),
+                        ),
+                        const Padding(padding: EdgeInsets.all(6)),
+                        const Text("Please wait..\n import in progress",textAlign: TextAlign.center,)
+                      ],
+                    ) : CustomPaint(painter: ProgressPainter(urQrProgress: urQrProgress!))),
               )
             : const SizedBox(),
-        urQrProgress != null
+        (urQrProgress != null && importInProgress == false)
             ? Container(
                 width: double.infinity,
                 height: double.infinity,
@@ -175,7 +275,10 @@ class _CameraViewState extends State<CameraView> {
                 child: Center(
                   child: Text(
                     "${urQrProgress?.processedPartsCount ?? "N"}/${urQrProgress?.expectedPartCount ?? "A"} ",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).primaryColor),
                   ),
                 ),
               )
@@ -187,6 +290,7 @@ class _CameraViewState extends State<CameraView> {
   @override
   void dispose() {
     platform.invokeMethod<Map>("stopCam");
+    subscription?.cancel();
     super.dispose();
   }
 }
