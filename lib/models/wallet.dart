@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/models/transaction.dart';
 
@@ -46,6 +47,8 @@ class Wallet {
     unlockedBalance = json['unlockedBalance'] ?? 0;
     numSubaddresses = json['numSubaddresses'] ?? 0;
     height = json['height'] ?? 0;
+    isViewOnly = json['isViewOnly'] ?? false;
+    isAirgapEnabled = json['isAirgapEnabled'] ?? false;
     if (json.containsKey("seed")) {
       seed = (json['seed'] as String).split(" ");
     }

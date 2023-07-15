@@ -8,3 +8,6 @@ const minPinSize = 5;
 //START WALLET tx
 const maxConfirms = 10;
 //END WALLET tx
+
+bool isViewOnly = false;
+bool isAirgapEnabled = false;
