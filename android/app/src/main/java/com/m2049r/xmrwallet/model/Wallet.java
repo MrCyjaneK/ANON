@@ -16,6 +16,8 @@
 
 package com.m2049r.xmrwallet.model;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -394,9 +396,16 @@ public class Wallet {
         return pendingTransaction;
     }
 
+    public UnsignedTransaction loadUnsignedTx(File file) {
+        long txHandle =  loadUnsignedTx(file.getAbsolutePath());
+        return new UnsignedTransaction(txHandle);
+    }
+
     private native long createTransactionJ(String dst_addr, String payment_id,
                                            long amount, int mixin_count,
                                            int priority, int accountIndex);
+
+   private native long loadUnsignedTx(String inputFile);
 
     private native long createSweepTransaction(String dst_addr, String payment_id,
                                                int mixin_count,

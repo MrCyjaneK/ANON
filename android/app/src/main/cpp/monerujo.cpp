@@ -1120,6 +1120,13 @@ Java_com_m2049r_xmrwallet_model_Wallet_signAndExportJ(JNIEnv *env, jobject insta
     }
     return env->NewStringUTF(wallet->errorString().c_str());
 }
+JNIEXPORT jlong JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_loadUnsignedTx(JNIEnv *env, jobject instance, jstring input_file) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    const char *_input_file = env->GetStringUTFChars(input_file, nullptr);
+    Monero::UnsignedTransaction *tx = wallet->loadUnsignedTx(_input_file);
+    return reinterpret_cast<jlong>(tx);
+}
 
 //virtual TransactionHistory * history() const = 0;
 JNIEXPORT jlong JNICALL
@@ -1437,6 +1444,73 @@ Java_com_m2049r_xmrwallet_model_PendingTransaction_getFee(JNIEnv *env, jobject i
     Monero::PendingTransaction *tx = getHandle<Monero::PendingTransaction>(env, instance);
     return tx->fee();
 }
+
+
+//Unsigned tx java implementation
+
+
+JNIEXPORT jint JNICALL
+Java_com_m2049r_xmrwallet_model_UnsignedTransaction_getStatusJ(JNIEnv *env, jobject instance) {
+    Monero::UnsignedTransaction *tx = getHandle<Monero::UnsignedTransaction>(env, instance);
+    return tx->status();
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_m2049r_xmrwallet_model_UnsignedTransaction_getErrorString(JNIEnv *env, jobject instance) {
+    Monero::UnsignedTransaction *tx = getHandle<Monero::UnsignedTransaction>(env, instance);
+    return env->NewStringUTF(tx->errorString().c_str());
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_m2049r_xmrwallet_model_UnsignedTransaction_getAddress(JNIEnv *env, jobject instance) {
+    Monero::UnsignedTransaction *tx = getHandle<Monero::UnsignedTransaction>(env, instance);
+
+    std::vector<std::string> arr = tx->recipientAddress();
+    if(0 > arr.size() - 1)
+        return env->NewStringUTF("");
+
+    return env->NewStringUTF(arr[0].c_str());
+}
+
+
+JNIEXPORT jlong JNICALL
+Java_com_m2049r_xmrwallet_model_UnsignedTransaction_getAmount(JNIEnv *env, jobject instance) {
+    Monero::UnsignedTransaction *tx = getHandle<Monero::UnsignedTransaction>(env, instance);
+    std::vector<uint64_t> arr = tx->amount();
+    if(0 > arr.size() - 1)
+        return 0;
+    return static_cast<jlong>(arr[0]);
+}
+
+
+JNIEXPORT jlong JNICALL
+Java_com_m2049r_xmrwallet_model_UnsignedTransaction_getFee(JNIEnv *env, jobject instance) {
+    Monero::UnsignedTransaction *tx = getHandle<Monero::UnsignedTransaction>(env, instance);
+    std::vector<uint64_t> arr = tx->fee();
+    if(0 > arr.size() - 1)
+        return 0;
+    return static_cast<jlong>(arr[0]);
+}
+
+// TODO this returns a vector of strings - deal with this later - for now return first one
+JNIEXPORT jstring JNICALL
+Java_com_m2049r_xmrwallet_model_UnsignedTransaction_getFirstTxIdJ(JNIEnv *env, jobject instance) {
+    Monero::UnsignedTransaction *tx = getHandle<Monero::UnsignedTransaction>(env, instance);
+    std::vector<std::string> txids = tx->paymentId();
+    if (!txids.empty())
+        return env->NewStringUTF(txids.front().c_str());
+    else
+        return nullptr;
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_m2049r_xmrwallet_model_UnsignedTransaction_getTxCount(JNIEnv *env, jobject instance) {
+    Monero::UnsignedTransaction *tx = getHandle<Monero::UnsignedTransaction>(env, instance);
+    return tx->txCount();
+}
+
+
+
 
 // TODO this returns a vector of strings - deal with this later - for now return first one
 JNIEXPORT jstring JNICALL
