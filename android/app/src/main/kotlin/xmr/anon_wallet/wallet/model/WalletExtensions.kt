@@ -1,8 +1,10 @@
 package xmr.anon_wallet.wallet.model
 
 import android.util.Log
+import anon.xmr.app.anon_wallet.BuildConfig
 import com.m2049r.xmrwallet.data.Subaddress
 import com.m2049r.xmrwallet.model.Wallet
+import com.m2049r.xmrwallet.model.WalletManager
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel
 
 fun Wallet.getLastUnusedIndex(): Int {
@@ -52,7 +54,6 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
         connection = "${this.fullStatus}"
         error = this.fullStatus.errorString
     }
-    Log.i("Wallet", "Wallet FullStatus: ${connection} $error")
     return hashMapOf(
         "connection" to (connection),
         "connectionError" to (error),
@@ -70,6 +71,8 @@ fun Wallet.walletToHashMap(): HashMap<String, Any> {
         "daemonBlockChainTargetHeight" to this.daemonBlockChainTargetHeight,
         "numSubaddresses" to this.numSubaddresses,
         "seedLanguage" to this.seedLanguage,
+        "isViewOnly" to BuildConfig.VIEW_ONLY,
+        "isAirgapEnabled" to (WalletManager.getInstance().daemonAddress.isNullOrBlank()),
         "restoreHeight" to this.restoreHeight,
         "transactions" to this.history.all.sortedByDescending { it.timestamp }.sortedBy { !it.isPending }.map { it.toHashMap() }.toList(),
         "EVENT_TYPE" to "WALLET",
