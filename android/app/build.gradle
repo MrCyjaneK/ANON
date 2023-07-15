@@ -107,12 +107,18 @@ android {
     productFlavors {
         mainNet {
             dimension "app"
-            resValue 'string', 'app_title', '"Anon"'
+            resValue 'string', 'app_title', '"ANON"'
             buildConfigField 'String', 'NETWORK', '"main"'
+        }
+        dev{
+            dimension "app"
+            resValue 'string', 'app_title', '"ANON Dev"'
+            buildConfigField 'String', 'NETWORK', '"main"'
+            applicationIdSuffix ".dev"
         }
         stageNet {
             dimension "app"
-            resValue 'string', 'app_title', '"Anon StageNet"'
+            resValue 'string', 'app_title', '"ANON StageNet"'
             buildConfigField 'String', 'NETWORK', '"staging"'
             applicationIdSuffix ".staging"
         }
