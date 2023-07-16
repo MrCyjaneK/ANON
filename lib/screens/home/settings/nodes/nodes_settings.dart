@@ -29,8 +29,12 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
     var asyncNodes = ref.watch(_nodesListProvider);
     List<Node> nodes = asyncNodes.asData?.value ?? [];
     bool isLoading = asyncNodes.isLoading;
-    Node? connectedNode =
-        nodes.where((element) => element.isActive == true).first;
+    Node? connectedNode;
+    for (var element in nodes) {
+      if (element.isActive == true) {
+        connectedNode = element;
+      }
+    }
     bool isConnected = ref.watch(connectionStatus);
     nodes = nodes.where((element) => element.isActive == false).toList();
 
@@ -107,60 +111,66 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                               ],
                             ),
                           )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              const Padding(padding: EdgeInsets.all(4)),
-                              ListTile(
-                                onLongPress: () {
-                                  showDialog(
-                                          context: context,
-                                          barrierColor: barrierColor,
-                                          builder: (context) {
-                                            return NodeDetails(connectedNode);
-                                          })
-                                      .then((value) =>
-                                          ref.refresh(_nodesListProvider));
-                                },
-                                title: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  child: Text("${connectedNode.host}",
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis),
-                                ),
-                                subtitle: Consumer(
-                                  builder: (context, ref, c) {
-                                    int activeNodeDaemonHeight =
-                                        ref.watch(walletNodeDaemonHeight);
-                                    int activeHeight = (activeNodeDaemonHeight >
-                                            connectedNode.height)
-                                        ? activeNodeDaemonHeight
-                                        : connectedNode.height;
-                                    return Text(
-                                        connectedNode.isActive == true
-                                            ? "Daemon Height: $activeHeight"
-                                            : "Inactive",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis);
-                                  },
-                                ),
-                                trailing: Container(
-                                  height: 12,
-                                  width: 12,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color:
-                                        isConnected ? Colors.green : Colors.red,
+                        : connectedNode != null
+                            ? Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  const Padding(padding: EdgeInsets.all(4)),
+                                  ListTile(
+                                    onLongPress: () {
+                                      showDialog(
+                                              context: context,
+                                              barrierColor: barrierColor,
+                                              builder: (context) {
+                                                return NodeDetails(
+                                                    connectedNode!);
+                                              })
+                                          .then((value) =>
+                                              ref.refresh(_nodesListProvider));
+                                    },
+                                    title: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      child: Text("${connectedNode.host}",
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis),
+                                    ),
+                                    subtitle: Consumer(
+                                      builder: (context, ref, c) {
+                                        int activeNodeDaemonHeight =
+                                            ref.watch(walletNodeDaemonHeight);
+                                        int activeHeight =
+                                            (activeNodeDaemonHeight >
+                                                    connectedNode!.height)
+                                                ? activeNodeDaemonHeight
+                                                : connectedNode!.height;
+                                        return Text(
+                                            connectedNode!.isActive == true
+                                                ? "Daemon Height: $activeHeight"
+                                                : "Inactive",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis);
+                                      },
+                                    ),
+                                    trailing: Container(
+                                      height: 12,
+                                      width: 12,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: isConnected
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              const Padding(padding: EdgeInsets.all(4)),
-                            ],
-                          ),
+                                  const Padding(padding: EdgeInsets.all(4)),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
                   )),
             ),
             const SliverPadding(padding: EdgeInsets.all(8)),

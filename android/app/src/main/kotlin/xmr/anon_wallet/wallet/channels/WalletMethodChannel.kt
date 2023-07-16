@@ -10,7 +10,11 @@ import com.m2049r.xmrwallet.utils.RestoreHeight
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.MainActivity
 import xmr.anon_wallet.wallet.channels.WalletEventsChannel.sendEvent
@@ -21,7 +25,7 @@ import xmr.anon_wallet.wallet.utils.AnonPreferences
 import xmr.anon_wallet.wallet.utils.Prefs
 import java.io.File
 import java.net.SocketException
-import java.util.*
+import java.util.Calendar
 
 
 class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, private val activity: MainActivity) : AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
@@ -57,12 +61,13 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "setTxUserNotes" -> setTxUserNotes(call, result)
             "wipeWallet" -> wipeWallet(call, result)
             "importOutputsJ" -> importOutputsJ(call, result)
-            "exportKeyImages" -> exportKeyImages(call, result)
+            "exportKeyImages" -> exportKeyImages(result)
             "signAndExportJ" -> signAndExportJ(call, result)
             "setTrustedDaemon" -> setTrustedDaemon(call, result)
             "lock" -> lock(call, result)
         }
     }
+
     private fun importOutputsJ(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
@@ -81,25 +86,26 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             }
         }
     }
-    private fun exportKeyImages(call: MethodCall, result: Result) {
+
+    private fun exportKeyImages(result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
-                if (call.hasArgument("filename") && call.hasArgument("all")) {
                     try {
-                        val filename = call.argument<String>("filename") as String
-                        val all = call.argument<Boolean>("all") as Boolean
-                        val eo = WalletManager.getInstance().wallet.exportKeyImages(filename, all)
-                        result.success(eo)
+                        val file = File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_KEY_IMAGE_FILE)
+                        val eo = WalletManager.getInstance().wallet.exportKeyImages(file.absolutePath, true)
+                        if(eo){
+                            result.success(file.absolutePath)
+                        }else{
+                            result.error("1", "exportKeyImages failed", "")
+                        }
                     } catch (e: Exception) {
                         result.error("1", e.message, "")
                         throw CancellationException(e.message)
                     }
-                } else {
-                    result.error("0", "invalid params", null)
-                }
             }
         }
     }
+
     private fun signAndExportJ(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
@@ -524,18 +530,17 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
     private fun exportOutputs(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
-                if (call.hasArgument("filename") && call.hasArgument("all")) {
-                    try {
-                        val filename = call.argument<String>("filename") as String
-                        val all = call.argument<Boolean>("all") as Boolean
-                        val eo = WalletManager.getInstance().wallet.exportOutputs(filename, all)
-                        result.success(eo)
-                    } catch (e: Exception) {
-                        result.error("1", e.message, "")
-                        throw CancellationException(e.message)
+                try {
+                    val file = File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_OUTPUT_FILE)
+                    val eo = WalletManager.getInstance().wallet.exportOutputs(file.absolutePath, true)
+                    if(eo){
+                        result.success(file.absolutePath)
+                    }else{
+                        result.error("1", "Failed to export outputs", "")
                     }
-                } else {
-                    result.error("0", "invalid params", null)
+                } catch (e: Exception) {
+                    result.error("1", e.message, "")
+                    throw CancellationException(e.message)
                 }
             }
         }
@@ -544,17 +549,14 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
     private fun importKeyImages(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
-                if (call.hasArgument("filename")) {
-                    try {
-                        val filename = call.argument<String>("filename") as String
-                        val eo = WalletManager.getInstance().wallet.importKeyImages(filename)
-                        result.success(eo)
-                    } catch (e: Exception) {
-                        result.error("1", e.message, "")
-                        throw CancellationException(e.message)
-                    }
-                } else {
-                    result.error("0", "invalid params", null)
+                try {
+                    val file = File(AnonWallet.getAppContext().cacheDir, AnonWallet.IMPORT_KEY_IMAGE_FILE)
+                    val eo = WalletManager.getInstance().wallet.importKeyImages(file.absolutePath)
+                    result.success(eo)
+                } catch (e: Exception) {
+                    result.error("1", e.message, "")
+                    throw CancellationException(e.message)
+
                 }
             }
         }

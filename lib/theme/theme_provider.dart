@@ -45,6 +45,16 @@ class ThemeProvider extends ChangeNotifier {
           padding: MaterialStateProperty.resolveWith((states) {
             return const EdgeInsets.symmetric(vertical: 14, horizontal: 34);
           }),
+          textStyle: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.pressed)) {
+              return const TextStyle(
+                fontWeight: FontWeight.bold,
+              );
+            }
+            return const TextStyle(
+              fontWeight: FontWeight.w500,
+            );
+          }),
           shape: MaterialStateProperty.resolveWith((states) {
             if (states.contains(MaterialState.pressed)) {
               return RoundedRectangleBorder(
@@ -54,8 +64,43 @@ class ThemeProvider extends ChangeNotifier {
                 borderRadius: BorderRadius.circular(8));
           }),
         )),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+            style: ButtonStyle(
+          padding: MaterialStateProperty.resolveWith((states) {
+            return const EdgeInsets.symmetric(vertical: 14, horizontal: 34);
+          }),
+          splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
+          enableFeedback: true,
+          foregroundColor: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.pressed)) {
+              return Colors.grey;
+            }
+            return Colors.white;
+          }),
+          side: MaterialStateBorderSide.resolveWith((states) {
+            if (states.contains(MaterialState.pressed)) {
+              return const BorderSide(color: Colors.white, width: 1);
+            }
+            return const BorderSide(color: Color(0xffe7e7e7), width: 0);
+          }),
+          shape: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.pressed)) {
+              return RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: const BorderSide(color: Colors.white, width: 8));
+            }
+            return RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: const BorderSide(color: Colors.white, width: 1));
+          }),
+        )),
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor: Colors.grey.shade900,
+          actionTextColor: colorScheme.primary,
+          contentTextStyle: const TextStyle(color: Colors.white),
+        ),
         buttonTheme: ButtonThemeData(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             colorScheme: colorScheme.copyWith(
                 primary: Colors.white, background: Colors.white)),
         useMaterial3: false);

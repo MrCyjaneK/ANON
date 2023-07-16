@@ -38,33 +38,42 @@ class ProgressSliverWidget extends ConsumerWidget {
           builder: (context) {
             if (sync != null && sync['remaining'] != 0) {
               double progress = sync['progress']?.toDouble() ?? 0.0;
-              return Column(
-                children: [
-                  RoundedLinearProgressBar(
-                    max: 1,
-                    height: 4,
-                    current: sync['progress']?.toDouble() ?? 0.0,
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "${sync['remaining']} blocks remaining",
-                          style: Theme.of(context).textTheme.caption?.copyWith(
-                              fontSize: 11, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          "${(progress * 100).toInt()}%",
-                          style: Theme.of(context).textTheme.caption?.copyWith(
-                              fontSize: 11, fontWeight: FontWeight.bold),
-                        )
-                      ],
+              return Container(
+                height: 28,
+                child: Column(
+                  children: [
+                    RoundedLinearProgressBar(
+                      max: 1,
+                      height: 4,
+                      current: sync['progress']?.toDouble() ?? 0.0,
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 2, vertical: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "${sync['remaining']} blocks remaining",
+                            style: Theme.of(context)
+                                .textTheme
+                                .caption
+                                ?.copyWith(
+                                    fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "${(progress * 100).toInt()}%",
+                            style: Theme.of(context)
+                                .textTheme
+                                .caption
+                                ?.copyWith(
+                                    fontSize: 11, fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               );
             } else if (isConnecting || isWalletOpening) {
               return ClipRRect(

@@ -1,5 +1,6 @@
 package xmr.anon_wallet.wallet.services
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.m2049r.xmrwallet.data.NodeInfo

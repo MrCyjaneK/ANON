@@ -60,6 +60,12 @@ object AnonWallet {
         this.application = flutterActivity.application
         initWalletPaths()
         attachScope(flutterActivity)
+        //clear cache directory
+        walletScope.launch {
+            withContext(Dispatchers.IO) {
+                getAppContext().cacheDir.delete()
+            }
+        }
     }
 
 

@@ -9,7 +9,10 @@ import io.flutter.plugin.common.MethodCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import xmr.anon_wallet.wallet.AnonWallet
 import xmr.anon_wallet.wallet.AnonWallet.ONE_XMR
+import xmr.anon_wallet.wallet.model.UrRegistryTypes
+import java.io.File
 
 class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
 
@@ -19,6 +22,115 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
             "composeTransaction" -> composeTransaction(call, result)
             "composeAndBroadcast" -> composeAndBroadcast(call, result)
             "composeAndSave" -> composeAndSave(call, result)
+            "broadcastSigned" -> broadcastSigned(call, result)
+            "loadUnsignedTx" -> loadUnsignedTx(call, result)
+            "signUnsignedTx" -> signUnsignedTx(call, result)
+            "getExportPath" -> getExportPath(call, result)
+        }
+    }
+
+    private fun signUnsignedTx(call: MethodCall, result: Result) {
+        scope.launch(Dispatchers.IO) {
+            val unsignedTxFile = File(AnonWallet.getAppContext().cacheDir, AnonWallet.IMPORT_UNSIGNED_TX_FILE)
+            val signedTxFile = File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_SIGNED_TX_FILE)
+            if (unsignedTxFile.exists()) {
+                val status = WalletManager.getInstance().wallet.signAndExportJ(unsignedTxFile.absolutePath, signedTxFile.absolutePath)
+                withContext(Dispatchers.Main) {
+                    if (status == "Signed") {
+                        return@withContext result.success(
+                            hashMapOf(
+                                "state" to "success",
+                                "status" to "Signed",
+                                "errorString" to "",
+                            )
+                        )
+                    } else {
+                        return@withContext result.success(
+                            hashMapOf(
+                                "state" to "error",
+                                "status" to "Signed",
+                                "errorString" to "Unable to sign tx",
+                            )
+                        )
+                    }
+                }
+            } else {
+                result.error("0", "no unsigned tx file", null)
+            }
+        }
+    }
+
+    private fun getExportPath(call: MethodCall, result: Result) {
+
+        val type = call.argument<String?>("type") ?: return result.error("0", "type is null", null)
+        val file = when (UrRegistryTypes.fromString(type)) {
+            UrRegistryTypes.XMR_OUTPUT -> File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_OUTPUT_FILE)
+            UrRegistryTypes.XMR_KEY_IMAGE -> File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_KEY_IMAGE_FILE)
+            UrRegistryTypes.XMR_TX_UNSIGNED -> File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_UNSIGNED_TX_FILE)
+            UrRegistryTypes.XMR_TX_SIGNED -> File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_SIGNED_TX_FILE)
+            null -> return result.error("0", "type is null", null)
+        }
+        result.success(file.absolutePath)
+    }
+
+    private fun broadcastSigned(call: MethodCall, result: Result) {
+        scope.launch(Dispatchers.IO) {
+            val wallet = WalletManager.getInstance().wallet;
+            val txFile = File(AnonWallet.getAppContext().cacheDir, AnonWallet.IMPORT_SIGNED_TX_FILE)
+            if (txFile.exists()) {
+                val status = wallet.submitTransaction(txFile.absolutePath)
+                wallet.store()
+                wallet.refreshHistory()
+                withContext(Dispatchers.Main) {
+                    if (status.lowercase().contains("submitted")) {
+                        return@withContext result.success(
+                            mapOf(
+                                "status" to "success",
+                                "result" to status
+                            )
+                        );
+                    } else {
+                        return@withContext result.error("0", status.ifEmpty { "Unable to broadcast transaction" }, null);
+                    }
+                }
+            } else {
+                withContext(Dispatchers.IO) {
+                    result.error("1", "no tx file", null)
+                }
+            }
+        }
+    }
+
+    private fun loadUnsignedTx(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                val txFile = File(AnonWallet.getAppContext().cacheDir, AnonWallet.IMPORT_UNSIGNED_TX_FILE)
+                if (txFile.exists()) {
+                    val unsignedTransaction = WalletManager.getInstance().wallet.loadUnsignedTx(txFile)
+                    withContext(Dispatchers.Main) {
+                        if (unsignedTransaction != null) {
+                            result.success(
+                                hashMapOf(
+                                    "fee" to unsignedTransaction.fee,
+                                    "amount" to unsignedTransaction.amount,
+                                    "address" to unsignedTransaction.address,
+                                    "state" to "preview",
+                                    "status" to unsignedTransaction.status.toString(),
+                                    "txId" to (unsignedTransaction.firstTxIdJ ?: ""),
+                                    "txCount" to 0,
+                                    "errorString" to unsignedTransaction.errorString,
+                                )
+                            )
+                        } else {
+                            result.error("0", "error", null);
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.IO) {
+                        result.error("1", "no tx file", null)
+                    }
+                }
+            }
         }
     }
 
@@ -101,7 +213,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
         val address = call.argument<String?>("address")
         val amount = call.argument<String>("amount")
         val notes = call.argument<String>("notes")
-        val path = call.argument<String>("path")
+        val sign = call.argument<Boolean?>("sign") ?: true
         val amountNumeric = Wallet.getAmountFromString(amount)
         if (address == null || amount == null) {
             return result.error("1", "invalid args", null)
@@ -112,20 +224,20 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
                 val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default);
                 val txId = pendingTx.firstTxIdJ;
                 var error = "";
-                var success = false;
+                var success = false
                 try {
-                    success = pendingTx.commit(path, true)
-                    if (success) {
-                        wallet.refreshHistory()
-                        wallet.setUserNote(txId, notes)
+                    val unsignedTxFile = File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_UNSIGNED_TX_FILE)
+                    success = pendingTx.commit(unsignedTxFile.absolutePath, true)
+                    if (sign) {
+                        val signedTxPath = File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_SIGNED_TX_FILE)
+                        wallet.signAndExportJ(unsignedTxFile.absolutePath, signedTxPath.absolutePath)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     error = e.message ?: "";
                 }
-
                 wallet.store()
-                withContext(Dispatchers.IO) {
+                withContext(Dispatchers.Main) {
                     result.success(
                         hashMapOf(
                             "fee" to pendingTx.fee,

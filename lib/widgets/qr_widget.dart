@@ -8,7 +8,8 @@ class AnimatedQR extends StatefulWidget {
   final int fps;
   final double size;
 
-  const AnimatedQR({super.key, this.fps = 8,this.size=200, required this.frames});
+  const AnimatedQR(
+      {super.key, this.fps = 8, this.size = 200, required this.frames});
 
   @override
   State<AnimatedQR> createState() => _QRState();
@@ -58,11 +59,10 @@ class _QRState extends State<AnimatedQR> {
       version: QrVersions.auto,
       padding: const EdgeInsets.all(0),
       size: widget.size,
-      eyeStyle: const QrEyeStyle(color: Colors.white, eyeShape: QrEyeShape.square),
+      eyeStyle:
+          const QrEyeStyle(color: Colors.white, eyeShape: QrEyeShape.square),
       dataModuleStyle: const QrDataModuleStyle(
-          color: Colors.white,
-          dataModuleShape: QrDataModuleShape.square
-      ),
+          color: Colors.white, dataModuleShape: QrDataModuleShape.square),
       data: widget.frames.next,
     );
   }

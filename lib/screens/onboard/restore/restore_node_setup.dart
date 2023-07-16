@@ -215,11 +215,17 @@ class RestoreNodeSetup extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 6)),
                   onPressed: () async {
-                    if (node != null) {
-                      onButtonPressed();
-                      return;
+                    if (ref.read(remoteHost).isEmpty) {
+                      showConfirmColdAlertExternal(context, () {
+                        onButtonPressed();
+                      });
+                    } else {
+                      if (node != null) {
+                        onButtonPressed();
+                        return;
+                      }
+                      ref.read(nodeConnectionProvider.notifier).connect();
                     }
-                    ref.read(nodeConnectionProvider.notifier).connect();
                   },
                   child: Text(node == null ? "Connect" : "Next"),
                 ),

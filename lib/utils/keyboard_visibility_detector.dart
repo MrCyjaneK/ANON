@@ -1,11 +1,10 @@
-
 import 'package:flutter/material.dart';
 
 class KeyboardVisibilityListener extends StatefulWidget {
   final Widget child;
   final void Function(
-      bool isKeyboardVisible,
-      ) listener;
+    bool isKeyboardVisible,
+  ) listener;
 
   const KeyboardVisibilityListener({
     Key? key,
@@ -14,10 +13,12 @@ class KeyboardVisibilityListener extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _KeyboardVisibilityListenerState createState() => _KeyboardVisibilityListenerState();
+  _KeyboardVisibilityListenerState createState() =>
+      _KeyboardVisibilityListenerState();
 }
 
-class _KeyboardVisibilityListenerState extends State<KeyboardVisibilityListener> with WidgetsBindingObserver {
+class _KeyboardVisibilityListenerState extends State<KeyboardVisibilityListener>
+    with WidgetsBindingObserver {
   var _isKeyboardVisible = false;
 
   @override

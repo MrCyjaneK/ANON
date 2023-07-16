@@ -1,3 +1,4 @@
+import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/screens/home/settings/nodes/nodes_settings.dart';
@@ -41,73 +42,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  child: Text("Connection", style: titleStyle),
-                ),
-                Divider(color: dividerColor, height: 2),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const NodesSettingsScreens()));
-                  },
-                  title: const Text("Node"),
-                  subtitle: Text("Manage nodes",
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: dividerColor)),
-                ),
-                HookConsumer(builder: (context, ref, child) {
-                  Proxy proxy = ref.watch(proxyStateProvider);
-                  bool isConnected = ref.watch(connectionStatus);
-                  useEffect(() {
-                    ref.read(proxyStateProvider.notifier).getState();
-                    ref.read(proxyStateProvider.notifier).getState();
-                    return null;
-                  }, []);
-                  return ListTile(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ProxySettings()));
-                    },
-                    title: const Text("Proxy"),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 34),
-                    subtitle: proxy.isConnected()
-                        ? Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                        color: isConnected
-                                            ? Colors.green
-                                            : dividerColor,
-                                        fontSize: 11,
-                                        wordSpacing: 0),
-                                isConnected
-                                    ? "Connected : ${proxy.serverUrl}:${proxy.portTor}/${proxy.portI2p}"
-                                    : "Disconnected : ${proxy.serverUrl}:${proxy.portTor}/${proxy.portI2p}",
-                              ),
-                            ],
-                          )
-                        : Text("Disabled",
+                !isAirgapEnabled
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 12),
+                        child: Text("Connection", style: titleStyle),
+                      )
+                    : const SizedBox.shrink(),
+                !isAirgapEnabled
+                    ? Divider(color: dividerColor, height: 2)
+                    : const SizedBox.shrink(),
+                !isAirgapEnabled
+                    ? ListTile(
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 34),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const NodesSettingsScreens()));
+                        },
+                        title: const Text("Node"),
+                        subtitle: Text("Manage nodes",
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
                                 ?.copyWith(color: dividerColor)),
-                  );
-                }),
+                      )
+                    : const SizedBox.shrink(),
+                !isAirgapEnabled
+                    ? HookConsumer(builder: (context, ref, child) {
+                        Proxy proxy = ref.watch(proxyStateProvider);
+                        bool isConnected = ref.watch(connectionStatus);
+                        useEffect(() {
+                          ref.read(proxyStateProvider.notifier).getState();
+                          ref.read(proxyStateProvider.notifier).getState();
+                          return null;
+                        }, []);
+                        return ListTile(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ProxySettings()));
+                          },
+                          title: const Text("Proxy"),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 34),
+                          subtitle: proxy.isConnected()
+                              ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                              color: isConnected
+                                                  ? Colors.green
+                                                  : dividerColor,
+                                              fontSize: 11,
+                                              wordSpacing: 0),
+                                      isConnected
+                                          ? "Connected : ${proxy.serverUrl}:${proxy.portTor}/${proxy.portI2p}"
+                                          : "Disconnected : ${proxy.serverUrl}:${proxy.portTor}/${proxy.portI2p}",
+                                    ),
+                                  ],
+                                )
+                              : Text("Disabled",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(color: dividerColor)),
+                        );
+                      })
+                    : const SizedBox.shrink(),
                 Divider(color: dividerColor, height: 2),
                 Padding(
                   padding:
@@ -125,6 +137,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 Divider(color: dividerColor, height: 2),
                 ListTile(
+                  enabled: !isViewOnly,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 34),
                   onTap: () {
                     Navigator.push(

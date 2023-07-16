@@ -1,3 +1,5 @@
+import 'package:anon_wallet/anon_wallet.dart';
+import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:flutter/services.dart';
 
 class SpendMethodChannel {
@@ -15,6 +17,18 @@ class SpendMethodChannel {
         .invokeMethod("validate", {"amount": amount, "address": address});
   }
 
+  Future<Map> signUnsignedTx() async {
+    return await platform.invokeMethod("signUnsignedTx");
+  }
+
+  Future<Map> broadcastSigned() async {
+    return await platform.invokeMethod("broadcastSigned");
+  }
+
+  Future<Map> loadUnsignedTx() async {
+    return await platform.invokeMethod("loadUnsignedTx");
+  }
+
   dynamic compose(String amount, String address, String notes) async {
     return await platform.invokeMethod("composeTransaction",
         {"amount": amount, "address": address, "notes": notes});
@@ -26,11 +40,24 @@ class SpendMethodChannel {
         {"amount": amount, "address": address, "notes": notes});
   }
 
-  dynamic composeAndSave(
-      String amount, String address, String notes, String path) async {
+  Future<Map> composeAndSave(
+      String amount, String address, String notes) async {
     return await platform.invokeMethod(
       "composeAndSave",
-      {"amount": amount, "address": address, "notes": notes, "path": path},
+      {
+        "amount": amount,
+        "sign": (!isViewOnly && isAirgapEnabled),
+        "address": address,
+        "notes": notes
+      },
+    );
+  }
+
+  Future<String> getFilePath(UrType type) async {
+    print("getExportPath ${type.type}}");
+    return await platform.invokeMethod(
+      "getExportPath",
+      {"type": type.type},
     );
   }
 }

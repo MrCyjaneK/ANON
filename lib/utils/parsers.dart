@@ -1,5 +1,5 @@
 class Parser {
-  static parseAddress(address) {
+  static parseAddress(String address) {
     if (address.startsWith('monero:')) {
       var uri = Uri.parse(address);
       // Extract the amount and description from the URI

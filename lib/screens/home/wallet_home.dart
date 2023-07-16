@@ -1,5 +1,7 @@
+import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/receive_screen.dart';
 import 'package:anon_wallet/screens/home/settings/settings_main.dart';
+import 'package:anon_wallet/screens/home/spend/spend_form_main.dart';
 import 'package:anon_wallet/screens/home/spend/spend_screen.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
 import 'package:anon_wallet/state/node_state.dart';
@@ -16,6 +18,8 @@ class WalletHome extends ConsumerStatefulWidget {
   @override
   ConsumerState<WalletHome> createState() => WalletHomeState();
 }
+
+final lockPageViewScroll = StateProvider<bool>((ref) => false);
 
 class WalletHomeState extends ConsumerState<WalletHome> {
   int _currentView = 0;
@@ -69,32 +73,40 @@ class WalletHomeState extends ConsumerState<WalletHome> {
       },
       child: Scaffold(
         key: scaffoldState,
-        body: PageView(
-          controller: _pageController,
-          children: [
-            Builder(
-              builder: (context) {
-                return TransactionsList(
-                  onScanClick: () async {
-                    showModalScanner(context);
+        body: Consumer(
+          builder: (context, ref, child) {
+            bool lock = ref.watch(lockPageViewScroll);
+            return PageView(
+              controller: _pageController,
+              physics: lock
+                  ? const NeverScrollableScrollPhysics()
+                  : const AlwaysScrollableScrollPhysics(),
+              children: [
+                Builder(
+                  builder: (context) {
+                    return TransactionsList(
+                      onScanClick: () async {
+                        showModalScanner(context);
+                      },
+                    );
                   },
-                );
+                ),
+                ReceiveWidget(() {
+                  _pageController.animateToPage(0,
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.ease);
+                }),
+                const AnonSpendForm(),
+                const SettingsScreen(),
+              ],
+              onPageChanged: (index) {
+                if (_bottomSheetController != null) {
+                  _bottomSheetController!.close();
+                  _bottomSheetController = null;
+                }
+                setState(() => _currentView = index);
               },
-            ),
-            ReceiveWidget(() {
-              _pageController.animateToPage(0,
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.ease);
-            }),
-            const SpendScreen(),
-            const SettingsScreen(),
-          ],
-          onPageChanged: (index) {
-            if (_bottomSheetController != null) {
-              _bottomSheetController!.close();
-              _bottomSheetController = null;
-            }
-            setState(() => _currentView = index);
+            );
           },
         ),
         floatingActionButton: Consumer(
@@ -155,18 +167,82 @@ class WalletHomeState extends ConsumerState<WalletHome> {
   }
 
   void showModalScanner(BuildContext context) {
-    String? result;
+    final messenger = ScaffoldMessenger.of(context);
+    final theme = Theme.of(context);
+    PersistentBottomSheetController? _bottomSheetController;
+
+    QRResult? result;
     _bottomSheetController = showQRBottomSheet(
       context,
       onScanCallback: (value) {
         result = value;
       },
     );
-    _bottomSheetController?.closed.then((value) async {
-      await Future.delayed(const Duration(milliseconds: 400));
-      if (result != null && result!.isNotEmpty) {
-        _pageController.jumpToPage(2);
+    final navigator = Navigator.of(context);
+    _bottomSheetController.closed.then((value) async {
+      await Future.delayed(const Duration(milliseconds: 200));
+      if (result != null && result!.type == QRResultType.text) {
+        _pageController.animateToPage(2,
+            duration: const Duration(milliseconds: 220), curve: Curves.ease);
+      } else {
+        if (result != null && result!.type == QRResultType.UR) {
+          if (result!.urResult.isNotEmpty) {}
+          switch (result!.urType) {
+            case UrType.xmrOutPut:
+              String message = "";
+              if (result!.urResult.isNotEmpty) {
+                message = "Output imported successfully";
+              }
+              if (result!.urError != null) {
+                message = result!.urError!;
+              }
+              messenger.showSnackBar(SnackBar(
+                  backgroundColor: Colors.grey[900],
+                  content: Text(
+                    message,
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: theme.primaryColor),
+                  )));
+              break;
+            case UrType.xmrKeyImage:
+              String message = "";
+              if (result!.urResult.isNotEmpty) {
+                message = result!.urResult;
+              }
+              if (result!.urError != null) {
+                message = result!.urError!;
+              }
+              messenger.showSnackBar(SnackBar(
+                  backgroundColor: Colors.grey[900],
+                  content: Text(
+                    message,
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: theme.primaryColor),
+                  )));
+              break;
+            case UrType.xmrTxUnsigned:
+              navigator.push(MaterialPageRoute(
+                builder: (context) {
+                  return const AnonSpendForm(scannedType: UrType.xmrTxUnsigned);
+                },
+              ));
+              break;
+            case UrType.xmrTxSigned:
+              navigator.push(MaterialPageRoute(
+                builder: (context) {
+                  return const AnonSpendForm(scannedType: UrType.xmrTxSigned);
+                },
+              ));
+              break;
+            case null:
+              {}
+          }
+        }
       }
     });
   }
+}
+
+navigateToHome(BuildContext context) {
+  Navigator.of(context).popUntil((route) => route.settings.name == "/");
 }

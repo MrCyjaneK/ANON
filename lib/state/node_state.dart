@@ -46,7 +46,7 @@ final syncProgressStateProvider = Provider<Map<String, num>?>((ref) {
       num remaining = (blockChainHeight - connectionState.syncBlock);
       num progress = connectionState.syncBlock / blockChainHeight;
 
-      if (progress >= 1 || remaining < 10) {
+      if (progress >= 1) {
         return null;
       }
       return {

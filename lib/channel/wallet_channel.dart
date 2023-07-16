@@ -1,5 +1,6 @@
 import 'package:anon_wallet/models/config.dart';
 import 'package:anon_wallet/models/wallet.dart';
+import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:flutter/services.dart';
 
 enum WalletState {
@@ -45,9 +46,8 @@ class WalletChannel {
     return value;
   }
 
-  Future<bool?> exportOutputs(String filename, bool all) async {
-    bool? value = await platform
-        .invokeMethod("exportOutputs", {"filename": filename, "all": all});
+  Future<String> exportOutputs(bool all) async {
+    String value = await platform.invokeMethod("exportOutputs");
     return value;
   }
 
@@ -106,9 +106,8 @@ class WalletChannel {
         .invokeMethod("importOutputsJ", {"filename": filename});
   }
 
-  Future exportKeyImages(String filename, bool all) async {
-    return await platform
-        .invokeMethod("exportKeyImages", {"filename": filename, "all": all});
+  Future<String> exportKeyImages() async {
+    return await platform.invokeMethod("exportKeyImages");
   }
 
   Future<String?> signAndExportJ(String inputFile, String outputFile) async {
@@ -118,5 +117,10 @@ class WalletChannel {
 
   Future lock() async {
     dynamic value = await platform.invokeMethod("lock");
+  }
+
+  Future<bool> importFromFile(UrType type, String path) async {
+    return await platform.invokeMethod(
+        "importFromFile", {"importType": type.type, "file": path});
   }
 }

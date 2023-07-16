@@ -5,9 +5,9 @@ class TxState {
   int? txCount;
   String? txId;
   String? status;
-
   //Shows tx states preview,waiting,success
   String state = "preview";
+  String? address;
 
   TxState();
 
@@ -19,6 +19,7 @@ class TxState {
     status = json['status'];
     txCount = json['txCount'];
     state = json['state'];
+    address = json['address'];
   }
 
   Map<String, dynamic> toJson() {

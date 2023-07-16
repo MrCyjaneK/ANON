@@ -8,7 +8,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class QRScannerView extends StatefulWidget {
   final Function(QRResult value) onScanCallback;
 
-  const QRScannerView({Key? key, required this.onScanCallback}) : super(key: key);
+  const QRScannerView({Key? key, required this.onScanCallback})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _QRScannerViewState();
@@ -20,9 +21,11 @@ class _QRScannerViewState extends State<QRScannerView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterDocked,
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterDocked,
       floatingActionButton: FloatingActionButton.extended(
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8))),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -56,7 +59,8 @@ class _QRScannerViewState extends State<QRScannerView> {
   }
 }
 
-PersistentBottomSheetController showQRBottomSheet(BuildContext context, {Function(QRResult value)? onScanCallback}) {
+PersistentBottomSheetController showQRBottomSheet(BuildContext context,
+    {Function(QRResult value)? onScanCallback}) {
   return showBottomSheet(
       context: context,
       builder: (context) {
@@ -69,10 +73,12 @@ PersistentBottomSheetController showQRBottomSheet(BuildContext context, {Functio
                 if (value.type == QRResultType.text && value.text.isNotEmpty) {
                   var parsedAddress = Parser.parseAddress(value.text);
                   if (parsedAddress[0] != null) {
-                    ref.read(addressStateProvider.state).state = parsedAddress[0];
+                    ref.read(addressStateProvider.state).state =
+                        parsedAddress[0];
                   }
                   if (parsedAddress[1] != null) {
-                    ref.read(amountStateProvider.state).state = parsedAddress[1];
+                    ref.read(amountStateProvider.state).state =
+                        parsedAddress[1];
                   }
                   if (parsedAddress[2] != null) {
                     ref.read(notesStateProvider.state).state = parsedAddress[2];

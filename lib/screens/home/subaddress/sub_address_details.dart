@@ -3,6 +3,7 @@ import 'package:anon_wallet/screens/home/subaddress/edit_sub_address.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_details.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
 import 'package:anon_wallet/state/sub_addresses.dart';
+import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/cupertino.dart';
@@ -76,6 +77,12 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                               backgroundColor: Colors.black,
                               data: "monero:${subAddress.address}",
                               version: QrVersions.auto,
+                              eyeStyle: const QrEyeStyle(
+                                  color: Colors.white,
+                                  eyeShape: QrEyeShape.square),
+                              dataModuleStyle: const QrDataModuleStyle(
+                                  color: Colors.white,
+                                  dataModuleShape: QrDataModuleShape.square),
                             ),
                           ),
                         ),

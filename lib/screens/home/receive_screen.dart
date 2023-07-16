@@ -41,55 +41,50 @@ class ReceiveWidget extends ConsumerWidget {
                   icon: const Icon(Icons.history))
             ],
           ),
-          SliverFillRemaining(
-            fillOverscroll: true,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Padding(padding: EdgeInsets.all(8)),
-                  QrImageView(
-                    backgroundColor: Colors.black,
-                    gapless: true,
-                    dataModuleStyle: const QrDataModuleStyle(
-                        dataModuleShape: QrDataModuleShape.square),
-                    eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square),
-                    foregroundColor: Colors.white,
-                    data: address,
-                    version: QrVersions.auto,
-                    size: 280.0,
+          const SliverPadding(padding: EdgeInsets.all(28)),
+          SliverToBoxAdapter(
+            child: Center(
+              child: QrImageView(
+                backgroundColor: Colors.black,
+                gapless: false,
+                dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.square,
+                    color: Colors.white),
+                eyeStyle: const QrEyeStyle(
+                    eyeShape: QrEyeShape.square, color: Colors.white),
+                data: address,
+                version: QrVersions.auto,
+                size: 280.0,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+              title: GestureDetector(
+                onTap: () {
+                  showDialog(
+                      barrierColor: const Color(0xab1e1e1e),
+                      context: context,
+                      builder: (context) {
+                        return SubAddressEditDialog(subAddress!);
+                      });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    "${subAddress?.getLabel()} ",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(color: Theme.of(context).primaryColor),
                   ),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 24),
-                    title: GestureDetector(
-                      onTap: () {
-                        showDialog(
-                            barrierColor: const Color(0xab1e1e1e),
-                            context: context,
-                            builder: (context) {
-                              return SubAddressEditDialog(subAddress!);
-                            });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          "${subAddress?.getLabel()} ",
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(color: Theme.of(context).primaryColor),
-                        ),
-                      ),
-                    ),
-                    subtitle: SelectableText(
-                      address,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  )
-                ],
+                ),
+              ),
+              subtitle: SelectableText(
+                address,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
           )

@@ -42,7 +42,12 @@ class QRResult {
   final String urResult;
   final String? urError;
 
-  QRResult({this.text = "", this.type = QRResultType.text, this.urType, this.urResult = "", this.urError});
+  QRResult(
+      {this.text = "",
+      this.type = QRResultType.text,
+      this.urType,
+      this.urResult = "",
+      this.urError});
 
   static fromMap(Map<String, dynamic> value) {
     if (value['urType']) {
@@ -81,7 +86,8 @@ class URQrProgress {
   List<int> receivedPartIndexes;
   double percentage;
 
-  URQrProgress(this.expectedPartCount, this.processedPartsCount, this.receivedPartIndexes, this.percentage);
+  URQrProgress(this.expectedPartCount, this.processedPartsCount,
+      this.receivedPartIndexes, this.percentage);
 
   bool equals(URQrProgress? progress) {
     if (progress == null) {
@@ -94,7 +100,7 @@ class URQrProgress {
 class _CameraViewState extends State<CameraView> {
   static const platform = MethodChannel('anon_camera');
   EventChannel eventChannel = const EventChannel("anon_camera:events");
-  int? id ;
+  int? id;
   bool? permissionGranted;
   double? width;
   double? height;
@@ -111,25 +117,26 @@ class _CameraViewState extends State<CameraView> {
   }
 
   void startCamera() async {
-    bool? permission = await platform.invokeMethod<bool>("checkPermissionState");
+    bool? permission =
+        await platform.invokeMethod<bool>("checkPermissionState");
     setState(() {
       permissionGranted = permission;
     });
     if (permission == true) {
-       platform.invokeMethod<Map>("startCam").then((value){
-         if(value != null){
-           permissionGranted = true;
-           setState(() {
-             id = value["id"];
-             width = value["width"];
-             height = value["height"];
-           });
-         }
-       });
+      platform.invokeMethod<Map>("startCam").then((value) {
+        if (value != null) {
+          permissionGranted = true;
+          setState(() {
+            id = value["id"];
+            width = value["width"];
+            height = value["height"];
+          });
+        }
+      });
     } else {
       platform.invokeMethod<Map>("requestPermission");
     }
-    subscription =  eventChannel.receiveBroadcastStream().listen((event) {
+    subscription = eventChannel.receiveBroadcastStream().listen((event) {
       if (event['id'] != null) {
         permissionGranted = true;
         setState(() {
@@ -142,7 +149,9 @@ class _CameraViewState extends State<CameraView> {
         URQrProgress progress = URQrProgress(
             event['expectedPartCount'] ?? -1,
             event['processedPartsCount'] ?? 0,
-            event['receivedPartIndexes'] != null ? List<int>.from(event['receivedPartIndexes']) : [],
+            event['receivedPartIndexes'] != null
+                ? List<int>.from(event['receivedPartIndexes'])
+                : [],
             event['estimatedPercentComplete']);
 
         if (!progress.equals(urQrProgress)) {
@@ -151,7 +160,7 @@ class _CameraViewState extends State<CameraView> {
             urQrProgress = progress;
           });
         }
-        if(event["progress"] != null ){
+        if (event["progress"] != null) {
           setState(() {
             importInProgress = event["progress"];
           });
@@ -190,8 +199,10 @@ class _CameraViewState extends State<CameraView> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text("To capture QR code, allow ANON to access your camera",
-                    style: Theme.of(context).textTheme.titleSmall, textAlign: TextAlign.center),
+                child: Text(
+                    "To capture QR code, allow ANON to access your camera",
+                    style: Theme.of(context).textTheme.titleSmall,
+                    textAlign: TextAlign.center),
               ),
               const Padding(padding: EdgeInsets.all(6)),
               TextButton(
@@ -219,7 +230,9 @@ class _CameraViewState extends State<CameraView> {
                       child: SizedBox(
                         width: width!,
                         height: height!,
-                        child: Texture(textureId: id!, filterQuality: FilterQuality.medium),
+                        child: Texture(
+                            textureId: id!,
+                            filterQuality: FilterQuality.medium),
                       ),
                     )
                   : const Column(
@@ -240,7 +253,8 @@ class _CameraViewState extends State<CameraView> {
           width: double.infinity,
           height: double.infinity,
           margin: const EdgeInsets.all(68),
-          child: SvgPicture.asset("assets/scanner_frame.svg", color: Colors.white24),
+          child: SvgPicture.asset("assets/scanner_frame.svg",
+              color: Colors.white24),
         ),
         urQrProgress != null
             ? Container(
@@ -250,20 +264,27 @@ class _CameraViewState extends State<CameraView> {
                 alignment: Alignment.center,
                 child: SizedBox.square(
                     dimension: 200,
-                    child: importInProgress ?   Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 140,
-                          height: 140,
-                          child: CircularProgressIndicator(),
-                        ),
-                        const Padding(padding: EdgeInsets.all(6)),
-                        const Text("Please wait..\n import in progress",textAlign: TextAlign.center,)
-                      ],
-                    ) : CustomPaint(painter: ProgressPainter(urQrProgress: urQrProgress!))),
+                    child: importInProgress
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 140,
+                                height: 140,
+                                child: CircularProgressIndicator(),
+                              ),
+                              const Padding(padding: EdgeInsets.all(6)),
+                              const Text(
+                                "Please wait..\n import in progress",
+                                textAlign: TextAlign.center,
+                              )
+                            ],
+                          )
+                        : CustomPaint(
+                            painter:
+                                ProgressPainter(urQrProgress: urQrProgress!))),
               )
             : const SizedBox(),
         (urQrProgress != null && importInProgress == false)
@@ -275,10 +296,9 @@ class _CameraViewState extends State<CameraView> {
                 child: Center(
                   child: Text(
                     "${urQrProgress?.processedPartsCount ?? "N"}/${urQrProgress?.expectedPartCount ?? "A"} ",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).primaryColor),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).primaryColor),
                   ),
                 ),
               )
@@ -308,13 +328,16 @@ class ProgressPainter extends CustomPainter {
     const fullAngle = 360.0;
     var startAngle = 0.0;
     for (int i = 0; i < urQrProgress.expectedPartCount.toInt(); i++) {
-      var sweepAngle = (1 / urQrProgress.expectedPartCount) * fullAngle * pi / 180.0;
-      drawSector(canvas, urQrProgress.receivedPartIndexes.contains(i), rect, startAngle, sweepAngle);
+      var sweepAngle =
+          (1 / urQrProgress.expectedPartCount) * fullAngle * pi / 180.0;
+      drawSector(canvas, urQrProgress.receivedPartIndexes.contains(i), rect,
+          startAngle, sweepAngle);
       startAngle += sweepAngle;
     }
   }
 
-  void drawSector(Canvas canvas, bool isActive, Rect rect, double startAngle, double sweepAngle) {
+  void drawSector(Canvas canvas, bool isActive, Rect rect, double startAngle,
+      double sweepAngle) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8
