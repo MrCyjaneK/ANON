@@ -50,8 +50,7 @@ class _TransactionsListState extends State<TransactionsList> {
               Consumer(
                 builder: (context, ref, child) {
                   bool isConnecting = ref.watch(connectingToNodeStateProvider);
-                  bool isWalletOpening =
-                      ref.watch(walletLoadingProvider) ?? false;
+                  bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
                   bool isLoading = isConnecting || isWalletOpening;
                   return Opacity(
                     opacity: isLoading ? 0.5 : 1,
@@ -60,11 +59,7 @@ class _TransactionsListState extends State<TransactionsList> {
                             ? null
                             : () {
                                 if (isLoading) return;
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const WalletLock()));
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => const WalletLock()));
                               },
                         icon: const Hero(
                           tag: "lock",
@@ -137,11 +132,8 @@ class _TransactionsListState extends State<TransactionsList> {
         builder: (context, ref, c) {
           return InkWell(
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TxDetails(transaction: transaction),
-                      fullscreenDialog: true));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => TxDetails(transaction: transaction), fullscreenDialog: true));
             },
             child: TransactionItem(transaction: transaction),
           );
@@ -166,6 +158,12 @@ class _TransactionsListState extends State<TransactionsList> {
           case 3:
             doBroadcastStuff(context);
             break;
+          case 4:
+            importOutputs(context);
+            break;
+          case 5:
+            importKeyImages(context);
+            break;
         }
       },
       itemBuilder: (context) => [
@@ -181,6 +179,14 @@ class _TransactionsListState extends State<TransactionsList> {
         const PopupMenuItem<int>(
           value: 3,
           child: Text('Broadcast Tx'),
+        ),
+        const PopupMenuItem<int>(
+          value: 4,
+          child: Text('Import Wallet Outs'),
+        ),
+        const PopupMenuItem<int>(
+          value: 5,
+          child: Text('Import Key Images'),
         ),
       ],
     );
@@ -202,6 +208,12 @@ class _TransactionsListState extends State<TransactionsList> {
           case 3:
             doBroadcastStuff(context);
             break;
+          case 4:
+            importOutputs(context);
+            break;
+          case 5:
+            importKeyImages(context);
+            break;
         }
       },
       itemBuilder: (context) => [
@@ -222,6 +234,14 @@ class _TransactionsListState extends State<TransactionsList> {
           value: 3,
           enabled: !isAirgapEnabled,
           child: const Text('Broadcast Tx'),
+        ),
+        const PopupMenuItem<int>(
+          value: 4,
+          child: Text('Import Wallet Outs'),
+        ),
+        const PopupMenuItem<int>(
+          value: 5,
+          child: Text('Import Key Images'),
         ),
       ],
     );
@@ -265,10 +285,8 @@ void exportOutput(BuildContext context) async {
   ));
 }
 
-final generateURQR =
-    FutureProvider.family<List<String>, String>((ref, path) async {
-  var items = await anonCameraMethodChannel
-      .invokeListMethod<String>("createUR", {"fpath": path});
+final generateURQR = FutureProvider.family<List<String>, String>((ref, path) async {
+  var items = await anonCameraMethodChannel.invokeListMethod<String>("createUR", {"fpath": path});
   return items ?? List<String>.empty();
 });
 
@@ -327,7 +345,7 @@ String formatTime(int? timestamp) {
   return DateFormat("H:mm\ndd/M").format(dateTime);
 }
 
-void doImportStuff(BuildContext context) async {
+void importKeyImages(BuildContext context) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(
     dialogTitle: 'Pick file',
     allowMultiple: false,
