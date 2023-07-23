@@ -97,19 +97,11 @@ class _TransactionsListState extends State<TransactionsList> {
                 ),
               ),
             ),
-            title: Wrap(
+            title: const Wrap(
               verticalDirection: VerticalDirection.up,
               crossAxisAlignment: WrapCrossAlignment.start,
               children: [
-                const Text("[ΛИ0И]"),
-                isViewOnly
-                    ? Text("[View Only]",
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w100,
-                            color: Colors.amber.shade800))
-                    : const SizedBox.shrink(),
+                Text("[ИΞR0]"),
               ],
             ),
           ),
@@ -215,7 +207,7 @@ class _TransactionsListState extends State<TransactionsList> {
       itemBuilder: (context) => [
         PopupMenuItem<int>(
           value: 0,
-          enabled: isAirgapEnabled,
+          enabled: !isAirgapEnabled,
           child: const Text("Resync blockchain"),
         ),
         const PopupMenuItem<int>(
