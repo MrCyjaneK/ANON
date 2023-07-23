@@ -300,7 +300,6 @@ class _TransactionsListState extends State<TransactionsList> {
               title: Text("Key Images",
                   style: TextStyle(color: Theme.of(context).primaryColor)),
             ),
-            const Divider(),
             !isViewOnly ? ListTile(
               onTap: () {
                 Navigator.pop(context);
@@ -309,17 +308,14 @@ class _TransactionsListState extends State<TransactionsList> {
               title: Text("Wallet OutPuts",
                   style: TextStyle(color: Theme.of(context).primaryColor)),
             ) :const SizedBox(),
-            const Divider(),
-            ListTile(
+            !isViewOnly ? ListTile(
               onTap: () {
                 Navigator.pop(context);
                 importUnsignedTx(context);
               },
-              enabled: !isViewOnly,
               title: Text("Unsigned Transaction",
                   style: TextStyle(color: Theme.of(context).primaryColor)),
-            ),
-            const Divider(),
+            ) :const SizedBox(),
             ListTile(
               onTap: () {
                 Navigator.pop(context);
