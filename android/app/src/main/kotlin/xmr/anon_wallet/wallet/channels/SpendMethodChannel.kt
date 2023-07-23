@@ -25,8 +25,29 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
             "broadcastSigned" -> broadcastSigned(call, result)
             "loadUnsignedTx" -> loadUnsignedTx(call, result)
             "signUnsignedTx" -> signUnsignedTx(call, result)
+            "importTxFile" -> importTxFile(call, result)
             "getExportPath" -> getExportPath(call, result)
         }
+    }
+
+    private fun importTxFile(call: MethodCall, result: Result) {
+        val unsignedTxFile = File(AnonWallet.getAppContext().cacheDir, AnonWallet.IMPORT_UNSIGNED_TX_FILE)
+        val signedTxFile = File(AnonWallet.getAppContext().cacheDir, AnonWallet.IMPORT_SIGNED_TX_FILE)
+        val path = call.argument<String?>("filePath") ?: return result.error("0", "Invalid file path", null)
+        val type = call.argument<String?>("type") ?: return result.error("0", "Invalid type", null)
+        val importFile = File(path)
+        when (type) {
+            "signed" -> {
+                importFile.copyTo(signedTxFile, overwrite = true)
+            }
+            "unsigned" -> {
+                importFile.copyTo(unsignedTxFile, overwrite = true)
+            }
+            else -> {
+                return result.error("0", "Invalid type", null)
+            }
+        }
+        result.success(true);
     }
 
     private fun signUnsignedTx(call: MethodCall, result: Result) {

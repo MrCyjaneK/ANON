@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:anon_wallet/anon_wallet.dart';
+import 'package:anon_wallet/channel/spend_channel.dart';
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/spend/airgap_export_screen.dart';
+import 'package:anon_wallet/screens/home/spend/spend_form_main.dart';
 import 'package:anon_wallet/screens/home/transactions/sticky_progress.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_details.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
@@ -13,7 +15,6 @@ import 'package:anon_wallet/screens/home/wallet_lock.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
-import 'package:anon_wallet/widgets/qr_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -159,10 +160,7 @@ class _TransactionsListState extends State<TransactionsList> {
             doBroadcastStuff(context);
             break;
           case 4:
-            importOutputs(context);
-            break;
-          case 5:
-            importKeyImages(context);
+            importFromFile(context);
             break;
         }
       },
@@ -182,11 +180,7 @@ class _TransactionsListState extends State<TransactionsList> {
         ),
         const PopupMenuItem<int>(
           value: 4,
-          child: Text('Import Wallet Outs'),
-        ),
-        const PopupMenuItem<int>(
-          value: 5,
-          child: Text('Import Key Images'),
+          child: Text('Import from file'),
         ),
       ],
     );
@@ -209,10 +203,7 @@ class _TransactionsListState extends State<TransactionsList> {
             doBroadcastStuff(context);
             break;
           case 4:
-            importOutputs(context);
-            break;
-          case 5:
-            importKeyImages(context);
+            importFromFile(context);
             break;
         }
       },
@@ -237,13 +228,95 @@ class _TransactionsListState extends State<TransactionsList> {
         ),
         const PopupMenuItem<int>(
           value: 4,
-          child: Text('Import Wallet Outs'),
-        ),
-        const PopupMenuItem<int>(
-          value: 5,
-          child: Text('Import Key Images'),
+          child: Text('Import from file'),
         ),
       ],
+    );
+  }
+
+  void importUnsignedTx(BuildContext context) async {
+    final navigator  = Navigator.of(context);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Pick Un signed Transaction File',
+      allowMultiple: false,
+    );
+    if (result == null) return;
+    bool impResult = await SpendMethodChannel().importTxFile(result.files[0].path!, "unsigned") ?? false;
+    if (impResult) {
+      navigator.push(MaterialPageRoute(
+        builder: (context) {
+          return const AnonSpendForm(scannedType: UrType.xmrTxUnsigned);
+        },
+      ));
+    }
+  }
+
+  void importSignedTx(BuildContext context) async {
+    final navigator  = Navigator.of(context);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Pick signed Transaction File',
+      allowMultiple: false,
+    );
+    if (result == null) return;
+    bool impResult = await SpendMethodChannel().importTxFile(result.files[0].path!, "signed") ?? false;
+    if (impResult) {
+      navigator.push(MaterialPageRoute(
+        builder: (context) {
+          return const AnonSpendForm(scannedType: UrType.xmrTxSigned);
+        },
+      ));
+    }
+  }
+
+  void importFromFile(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[900],
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text("Import From File"),
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.pop(context);
+                importKeyImages(context);
+              },
+              title: Text("Key Images", style: TextStyle(color: Theme.of(context).primaryColor)),
+            ),
+            Divider(),
+            ListTile(
+              onTap: () {
+                Navigator.pop(context);
+                importKeyImages(context);
+              },
+              title: Text("Wallet OutPuts", style: TextStyle(color: Theme.of(context).primaryColor)),
+            ),
+            const Divider(),
+            ListTile(
+              onTap: () {
+                Navigator.pop(context);
+                importUnsignedTx(context);
+              },
+              enabled: !isViewOnly,
+              title: Text("Unsigned Transaction", style: TextStyle(color: Theme.of(context).primaryColor)),
+            ),
+            const Divider(),
+            ListTile(
+              onTap: () {
+                Navigator.pop(context);
+                importSignedTx(context);
+              },
+              enabled: !isAirgapEnabled,
+              title: Text("Signed Transaction", style: TextStyle(color: Theme.of(context).primaryColor)),
+            ),
+            const Padding(padding: EdgeInsets.all(8 ))
+          ],
+        );
+      },
     );
   }
 }
@@ -289,34 +362,6 @@ final generateURQR = FutureProvider.family<List<String>, String>((ref, path) asy
   var items = await anonCameraMethodChannel.invokeListMethod<String>("createUR", {"fpath": path});
   return items ?? List<String>.empty();
 });
-
-class ViewINExport extends ConsumerWidget {
-  final String fpath;
-
-  const ViewINExport({super.key, required this.fpath});
-
-  @override
-  Widget build(BuildContext context, ref) {
-    var item = ref.watch(generateURQR(fpath));
-    return Scaffold(
-      appBar: AppBar(),
-      body: item.when(
-        data: (data) {
-          return Center(
-            child: SizedBox.square(
-              dimension: 310,
-              child: AnimatedQR(
-                frames: QRFrames(data),
-              ),
-            ),
-          );
-        },
-        error: (error, stackTrace) => Text("Unable to mke"),
-        loading: () => CircularProgressIndicator(),
-      ),
-    );
-  }
-}
 
 void signTx(BuildContext context) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(
