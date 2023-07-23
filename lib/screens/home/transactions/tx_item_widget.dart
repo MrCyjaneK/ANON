@@ -76,10 +76,10 @@ class TransactionItem extends StatelessWidget {
     } else {
       return (transaction.isSpend)
           ? Icon(
-              CupertinoIcons.arrow_turn_left_up,
+              CupertinoIcons.arrow_up_right,
               color: Theme.of(context).primaryColor,
             )
-          : const Icon(CupertinoIcons.arrow_turn_left_down);
+          : const Icon(CupertinoIcons.arrow_down_left);
     }
   }
 }
