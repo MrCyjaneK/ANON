@@ -162,7 +162,7 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
             child: ListTile(
               title: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text("PRIVATE VIEW ONLY KEY",
+                child: Text("PRIVATE VIEW KEY",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: colorScheme.primary)),
@@ -193,7 +193,7 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
             child: ListTile(
               title: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text("RESTORE KEY",
+                child: Text("RESTORE HEIGHT",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: colorScheme.primary)),
