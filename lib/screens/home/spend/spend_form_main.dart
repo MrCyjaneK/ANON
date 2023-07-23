@@ -394,7 +394,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
         String notes = ref.read(notesStateProvider);
         if (isViewOnly) {
           try {
-            await ref
+            ref
                 .read(transactionStateProvider.notifier)
                 .composeAndSave(amountStr, address, notes);
             navigator.push(MaterialPageRoute(
@@ -415,7 +415,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
             print(e);
           }
         } else {
-          await ref
+            ref
               .read(transactionStateProvider.notifier)
               .createPreview(amountStr, address, notes);
           navigator.push(MaterialPageRoute(

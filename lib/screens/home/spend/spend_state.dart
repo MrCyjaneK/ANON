@@ -85,12 +85,18 @@ class TransactionStateNotifier extends StateNotifier<TxState> {
   }
 
   Future composeAndSave(String amount, String address, String notes) async {
+    var broadcastState = TxState();
+    broadcastState.state = "waiting";
+    state = broadcastState;
     var returnValue =
         await SpendMethodChannel().composeAndSave(amount, address, notes);
     state = TxState.fromJson(returnValue);
   }
 
   Future loadUnSignedTx() async {
+    var broadcastState = TxState();
+    broadcastState.state = "waiting";
+    state = broadcastState;
     var returnValue = await SpendMethodChannel().loadUnsignedTx();
     state = TxState.fromJson(returnValue);
   }
