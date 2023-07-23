@@ -29,13 +29,11 @@ class SpendMethodChannel {
     return await platform.invokeMethod("loadUnsignedTx");
   }
 
-
-  Future<bool?> importTxFile(String filename,String type) async {
+  Future<bool?> importTxFile(String filename, String type) async {
     bool? value = await platform
-        .invokeMethod("importTxFile", {"filePath": filename,"type":type});
+        .invokeMethod("importTxFile", {"filePath": filename, "type": type});
     return value;
   }
-
 
   dynamic compose(String amount, String address, String notes) async {
     return await platform.invokeMethod("composeTransaction",

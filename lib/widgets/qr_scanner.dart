@@ -65,10 +65,10 @@ class _QRScannerViewState extends State<QRScannerView> {
 }
 
 PersistentBottomSheetController showQRBottomSheet(BuildContext context,
-    {Function(QRResult value)? onScanCallback,UrType? urType,String? importTitle}) {
-
+    {Function(QRResult value)? onScanCallback,
+    UrType? urType,
+    String? importTitle}) {
   Completer<QRResult> completer = Completer();
-
 
   return showBottomSheet(
       context: context,
@@ -83,7 +83,8 @@ PersistentBottomSheetController showQRBottomSheet(BuildContext context,
                     onScanCallback: (value) {
                       onScanCallback?.call(value);
                       AppHaptics.lightImpact();
-                      if (value.type == QRResultType.text && value.text.isNotEmpty) {
+                      if (value.type == QRResultType.text &&
+                          value.text.isNotEmpty) {
                         var parsedAddress = Parser.parseAddress(value.text);
                         if (parsedAddress[0] != null) {
                           ref.read(addressStateProvider.state).state =
@@ -94,7 +95,8 @@ PersistentBottomSheetController showQRBottomSheet(BuildContext context,
                               parsedAddress[1];
                         }
                         if (parsedAddress[2] != null) {
-                          ref.read(notesStateProvider.state).state = parsedAddress[2];
+                          ref.read(notesStateProvider.state).state =
+                              parsedAddress[2];
                         }
                       }
                     },

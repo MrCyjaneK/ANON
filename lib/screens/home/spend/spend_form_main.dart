@@ -326,8 +326,8 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                         child: Consumer(
                           builder: (context, ref, c) {
                             num amount =
-                            ref.watch(walletAvailableBalanceProvider);
-                            return  Text(
+                                ref.watch(walletAvailableBalanceProvider);
+                            return Text(
                               "Available Balance  : ${formatMonero(amount, minimumFractions: 8)} XMR",
                               style: Theme.of(context).textTheme.bodySmall,
                             );
@@ -363,8 +363,8 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                       tag: "main_button",
                       child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                              side:
-                              const BorderSide(width: 1.0, color: Colors.white),
+                              side: const BorderSide(
+                                  width: 1.0, color: Colors.white),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                   side: const BorderSide(
@@ -415,7 +415,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
             print(e);
           }
         } else {
-            ref
+          ref
               .read(transactionStateProvider.notifier)
               .createPreview(amountStr, address, notes);
           navigator.push(MaterialPageRoute(
@@ -529,7 +529,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
           String amountStr = ref.read(amountStateProvider);
           String address = ref.read(addressStateProvider);
           String notes = ref.read(notesStateProvider);
-           ref
+          ref
               .read(transactionStateProvider.notifier)
               .createPreview(amountStr, address, notes);
           navigatorState.push(MaterialPageRoute(

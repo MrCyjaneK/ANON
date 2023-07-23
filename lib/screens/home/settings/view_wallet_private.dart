@@ -38,11 +38,10 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                       title: Text("Seed",
                           style: Theme.of(context).textTheme.titleLarge),
                       bottom: PreferredSize(
-                        preferredSize: const Size.fromHeight(12),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 12),
-                        )
-                      ),
+                          preferredSize: const Size.fromHeight(12),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 12),
+                          )),
                     ),
                     SliverToBoxAdapter(
                       child: ListTile(

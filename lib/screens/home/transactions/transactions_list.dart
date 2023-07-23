@@ -51,7 +51,8 @@ class _TransactionsListState extends State<TransactionsList> {
               Consumer(
                 builder: (context, ref, child) {
                   bool isConnecting = ref.watch(connectingToNodeStateProvider);
-                  bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
+                  bool isWalletOpening =
+                      ref.watch(walletLoadingProvider) ?? false;
                   bool isLoading = isConnecting || isWalletOpening;
                   return Opacity(
                     opacity: isLoading ? 0.5 : 1,
@@ -60,7 +61,11 @@ class _TransactionsListState extends State<TransactionsList> {
                             ? null
                             : () {
                                 if (isLoading) return;
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => const WalletLock()));
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const WalletLock()));
                               },
                         icon: const Hero(
                           tag: "lock",
@@ -133,8 +138,11 @@ class _TransactionsListState extends State<TransactionsList> {
         builder: (context, ref, c) {
           return InkWell(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => TxDetails(transaction: transaction), fullscreenDialog: true));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TxDetails(transaction: transaction),
+                      fullscreenDialog: true));
             },
             child: TransactionItem(transaction: transaction),
           );
@@ -235,13 +243,15 @@ class _TransactionsListState extends State<TransactionsList> {
   }
 
   void importUnsignedTx(BuildContext context) async {
-    final navigator  = Navigator.of(context);
+    final navigator = Navigator.of(context);
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       dialogTitle: 'Pick Un signed Transaction File',
       allowMultiple: false,
     );
     if (result == null) return;
-    bool impResult = await SpendMethodChannel().importTxFile(result.files[0].path!, "unsigned") ?? false;
+    bool impResult = await SpendMethodChannel()
+            .importTxFile(result.files[0].path!, "unsigned") ??
+        false;
     if (impResult) {
       navigator.push(MaterialPageRoute(
         builder: (context) {
@@ -252,13 +262,15 @@ class _TransactionsListState extends State<TransactionsList> {
   }
 
   void importSignedTx(BuildContext context) async {
-    final navigator  = Navigator.of(context);
+    final navigator = Navigator.of(context);
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       dialogTitle: 'Pick signed Transaction File',
       allowMultiple: false,
     );
     if (result == null) return;
-    bool impResult = await SpendMethodChannel().importTxFile(result.files[0].path!, "signed") ?? false;
+    bool impResult = await SpendMethodChannel()
+            .importTxFile(result.files[0].path!, "signed") ??
+        false;
     if (impResult) {
       navigator.push(MaterialPageRoute(
         builder: (context) {
@@ -285,7 +297,8 @@ class _TransactionsListState extends State<TransactionsList> {
                 Navigator.pop(context);
                 importKeyImages(context);
               },
-              title: Text("Key Images", style: TextStyle(color: Theme.of(context).primaryColor)),
+              title: Text("Key Images",
+                  style: TextStyle(color: Theme.of(context).primaryColor)),
             ),
             Divider(),
             ListTile(
@@ -293,7 +306,8 @@ class _TransactionsListState extends State<TransactionsList> {
                 Navigator.pop(context);
                 importKeyImages(context);
               },
-              title: Text("Wallet OutPuts", style: TextStyle(color: Theme.of(context).primaryColor)),
+              title: Text("Wallet OutPuts",
+                  style: TextStyle(color: Theme.of(context).primaryColor)),
             ),
             const Divider(),
             ListTile(
@@ -302,7 +316,8 @@ class _TransactionsListState extends State<TransactionsList> {
                 importUnsignedTx(context);
               },
               enabled: !isViewOnly,
-              title: Text("Unsigned Transaction", style: TextStyle(color: Theme.of(context).primaryColor)),
+              title: Text("Unsigned Transaction",
+                  style: TextStyle(color: Theme.of(context).primaryColor)),
             ),
             const Divider(),
             ListTile(
@@ -311,9 +326,10 @@ class _TransactionsListState extends State<TransactionsList> {
                 importSignedTx(context);
               },
               enabled: !isAirgapEnabled,
-              title: Text("Signed Transaction", style: TextStyle(color: Theme.of(context).primaryColor)),
+              title: Text("Signed Transaction",
+                  style: TextStyle(color: Theme.of(context).primaryColor)),
             ),
-            const Padding(padding: EdgeInsets.all(8 ))
+            const Padding(padding: EdgeInsets.all(8))
           ],
         );
       },
@@ -358,8 +374,10 @@ void exportOutput(BuildContext context) async {
   ));
 }
 
-final generateURQR = FutureProvider.family<List<String>, String>((ref, path) async {
-  var items = await anonCameraMethodChannel.invokeListMethod<String>("createUR", {"fpath": path});
+final generateURQR =
+    FutureProvider.family<List<String>, String>((ref, path) async {
+  var items = await anonCameraMethodChannel
+      .invokeListMethod<String>("createUR", {"fpath": path});
   return items ?? List<String>.empty();
 });
 

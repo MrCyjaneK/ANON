@@ -67,7 +67,6 @@ class WalletChannel {
     return value;
   }
 
-
   Future<bool> setTxUserNotes(String txId, String notes) async {
     bool value = await platform
         .invokeMethod("setTxUserNotes", {"txId": txId, "message": notes});

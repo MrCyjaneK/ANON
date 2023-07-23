@@ -130,7 +130,8 @@ class _ImportFromQRScreenState extends ConsumerState<ExportQRScreen> {
                                 .textTheme
                                 .titleLarge
                                 ?.copyWith(
-                                    color: Theme.of(context).primaryColor,fontWeight: FontWeight.w600)),
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ),
@@ -173,8 +174,8 @@ class _ImportFromQRScreenState extends ConsumerState<ExportQRScreen> {
                       tag: "main_button",
                       child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                              side:
-                              const BorderSide(width: 1.0, color: Colors.white),
+                              side: const BorderSide(
+                                  width: 1.0, color: Colors.white),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                   side: const BorderSide(

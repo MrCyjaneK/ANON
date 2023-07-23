@@ -170,12 +170,17 @@ class AnonSpendReview extends ConsumerWidget {
               tag: "main_button",
               child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                      side: BorderSide(width: 1.0, color: loading ? Colors.white54 : Colors.white),
+                      side: BorderSide(
+                          width: 1.0,
+                          color: loading ? Colors.white54 : Colors.white),
                       foregroundColor: loading ? Colors.white54 : Colors.white,
                       shape: RoundedRectangleBorder(
-                          side: BorderSide(width: 12, color: loading ? Colors.white54 : Colors.white),
+                          side: BorderSide(
+                              width: 12,
+                              color: loading ? Colors.white54 : Colors.white),
                           borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 6)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 6)),
                   onPressed: () {
                     onActionClicked?.call();
                   },
