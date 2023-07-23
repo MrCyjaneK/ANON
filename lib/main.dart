@@ -4,7 +4,7 @@ import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/channel/wallet_events_channel.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/screens/home/spend/anon_progress.dart';
-import 'package:anon_wallet/screens/home/spend/spend_review_anon.dart';
+import 'package:anon_wallet/screens/home/spend/spend_review.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/screens/landing_screen.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';

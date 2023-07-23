@@ -1,15 +1,15 @@
+import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/models/broadcast_tx_state.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
+import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SpendReview extends ConsumerWidget {
-  final VoidCallback onConfirm;
-  final VoidCallback close;
+class AnonSpendReview extends ConsumerWidget {
+  final Function? onActionClicked;
 
-  const SpendReview({Key? key, required this.onConfirm, required this.close})
-      : super(key: key);
+  const AnonSpendReview({Key? key, this.onActionClicked}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,14 +25,14 @@ class SpendReview extends ConsumerWidget {
     bool loading = txState.isLoading();
     bool hasError = txState.hasError();
 
+    if (txState.address != null && txState.address!.isNotEmpty) {
+      address = txState.address!;
+    }
     if (hasError) {
       return Scaffold(
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              leading: BackButton(
-                onPressed: close,
-              ),
               toolbarHeight: 120,
               bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(60),
@@ -76,7 +76,7 @@ class SpendReview extends ConsumerWidget {
                   child: TextButton(
                     child: const Text("Close"),
                     onPressed: () {
-                      close();
+                      navigateToHome(context);
                     },
                   )),
             )
@@ -89,9 +89,6 @@ class SpendReview extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            leading: BackButton(
-              onPressed: close,
-            ),
             toolbarHeight: 120,
             bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),
@@ -161,38 +158,31 @@ class SpendReview extends ConsumerWidget {
               ),
             ),
           ),
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                  child: ElevatedButton(
-                    onPressed: !loading
-                        ? () {
-                            onConfirm();
-                          }
-                        : null,
-                    style: Theme.of(context)
-                        .elevatedButtonTheme
-                        .style
-                        ?.copyWith(
-                            backgroundColor: MaterialStateColor.resolveWith(
-                                (states) =>
-                                    loading ? Colors.white54 : Colors.white)),
-                    child: Text("CONFIRM",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.black, fontWeight: FontWeight.w800)),
-                  ),
-                ),
-              ],
-            ),
-          )
         ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24)
+            .add(const EdgeInsets.only(bottom: 12)),
+        child: Builder(builder: (context) {
+          return Opacity(
+            opacity: View.of(context).viewInsets.bottom > 0 ? 0 : 1,
+            child: Hero(
+              tag: "main_button",
+              child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                      side: BorderSide(width: 1.0, color: loading ? Colors.white54 : Colors.white),
+                      foregroundColor: loading ? Colors.white54 : Colors.white,
+                      shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 12, color: loading ? Colors.white54 : Colors.white),
+                          borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 6)),
+                  onPressed: () {
+                    onActionClicked?.call();
+                  },
+                  child: const Text("Confirm")),
+            ),
+          );
+        }),
       ),
     );
   }

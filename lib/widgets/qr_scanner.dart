@@ -1,8 +1,13 @@
+import 'dart:async';
+
+import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:anon_wallet/utils/parsers.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class QRScannerView extends StatefulWidget {
@@ -60,31 +65,42 @@ class _QRScannerViewState extends State<QRScannerView> {
 }
 
 PersistentBottomSheetController showQRBottomSheet(BuildContext context,
-    {Function(QRResult value)? onScanCallback}) {
+    {Function(QRResult value)? onScanCallback,UrType? urType,String? importTitle}) {
+
+  Completer<QRResult> completer = Completer();
+
+
   return showBottomSheet(
       context: context,
       builder: (context) {
-        return Consumer(
+        return HookConsumer(
           builder: (context, ref, c) {
-            return QRScannerView(
-              onScanCallback: (value) {
-                onScanCallback?.call(value);
-                AppHaptics.lightImpact();
-                if (value.type == QRResultType.text && value.text.isNotEmpty) {
-                  var parsedAddress = Parser.parseAddress(value.text);
-                  if (parsedAddress[0] != null) {
-                    ref.read(addressStateProvider.state).state =
-                        parsedAddress[0];
-                  }
-                  if (parsedAddress[1] != null) {
-                    ref.read(amountStateProvider.state).state =
-                        parsedAddress[1];
-                  }
-                  if (parsedAddress[2] != null) {
-                    ref.read(notesStateProvider.state).state = parsedAddress[2];
-                  }
-                }
-              },
+            ValueNotifier<bool> progress = useState(false);
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: QRScannerView(
+                    onScanCallback: (value) {
+                      onScanCallback?.call(value);
+                      AppHaptics.lightImpact();
+                      if (value.type == QRResultType.text && value.text.isNotEmpty) {
+                        var parsedAddress = Parser.parseAddress(value.text);
+                        if (parsedAddress[0] != null) {
+                          ref.read(addressStateProvider.state).state =
+                              parsedAddress[0];
+                        }
+                        if (parsedAddress[1] != null) {
+                          ref.read(amountStateProvider.state).state =
+                              parsedAddress[1];
+                        }
+                        if (parsedAddress[2] != null) {
+                          ref.read(notesStateProvider.state).state = parsedAddress[2];
+                        }
+                      }
+                    },
+                  ),
+                ),
+              ],
             );
           },
         );
