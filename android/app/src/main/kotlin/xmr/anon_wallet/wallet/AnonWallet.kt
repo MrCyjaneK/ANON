@@ -36,7 +36,6 @@ object AnonWallet {
     const val EXPORT_UNSIGNED_TX_FILE = "export_unsigned_tx"
     const val IMPORT_UNSIGNED_TX_FILE = "import_unsigned_tx"
 
-
     const val EXPORT_SIGNED_TX_FILE = "export_signed_tx"
     const val IMPORT_SIGNED_TX_FILE = "import_signed_tx"
 

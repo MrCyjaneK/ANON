@@ -130,7 +130,7 @@ class _ImportFromQRScreenState extends ConsumerState<ExportQRScreen> {
                                 .textTheme
                                 .titleLarge
                                 ?.copyWith(
-                                    color: Theme.of(context).primaryColor)),
+                                    color: Theme.of(context).primaryColor,fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ),
@@ -169,20 +169,24 @@ class _ImportFromQRScreenState extends ConsumerState<ExportQRScreen> {
                 child: Builder(builder: (context) {
                   return Opacity(
                     opacity: View.of(context).viewInsets.bottom > 0 ? 0 : 1,
-                    child: OutlinedButton(
-                        style: Theme.of(context)
-                            .outlinedButtonTheme
-                            .style
-                            ?.copyWith(
-                          padding: MaterialStateProperty.resolveWith((states) {
-                            return const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 8);
-                          }),
-                        ),
-                        onPressed: () async {
-                          widget.counterScanCalled.call();
-                        },
-                        child: Text(widget.buttonText)),
+                    child: Hero(
+                      tag: "main_button",
+                      child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                              side:
+                              const BorderSide(width: 1.0, color: Colors.white),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  side: const BorderSide(
+                                      width: 12, color: Colors.white),
+                                  borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 16, horizontal: 6)),
+                          onPressed: () async {
+                            widget.counterScanCalled.call();
+                          },
+                          child: Text(widget.buttonText)),
+                    ),
                   );
                 }),
               ),

@@ -90,18 +90,18 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
     private fun exportKeyImages(result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
-                    try {
-                        val file = File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_KEY_IMAGE_FILE)
-                        val eo = WalletManager.getInstance().wallet.exportKeyImages(file.absolutePath, true)
-                        if(eo){
-                            result.success(file.absolutePath)
-                        }else{
-                            result.error("1", "exportKeyImages failed", "")
-                        }
-                    } catch (e: Exception) {
-                        result.error("1", e.message, "")
-                        throw CancellationException(e.message)
+                try {
+                    val file = File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_KEY_IMAGE_FILE)
+                    val eo = WalletManager.getInstance().wallet.exportKeyImages(file.absolutePath, true)
+                    if (eo) {
+                        result.success(file.absolutePath)
+                    } else {
+                        result.error("1", "exportKeyImages failed", "")
                     }
+                } catch (e: Exception) {
+                    result.error("1", e.message, "")
+                    throw CancellationException(e.message)
+                }
             }
         }
     }
@@ -533,9 +533,9 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                 try {
                     val file = File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_OUTPUT_FILE)
                     val eo = WalletManager.getInstance().wallet.exportOutputs(file.absolutePath, true)
-                    if(eo){
+                    if (eo) {
                         result.success(file.absolutePath)
-                    }else{
+                    } else {
                         result.error("1", "Failed to export outputs", "")
                     }
                 } catch (e: Exception) {
@@ -550,7 +550,13 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         scope.launch {
             withContext(Dispatchers.IO) {
                 try {
-                    val file = File(AnonWallet.getAppContext().cacheDir, AnonWallet.IMPORT_KEY_IMAGE_FILE)
+                    val path = call.argument<String?>("filename")
+                    val file = if (path == null) {
+                        File(AnonWallet.getAppContext().cacheDir, AnonWallet.IMPORT_KEY_IMAGE_FILE)
+                    } else {
+                        File(path)
+                    }
+
                     val eo = WalletManager.getInstance().wallet.importKeyImages(file.absolutePath)
                     result.success(eo)
                 } catch (e: Exception) {
