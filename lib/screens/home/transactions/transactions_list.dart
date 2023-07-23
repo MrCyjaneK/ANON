@@ -51,8 +51,7 @@ class _TransactionsListState extends State<TransactionsList> {
               Consumer(
                 builder: (context, ref, child) {
                   bool isConnecting = ref.watch(connectingToNodeStateProvider);
-                  bool isWalletOpening =
-                      ref.watch(walletLoadingProvider) ?? false;
+                  bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
                   bool isLoading = isConnecting || isWalletOpening;
                   return Opacity(
                     opacity: isLoading ? 0.5 : 1,
@@ -61,11 +60,7 @@ class _TransactionsListState extends State<TransactionsList> {
                             ? null
                             : () {
                                 if (isLoading) return;
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const WalletLock()));
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => const WalletLock()));
                               },
                         icon: const Hero(
                           tag: "lock",
@@ -98,11 +93,11 @@ class _TransactionsListState extends State<TransactionsList> {
                 ),
               ),
             ),
-            title: const Wrap(
+            title: Wrap(
               verticalDirection: VerticalDirection.up,
               crossAxisAlignment: WrapCrossAlignment.start,
               children: [
-                Text("[ИΞR0]"),
+                Text(isViewOnly ? "[ИΞR0]" : "[ΛИ0И]"),
               ],
             ),
           ),
@@ -138,11 +133,8 @@ class _TransactionsListState extends State<TransactionsList> {
         builder: (context, ref, c) {
           return InkWell(
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TxDetails(transaction: transaction),
-                      fullscreenDialog: true));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => TxDetails(transaction: transaction), fullscreenDialog: true));
             },
             child: TransactionItem(transaction: transaction),
           );
@@ -168,7 +160,7 @@ class _TransactionsListState extends State<TransactionsList> {
             doBroadcastStuff(context);
             break;
           case 4:
-            importFromFile(context);
+            importKeyImages(context);
             break;
         }
       },
@@ -188,7 +180,7 @@ class _TransactionsListState extends State<TransactionsList> {
         ),
         const PopupMenuItem<int>(
           value: 4,
-          child: Text('Import from file'),
+          child: Text('Import Key Images'),
         ),
       ],
     );
@@ -211,7 +203,7 @@ class _TransactionsListState extends State<TransactionsList> {
             doBroadcastStuff(context);
             break;
           case 4:
-            importFromFile(context);
+            importUnsignedTx(context);
             break;
         }
       },
@@ -225,18 +217,14 @@ class _TransactionsListState extends State<TransactionsList> {
           value: 1,
           child: Text('Export Key Images'),
         ),
-        const PopupMenuItem<int>(
-          value: 2,
-          child: Text('Export Wallet Outs'),
-        ),
         PopupMenuItem<int>(
-          value: 3,
-          enabled: !isAirgapEnabled,
-          child: const Text('Broadcast Tx'),
+          enabled: isAirgapEnabled,
+          value: 5,
+          child: const Text('Import Wallet Output'),
         ),
         const PopupMenuItem<int>(
           value: 4,
-          child: Text('Import from file'),
+          child: Text('Sign Tx'),
         ),
       ],
     );
@@ -249,9 +237,7 @@ class _TransactionsListState extends State<TransactionsList> {
       allowMultiple: false,
     );
     if (result == null) return;
-    bool impResult = await SpendMethodChannel()
-            .importTxFile(result.files[0].path!, "unsigned") ??
-        false;
+    bool impResult = await SpendMethodChannel().importTxFile(result.files[0].path!, "unsigned") ?? false;
     if (impResult) {
       navigator.push(MaterialPageRoute(
         builder: (context) {
@@ -268,9 +254,7 @@ class _TransactionsListState extends State<TransactionsList> {
       allowMultiple: false,
     );
     if (result == null) return;
-    bool impResult = await SpendMethodChannel()
-            .importTxFile(result.files[0].path!, "signed") ??
-        false;
+    bool impResult = await SpendMethodChannel().importTxFile(result.files[0].path!, "signed") ?? false;
     if (impResult) {
       navigator.push(MaterialPageRoute(
         builder: (context) {
@@ -278,58 +262,6 @@ class _TransactionsListState extends State<TransactionsList> {
         },
       ));
     }
-  }
-
-  void importFromFile(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.grey[900],
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text("Import From File"),
-            ),
-            ListTile(
-              onTap: () {
-                Navigator.pop(context);
-                importKeyImages(context);
-              },
-              title: Text("Key Images",
-                  style: TextStyle(color: Theme.of(context).primaryColor)),
-            ),
-            !isViewOnly ? ListTile(
-              onTap: () {
-                Navigator.pop(context);
-                importKeyImages(context);
-              },
-              title: Text("Wallet OutPuts",
-                  style: TextStyle(color: Theme.of(context).primaryColor)),
-            ) :const SizedBox(),
-            !isViewOnly ? ListTile(
-              onTap: () {
-                Navigator.pop(context);
-                importUnsignedTx(context);
-              },
-              title: Text("Unsigned Transaction",
-                  style: TextStyle(color: Theme.of(context).primaryColor)),
-            ) :const SizedBox(),
-            ListTile(
-              onTap: () {
-                Navigator.pop(context);
-                importSignedTx(context);
-              },
-              enabled: !isAirgapEnabled,
-              title: Text("Signed Transaction",
-                  style: TextStyle(color: Theme.of(context).primaryColor)),
-            ),
-            const Padding(padding: EdgeInsets.all(8))
-          ],
-        );
-      },
-    );
   }
 }
 
@@ -370,10 +302,8 @@ void exportOutput(BuildContext context) async {
   ));
 }
 
-final generateURQR =
-    FutureProvider.family<List<String>, String>((ref, path) async {
-  var items = await anonCameraMethodChannel
-      .invokeListMethod<String>("createUR", {"fpath": path});
+final generateURQR = FutureProvider.family<List<String>, String>((ref, path) async {
+  var items = await anonCameraMethodChannel.invokeListMethod<String>("createUR", {"fpath": path});
   return items ?? List<String>.empty();
 });
 
