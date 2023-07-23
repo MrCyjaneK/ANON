@@ -300,15 +300,15 @@ class _TransactionsListState extends State<TransactionsList> {
               title: Text("Key Images",
                   style: TextStyle(color: Theme.of(context).primaryColor)),
             ),
-            Divider(),
-            ListTile(
+            const Divider(),
+            !isViewOnly ? ListTile(
               onTap: () {
                 Navigator.pop(context);
                 importKeyImages(context);
               },
               title: Text("Wallet OutPuts",
                   style: TextStyle(color: Theme.of(context).primaryColor)),
-            ),
+            ) :const SizedBox(),
             const Divider(),
             ListTile(
               onTap: () {
