@@ -1,8 +1,9 @@
+import 'dart:async';
+
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/receive_screen.dart';
 import 'package:anon_wallet/screens/home/settings/settings_main.dart';
 import 'package:anon_wallet/screens/home/spend/spend_form_main.dart';
-import 'package:anon_wallet/screens/home/spend/spend_screen.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
@@ -66,8 +67,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                 );
               });
         } else {
-          _pageController.animateToPage(0,
-              duration: const Duration(milliseconds: 220), curve: Curves.ease);
+          _pageController.animateToPage(0, duration: const Duration(milliseconds: 220), curve: Curves.ease);
         }
         return false;
       },
@@ -78,9 +78,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
             bool lock = ref.watch(lockPageViewScroll);
             return PageView(
               controller: _pageController,
-              physics: lock
-                  ? const NeverScrollableScrollPhysics()
-                  : const AlwaysScrollableScrollPhysics(),
+              physics: lock ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
               children: [
                 Builder(
                   builder: (context) {
@@ -96,8 +94,31 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                       duration: const Duration(milliseconds: 220),
                       curve: Curves.ease);
                 }),
-                const AnonSpendForm(),
-                const SettingsScreen(),
+                 Scaffold(
+                  appBar: AppBar(
+                    leading: BackButton(
+                      onPressed: () {
+                        _pageController.animateToPage(0,
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.ease);
+                      },
+                    ),
+                  ),
+                  body: AnonSpendForm(),
+                ),
+                Scaffold(
+                  appBar: AppBar(
+                    title: Text("Settings"),
+                    leading: BackButton(
+                      onPressed: () {
+                        _pageController.animateToPage(0,
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.ease);
+                      },
+                    ),
+                  ),
+                  body: SettingsScreen(),
+                ),
               ],
               onPageChanged: (index) {
                 if (_bottomSheetController != null) {
@@ -111,16 +132,13 @@ class WalletHomeState extends ConsumerState<WalletHome> {
         ),
         floatingActionButton: Consumer(
           builder: (context, ref, child) {
-            ref.listen<String?>(nodeErrorState,
-                (String? previousCount, String? newValue) {
+            ref.listen<String?>(nodeErrorState, (String? previousCount, String? newValue) {
               if (newValue != null && scaffoldState.currentContext != null) {
                 ScaffoldMessenger.of(scaffoldState.currentContext!)
-                    .showMaterialBanner(
-                        MaterialBanner(content: Text(newValue), actions: [
+                    .showMaterialBanner(MaterialBanner(content: Text(newValue), actions: [
                   TextButton(
                       onPressed: () {
-                        ScaffoldMessenger.of(context)
-                            .hideCurrentMaterialBanner();
+                        ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
                       },
                       child: const Text("Close"))
                 ]));
@@ -136,8 +154,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
           selectedIndex: _currentView,
           onTap: (int index) {
             setState(() => _currentView = index);
-            _pageController.animateToPage(index,
-                duration: Duration(milliseconds: 120), curve: Curves.ease);
+            _pageController.animateToPage(index, duration: Duration(milliseconds: 120), curve: Curves.ease);
           },
           items: <BottomBarItem>[
             BottomBarItem(
@@ -200,8 +217,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                   backgroundColor: Colors.grey[900],
                   content: Text(
                     message,
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: theme.primaryColor),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.primaryColor),
                   )));
               break;
             case UrType.xmrKeyImage:
@@ -216,8 +232,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                   backgroundColor: Colors.grey[900],
                   content: Text(
                     message,
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: theme.primaryColor),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.primaryColor),
                   )));
               break;
             case UrType.xmrTxUnsigned:

@@ -20,13 +20,11 @@ class ReceiveWidget extends ConsumerWidget {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.transparent,
-            bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(110),
-                child: Hero(
-                  tag: "anon_logo",
-                  child: SizedBox(
-                      width: 160, child: Image.asset("assets/anon_logo.png")),
-                )),
+            leading: BackButton(
+              onPressed: () {
+                callback();
+              },
+            ),
             actions: [
               IconButton(
                   onPressed: () {
