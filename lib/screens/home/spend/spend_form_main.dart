@@ -3,7 +3,7 @@ import 'package:anon_wallet/channel/spend_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/spend/airgap_export_screen.dart';
-import 'package:anon_wallet/screens/home/spend/spend_review_anon.dart';
+import 'package:anon_wallet/screens/home/spend/spend_review.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
@@ -186,16 +186,6 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
       child: Scaffold(
         body: CustomScrollView(
           slivers: [
-            SliverAppBar(
-              toolbarHeight: 80,
-              bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(60),
-                  child: Hero(
-                    tag: "anon_logo",
-                    child: SizedBox(
-                        width: 160, child: Image.asset("assets/anon_logo.png")),
-                  )),
-            ),
             SliverFillRemaining(
                 hasScrollBody: false,
                 child: Container(
@@ -221,6 +211,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                                                 .primaryColor)),
                                 const Padding(padding: EdgeInsets.all(12)),
                                 TextFormField(
+                                  autofocus: false,
                                   textAlign: TextAlign.start,
                                   controller: addressEditingController,
                                   keyboardType: TextInputType.text,
@@ -236,14 +227,6 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                                         ? "Invalid address"
                                         : null,
                                     border: unFocusedBorder,
-                                    suffixIcon: IconButton(
-                                        onPressed: () {
-                                          context
-                                              .findRootAncestorStateOfType<
-                                                  WalletHomeState>()
-                                              ?.showModalScanner(context);
-                                        },
-                                        icon: const Icon(Icons.qr_code)),
                                     enabledBorder: unFocusedBorder,
                                     focusedBorder: enabledBorder,
                                     contentPadding: const EdgeInsets.symmetric(
@@ -276,6 +259,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                                     ref.read(amountStateProvider.state).state =
                                         value;
                                   },
+                                  autofocus: false,
                                   keyboardType: TextInputType.number,
                                   decoration: InputDecoration(
                                     alignLabelWithHint: true,
@@ -317,6 +301,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                                     ref.read(notesStateProvider.state).state =
                                         value;
                                   },
+                                  autofocus: false,
                                   keyboardType: TextInputType.text,
                                   decoration: InputDecoration(
                                     alignLabelWithHint: true,
@@ -336,35 +321,29 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                       ),
                       Container(
                         alignment: Alignment.center,
+                        width: double.infinity,
+                        height: 80,
+                        child: Consumer(
+                          builder: (context, ref, c) {
+                            num amount =
+                            ref.watch(walletAvailableBalanceProvider);
+                            return  Text(
+                              "Available Balance  : ${formatMonero(amount, minimumFractions: 8)} XMR",
+                              style: Theme.of(context).textTheme.bodySmall,
+                            );
+                          },
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
                         child: IconButton(
+                          iconSize: 48,
                           onPressed: () {
                             context
                                 .findRootAncestorStateOfType<WalletHomeState>()
                                 ?.showModalScanner(context);
                           },
                           icon: const Icon(Icons.crop_free_sharp),
-                        ),
-                      ),
-                      Container(
-                        alignment: Alignment.center,
-                        width: double.infinity,
-                        height: 80,
-                        child: Consumer(
-                          builder: (context, ref, c) {
-                            num amount =
-                                ref.watch(walletAvailableBalanceProvider);
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Available Balance  : ${formatMonero(amount, minimumFractions: 8)} XMR",
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                                const Padding(padding: EdgeInsets.all(4)),
-                              ],
-                            );
-                          },
                         ),
                       ),
                     ],
@@ -380,18 +359,22 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                 child: Builder(builder: (context) {
                   return Opacity(
                     opacity: View.of(context).viewInsets.bottom > 0 ? 0 : 1,
-                    child: OutlinedButton(
-                        style: Theme.of(context)
-                            .outlinedButtonTheme
-                            .style
-                            ?.copyWith(
-                          padding: MaterialStateProperty.resolveWith((states) {
-                            return const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 8);
-                          }),
-                        ),
-                        onPressed: () => onMainActionPressed(context),
-                        child: const Text("Continue")),
+                    child: Hero(
+                      tag: "main_button",
+                      child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                              side:
+                              const BorderSide(width: 1.0, color: Colors.white),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  side: const BorderSide(
+                                      width: 12, color: Colors.white),
+                                  borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 16, horizontal: 6)),
+                          onPressed: () => onMainActionPressed(context),
+                          child: const Text("Continue")),
+                    ),
                   );
                 }),
               ),
@@ -406,7 +389,6 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
     if (value != null) {
       if (value.urType == UrType.xmrKeyImage &&
           value.urResult.toLowerCase() == "imported") {
-        navigator.pushNamed("/loading-tx-construct");
         String amountStr = ref.read(amountStateProvider);
         String address = ref.read(addressStateProvider);
         String notes = ref.read(notesStateProvider);
@@ -492,6 +474,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
   }
 
   onMainActionPressed(BuildContext context) async {
+    FocusScope.of(context).unfocus();
     final navigatorState = Navigator.of(context, rootNavigator: false);
     String amountStr = ref.read(amountStateProvider);
     String address = ref.read(addressStateProvider);
@@ -546,8 +529,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
           String amountStr = ref.read(amountStateProvider);
           String address = ref.read(addressStateProvider);
           String notes = ref.read(notesStateProvider);
-          navigatorState.pushNamed("/loading-tx-construct");
-          await ref
+           ref
               .read(transactionStateProvider.notifier)
               .createPreview(amountStr, address, notes);
           navigatorState.push(MaterialPageRoute(

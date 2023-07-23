@@ -35,15 +35,14 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                 child: CustomScrollView(
                   slivers: [
                     SliverAppBar(
-                      toolbarHeight: 120,
+                      title: Text("Seed",
+                          style: Theme.of(context).textTheme.titleLarge),
                       bottom: PreferredSize(
-                          preferredSize: const Size.fromHeight(60),
-                          child: Hero(
-                            tag: "anon_logo",
-                            child: SizedBox(
-                                width: 160,
-                                child: Image.asset("assets/anon_logo.png")),
-                          )),
+                        preferredSize: const Size.fromHeight(12),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 12),
+                        )
+                      ),
                     ),
                     SliverToBoxAdapter(
                       child: ListTile(

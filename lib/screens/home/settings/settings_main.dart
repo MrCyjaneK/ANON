@@ -32,11 +32,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(
-            title: Text("Settings"),
-            centerTitle: true,
-          ),
-          const SliverPadding(padding: EdgeInsets.all(12)),
           SliverFillRemaining(
             hasScrollBody: false,
             child: Column(
