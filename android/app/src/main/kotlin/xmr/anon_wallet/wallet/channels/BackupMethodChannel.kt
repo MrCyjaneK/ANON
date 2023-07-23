@@ -3,7 +3,6 @@ package xmr.anon_wallet.wallet.channels
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import com.m2049r.xmrwallet.model.Wallet
@@ -60,7 +59,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             result.error("primaryAddress", "Invalid Address", null)
             return
         }
-        if ( !(privateViewKey.length == 64 && privateViewKey.matches("^[0-9a-fA-F]+$".toRegex()))) {
+        if (!(privateViewKey.length == 64 && privateViewKey.matches("^[0-9a-fA-F]+$".toRegex()))) {
             result.error("privateViewKey", "Invalid View Key", null)
             return
         }
@@ -69,7 +68,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             withContext(Dispatchers.IO) {
                 val walletFile = File(AnonWallet.walletDir, walletFileName)
                 val wallet = WalletManager.getInstance().createWalletWithKeys(
-                    walletFile,pin,
+                    walletFile, pin,
                     "English",
                     restoreHeight.toLong(),
                     primaryAddress,
@@ -273,11 +272,20 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     val path = call.argument<String?>("path") as String
                     WalletMethodChannel.backupPath = path
                     scope.launch {
+                        val name = if (path.endsWith(AnonWallet.EXPORT_UNSIGNED_TX_FILE)) {
+                            "unsigned_monero_tx"
+                        } else {
+                            if (path.endsWith(AnonWallet.EXPORT_SIGNED_TX_FILE)) {
+                                "signed_monero_tx"
+                            } else {
+                                File(path).name
+                            }
+                        }
                         withContext(Dispatchers.IO) {
                             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
                                 type = "*/*"
-                                putExtra(Intent.EXTRA_TITLE, File(path).name)
+                                putExtra(Intent.EXTRA_TITLE, name)
                             }
                             currentResult = result
                             activity.startActivityForResult(intent, BACKUP_EXPORT_CODE)
