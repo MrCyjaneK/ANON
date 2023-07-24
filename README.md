@@ -3,14 +3,21 @@
 
 ## BUILD INSTRUCTIONS
 
-1) Install Flutter
-2) Connect device & enable USB Debugging
-3) Clone ANON repo: `git clone -b view-only https://codeberg.org/r4v3r23/ANON.git && cd ANON/android/external-libs`
+Install Flutter & tor
 
-             git -c http.proxy=socks5h://127.0.0.1:9050 clone http://git.anonero5wmhraxqsvzq2ncgptq6gq45qoto6fnkfwughfl4gbt44swad.onion/ANONERO/ANON.git && cd ANON/android/external-libs
+1. Clone ANON repo: `git -c http.proxy=socks5h://127.0.0.1:9050 clone
+http://git.anonero5wmhraxqsvzq2ncgptq6gq45qoto6fnkfwughfl4gbt44swad.onion/ANONERO/ANON.git`
 
-5) Back out and build libs: `cd ../ && sudo make && cd ../../`
+2. Change current directory to external-libs: `cd ANON/android/external-libs`
 
-             git -c http.proxy=socks5h://127.0.0.1:9050 clone http://git.anonero5wmhraxqsvzq2ncgptq6gq45qoto6fnkfwughfl4gbt44swad.onion/ANONERO/monero.git && cd monero && git submodule update --init --force && cd ../ && sudo make && cd ../../
+3. Clone Monero repo: `git -c http.proxy=socks5h://127.0.0.1:9050 clone
+http://git.anonero5wmhraxqsvzq2ncgptq6gq45qoto6fnkfwughfl4gbt44swad.onion/ANONERO/monero.git`
 
-     - Install & run ANON: flutter run --flavor mainnet --release
+4. Go to monero folder and update submodules: `cd monero && git submodule update
+--init --force`
+
+5. Back out and build monero libs: `cd ../ && sudo make && cd ../../`
+
+6. Build ANON: `flutter build apk --flavor mainnet --release`
+
+Compiled APK will be found in `ANON/build/app/outputs/apk/mainnet/release`
