@@ -97,17 +97,20 @@ class NodeMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
                       preferences.proxyPortI2p = proxyPortI2p
                       val preferences = AnonPreferences(AnonWallet.getAppContext());
                       if(preferences.serverUrl.isNullOrEmpty() || preferences.serverPort == null){
-                          result.error("0","No node found",null);
+                          result.success("No node found");
+                          return@withContext;
                       }
-                      if (preferences.serverUrl.toString().contains(".i2p")) {
-                          Log.d("NodeMethodCHannel.kt", "proxy type: i2p")
-                          WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPortI2p}")
-                          // WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPortI2p}")
-                      } else {
-                          Log.d("NodeMethodCHannel.kt", "proxy type: tor")
-                          WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPortTor}")
-                          // WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPortTor}")
-                      }
+                      if (preferences.serverUrl != null) {
+                        if (preferences.serverUrl.toString().contains(".i2p")) {
+                            Log.d("NodeMethodCHannel.kt", "proxy type: i2p")
+                            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPortI2p}")
+                            // WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPortI2p}")
+                        } else {
+                            Log.d("NodeMethodCHannel.kt", "proxy type: tor")
+                            WalletManager.getInstance()?.setProxy("${proxyServer}:${proxyPortTor}")
+                            // WalletManager.getInstance().wallet?.setProxy("${proxyServer}:${proxyPortTor}")
+                        }
+                        }
                   } else if (proxyServer.isNullOrEmpty() || proxyPortTor.isNullOrEmpty()|| proxyPortI2p.isNullOrEmpty()) {
                       preferences.proxyServer = proxyServer
                       preferences.proxyPortTor = proxyPortTor

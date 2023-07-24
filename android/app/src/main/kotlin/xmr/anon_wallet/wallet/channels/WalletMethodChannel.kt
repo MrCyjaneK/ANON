@@ -323,10 +323,15 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             result.error("1", "Invalid pin", "invalid pin")
                             return@withContext
                         }
-                        if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
-                            WalletManager.getInstance().proxy = getProxyI2p()
-                        } else {
-                            WalletManager.getInstance().proxy = getProxyTor()
+                        if (WalletManager.getInstance().daemonAddress == null) {
+                            NodeManager.setNode()
+                        }
+                        if (WalletManager.getInstance().daemonAddress != null) {
+                            if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
+                                WalletManager.getInstance().proxy = getProxyI2p()
+                            } else {
+                                WalletManager.getInstance().proxy = getProxyTor()
+                            }
                         }
                         Log.d("WalletMethodChannel.kt", "openWallet(${walletFile.path}, '****', true)")
                         val wallet = WalletManager.getInstance().openWallet(walletFile.path, walletPassword, true)
@@ -337,20 +342,25 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                         WalletEventsChannel.initWalletListeners()
                         val preferences = AnonPreferences(AnonWallet.getAppContext())
                         val serverUrl = preferences.serverUrl
-                        Log.d("WalletMethodChannel.kt", WalletManager.getInstance().daemonAddress.toString())
+                        if (WalletManager.getInstance().daemonAddress != null) {
+                            Log.d("WalletMethodChannel.kt", WalletManager.getInstance().daemonAddress.toString())
+                        } else {
+                            Log.d("WalletMethodChannel.kt", "(WalletManager.getInstance().daemonAddress != null): true")
+                        }
+                        
                         // if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
                         //     wallet.setProxy(getProxyI2p())
                         // } else {
                         //     wallet.setProxy(getProxyTor())
                         // }
-                        if (WalletManager.getInstance().daemonAddress == null) {
-                            NodeManager.setNode()
-                        }
+
                         WalletManager.getInstance().daemonAddress?.let {
-                            if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
-                                WalletEventsChannel.initialized = wallet.init(0, getProxyI2p())
-                            } else {
-                                WalletEventsChannel.initialized = wallet.init(0, getProxyTor())
+                            if (WalletManager.getInstance().daemonAddress != null) {
+                                if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
+                                    WalletEventsChannel.initialized = wallet.init(0, getProxyI2p())
+                                } else {
+                                    WalletEventsChannel.initialized = wallet.init(0, getProxyTor())
+                                }
                             }
                             Prefs.restoreHeight?.let {
                                 if (it != 0L)

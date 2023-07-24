@@ -159,7 +159,100 @@ class AnonQRCameraPlugin(
         }
     }
 
-    private val qrAnalyzer = QrCodeAnalyzer { qrResult ->
+    private val qrAnalyzerZxing = QrCodeAnalyzerZxing { qrResult ->
+        scope.launch(Dispatchers.IO) {
+            val resultQR = qrResult.text
+            if (resultQR.lowercase().startsWith("ur:")) {
+                if (decoder.result == null) {
+                    val decoded = decoder.receivePart(resultQR)
+                    if (decoded) {
+                        if (decoder.expectedPartCount != 0) {
+                            withContext(Dispatchers.Main) {
+                                eventSink?.success(
+                                    hashMapOf(
+                                        "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                                        "expectedPartCount" to decoder.expectedPartCount,
+                                        "processedPartsCount" to decoder.processedPartsCount,
+                                        "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                                    )
+                                )
+                            }
+                        }
+                        val urResult = decoder.result
+                        if (urResult != null && urResult.type == ResultType.SUCCESS) {
+                            withContext(Dispatchers.Main) {
+                                eventSink?.success(
+                                    hashMapOf(
+                                        "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                                        "expectedPartCount" to decoder.expectedPartCount,
+                                        "processedPartsCount" to decoder.processedPartsCount,
+                                        "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                                    )
+                                )
+                            }
+                            val resultMap = hashMapOf(
+                                "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                                "expectedPartCount" to decoder.expectedPartCount,
+                                "processedPartsCount" to decoder.processedPartsCount,
+                                "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                                "urType" to urResult.ur.type,
+                                "urError" to null,
+                            );
+                            //TODO: Handle different types of URs
+                            if (decoder.processedPartsCount == decoder.expectedPartCount) {
+                                
+                                handleURTypes(urResult, resultMap)
+                            }
+                        }
+                    }
+                } else {
+                    val urResult = decoder.result
+                    if (urResult != null && urResult.type == ResultType.SUCCESS) {
+                        withContext(Dispatchers.Main) {
+                            eventSink?.success(
+                                hashMapOf(
+                                    "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                                    "expectedPartCount" to decoder.expectedPartCount,
+                                    "processedPartsCount" to decoder.processedPartsCount,
+                                    "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                                )
+                            )
+                        }
+                        val resultMap = hashMapOf(
+                            "estimatedPercentComplete" to decoder.estimatedPercentComplete,
+                            "expectedPartCount" to decoder.expectedPartCount,
+                            "processedPartsCount" to decoder.processedPartsCount,
+                            "receivedPartIndexes" to decoder.receivedPartIndexes.toIntArray().toList(),
+                            "urType" to urResult.ur.type,
+                            "urError" to null,
+                        );
+                        //TODO: Handle different types of URs
+                        if (decoder.processedPartsCount == decoder.expectedPartCount) {
+                            handleURTypes(urResult, resultMap)
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            eventSink?.success(
+                                hashMapOf(
+                                    "result" to qrResult.text
+                                )
+                            )
+                        }
+                    }
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    eventSink?.success(
+                        hashMapOf(
+                            "result" to qrResult.text
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private val qrAnalyzerBoofcv = QrCodeAnalyzerBoofcv { qrResult ->
         scope.launch(Dispatchers.IO) {
             val resultQR = qrResult.text
             if (resultQR.lowercase().startsWith("ur:")) {
@@ -366,7 +459,7 @@ class AnonQRCameraPlugin(
             preview = previewBuilder.build().apply { setSurfaceProvider(surfaceProvider) }
 
             val imageAnalysis = ImageAnalysis.Builder().setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build().also {
-                it.setAnalyzer(cameraExecutor, qrAnalyzer)
+                it.setAnalyzer(cameraExecutor, qrAnalyzerBoofcv)
             }
 
             camera = cameraProvider?.bindToLifecycle(

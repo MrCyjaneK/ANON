@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
 import java.util.*
 
 
-class QrCodeAnalyzer(
+class QrCodeAnalyzerZxing(
     private val onQrCodesDetected: (qrCode: Result) -> Unit
 ) : ImageAnalysis.Analyzer {
 

@@ -149,6 +149,15 @@ flutter {
 }
 
 dependencies {
+    ['boofcv-android', 'boofcv-core'].each {
+        String a -> api group: 'org.boofcv', name: a, version: '0.44' }
+    // conflicts with Android dependencies
+    // configurations {
+    //     all*.exclude group: "xmlpull", module: "xmlpull"
+    //     all*.exclude group: "org.apache.commons", module: "commons-compress"
+    //     all*.exclude group: "com.thoughtworks.xstream", module: "commons-compress"
+    // }
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation "androidx.datastore:datastore-preferences:1.0.0"

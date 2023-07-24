@@ -236,11 +236,31 @@ public class Wallet {
         String daemon_username = WalletManager.getInstance().getDaemonUsername();
         String daemon_password = WalletManager.getInstance().getDaemonPassword();
         Log.d("Wallet.java", "init(");
-        Log.d("Wallet.java", daemon_address.toString());
+        if (daemon_address != null) {
+            Log.d("Wallet.java", daemon_address.toString());
+        } else {
+            Log.d("Wallet.java", "daemon_address == null");
+            daemon_address = "";
+        }
         Log.d("Wallet.java", "upper_transaction_size_limit = 0 (probably)");
-        Log.d("Wallet.java", daemon_username.toString());
-        Log.d("Wallet.java", daemon_password.toString());
-        Log.d("Wallet.java", proxy_address.toString());
+        if (daemon_username != null) {
+            Log.d("Wallet.java", daemon_username.toString());
+        } else {
+            Log.d("Wallet.java", "daemon_username == null");
+            daemon_username = "";
+        }
+        if (daemon_password != null) {
+            Log.d("Wallet.java", daemon_password.toString());
+        } else {
+            Log.d("Wallet.java", "daemon_password == null");
+            daemon_password = "";
+        }
+        if (proxy_address != null) {
+            Log.d("Wallet.java", proxy_address.toString());
+        } else {
+            Log.d("Wallet.java", "proxy_address == null");
+            proxy_address = "";
+        }
         Log.d("Wallet.java", ");");
         return initJ(daemon_address, upper_transaction_size_limit,
                 daemon_username, daemon_password,
