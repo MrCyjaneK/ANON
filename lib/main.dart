@@ -64,25 +64,25 @@ class _AnonAppState extends State<AnonApp> {
           if (settings.name == "/loading-tx-construct") {
             return MaterialPageRoute(
                 builder: (context) => const CircleProgressWidget(
-                      progressMessage: "Constructing Transaction...",
+                      progressMessage: "CONSTRUCTING TRANSACTION...",
                     ));
           }
           if (settings.name == "/loading-broadcast-tx") {
             return MaterialPageRoute(
                 builder: (context) => const CircleProgressWidget(
-                      progressMessage: "Broadcasting Transaction...",
+                      progressMessage: "SENDING TRANSACTION...",
                     ));
           }
           if (settings.name == "/loading-tx-signing") {
             return MaterialPageRoute(
                 builder: (context) => const CircleProgressWidget(
-                      progressMessage: "Signing Transaction...",
+                      progressMessage: "SIGNING TRANSACTION...",
                     ));
           }
           if (settings.name == "/loading-tx") {
             return MaterialPageRoute(
                 builder: (context) => const CircleProgressWidget(
-                      progressMessage: "Loading Transaction...",
+                      progressMessage: "LOADING TRANSACTION...",
                     ));
           }
           if (settings.name == "/tx-success") {
