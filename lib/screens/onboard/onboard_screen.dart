@@ -213,7 +213,7 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Do you want to create an offline wallet? Using this option will not use any node and will operate in a fully-offline way. You will need a separate wallet to sign transactions.",
+                        "Creating offline wallet.\n\nUse NERO to send airgapped transactions from this device.",
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ],
