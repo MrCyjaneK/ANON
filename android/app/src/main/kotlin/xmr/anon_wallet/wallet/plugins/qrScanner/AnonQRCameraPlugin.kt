@@ -64,7 +64,7 @@ class AnonQRCameraPlugin(
     private var cameraProvider: ProcessCameraProvider? = null
     private var textureEntry: TextureRegistry.SurfaceTextureEntry? = null
     private var decoder = URDecoder()
-
+    private var isImportPending: Boolean = false
 
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
         registry = binding.textureRegistry
@@ -386,14 +386,20 @@ class AnonQRCameraPlugin(
                 }
                 file.writeBytes(urResult.ur.toBytes())
                 WalletManager.getInstance().wallet.setTrustedDaemon(true)
-                val keyImageImport = WalletManager.getInstance().wallet.importKeyImages(file.absolutePath)
-                withContext(Dispatchers.Main) {
-                    eventSink?.success(
-                        resultMap.apply {
-                            put("progress", false)
-                            put("urResult", keyImageImport)
-                        }
-                    )
+                if (!isImportPending) {
+                    isImportPending = true;
+                    val keyImageImport = WalletManager.getInstance().wallet.importKeyImages(file.absolutePath)
+                    withContext(Dispatchers.Main) {
+                        eventSink?.success(
+                            resultMap.apply {
+                                put("progress", false)
+                                put("urResult", keyImageImport)
+                            }
+                        )
+                    }
+                    isImportPending = false;
+                } else {
+                    
                 }
             }
             UrRegistryTypes.XMR_TX_UNSIGNED.type -> {

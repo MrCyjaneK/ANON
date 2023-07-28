@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:anon_wallet/utils/parsers.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -48,6 +47,10 @@ class _QRScannerViewState extends State<QRScannerView> {
   Widget _buildQrView(BuildContext context) {
     return CameraView(
       callBack: (value) async {
+        if (kDebugMode) {
+          print(
+              "qr_scanner.dart: CameraView: callBack: value.text: ${value.text}");
+        }
         if (!isScanned) {
           AppHaptics.lightImpact();
           widget.onScanCallback(value);

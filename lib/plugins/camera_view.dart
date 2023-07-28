@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -137,6 +138,9 @@ class _CameraViewState extends State<CameraView> {
       platform.invokeMethod<Map>("requestPermission");
     }
     subscription = eventChannel.receiveBroadcastStream().listen((event) {
+      if (kDebugMode) {
+        // print("camera_view.dart: eventChannel: $event");
+      }
       if (event['id'] != null) {
         permissionGranted = true;
         setState(() {
@@ -167,21 +171,21 @@ class _CameraViewState extends State<CameraView> {
         }
         if (progress.processedPartsCount == progress.expectedPartCount) {
           if (event["urResult"] != null) {
-            platform.invokeMethod<Map>("stopCam");
             widget.callBack(QRResult(
               urResult: event["urResult"],
               urError: event["urError"],
               urType: UrType.fromType(event["urType"]),
               type: QRResultType.UR,
             ));
+            platform.invokeMethod<Map>("stopCam");
           }
         }
       } else if (event["result"] != null) {
-        platform.invokeMethod<Map>("stopCam");
         widget.callBack(QRResult(
           text: event["result"],
           type: QRResultType.text,
         ));
+        platform.invokeMethod<Map>("stopCam");
       }
     });
   }
@@ -190,7 +194,7 @@ class _CameraViewState extends State<CameraView> {
   Widget build(BuildContext context) {
     if (permissionGranted == false) {
       return Scaffold(
-        body: Container(
+        body: SizedBox(
           width: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -263,28 +267,29 @@ class _CameraViewState extends State<CameraView> {
                 margin: const EdgeInsets.all(68),
                 alignment: Alignment.center,
                 child: SizedBox.square(
-                    dimension: 200,
-                    child: importInProgress
-                        ? Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 140,
-                                height: 140,
-                                child: CircularProgressIndicator(),
-                              ),
-                              const Padding(padding: EdgeInsets.all(6)),
-                              const Text(
-                                "Please wait..\n import in progress",
-                                textAlign: TextAlign.center,
-                              )
-                            ],
-                          )
-                        : CustomPaint(
-                            painter:
-                                ProgressPainter(urQrProgress: urQrProgress!))),
+                  dimension: 200,
+                  child: importInProgress
+                      ? const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 140,
+                              height: 140,
+                              child: CircularProgressIndicator(),
+                            ),
+                            Padding(padding: EdgeInsets.all(6)),
+                            Text(
+                              "Please wait..\n import in progress",
+                              textAlign: TextAlign.center,
+                            )
+                          ],
+                        )
+                      : CustomPaint(
+                          painter: ProgressPainter(urQrProgress: urQrProgress!),
+                        ),
+                ),
               )
             : const SizedBox(),
         (urQrProgress != null && importInProgress == false)

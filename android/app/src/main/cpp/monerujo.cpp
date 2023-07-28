@@ -1058,16 +1058,29 @@ Java_com_m2049r_xmrwallet_model_Wallet_exportKeyImages(JNIEnv *env, jobject inst
     // return env->NewStringUTF(outputs.c_str());
 }
 
+
+bool isImportKeyImagesLocked = false;
+
 //virtual bool importKeyImages(const std::string &filename) = 0;
 JNIEXPORT jstring JNICALL
 Java_com_m2049r_xmrwallet_model_Wallet_importKeyImages(JNIEnv *env, jobject instance, jstring filename) {
+    if (isImportKeyImagesLocked) {
+        LOGD("monerujo.cpp: importKeyImages: not starting because importKeyImages is already in progress");
+        return env->NewStringUTF("Import request ignored. This is a Bug. Please report it.");
+    }
+    isImportKeyImagesLocked = true;
     const char *_filename = env->GetStringUTFChars(filename, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
-
+    LOGD("monerujo.cpp: importKeyImages: start");
     bool success = wallet->importKeyImages(_filename);
     if (success) {
+        LOGD("monerujo.cpp: importKeyImages: success!");
+        isImportKeyImagesLocked = false;
         return env->NewStringUTF("Imported");
     }
+    LOGD("monerujo.cpp: importKeyImages: error");
+    LOGD(wallet->errorString().c_str());
+    isImportKeyImagesLocked = false;
     return env->NewStringUTF(wallet->errorString().c_str());
 }
 

@@ -45,8 +45,8 @@ class WalletEventsChannel {
         channel.receiveBroadcastStream().asBroadcastStream().listen((event) {
       try {
         var type = event['EVENT_TYPE'];
-        if (kDebugMode) {
-          print("walletEventsChannel: Sync:$type $event");
+        if (debugWalletEventsChannel) {
+          // print("walletEventsChannel: Sync:$type $event");
         }
         switch (type) {
           case "NODE":
