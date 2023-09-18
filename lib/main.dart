@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
@@ -14,6 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() async {
@@ -23,6 +26,7 @@ void main() async {
   }
   runApp(const SplashScreen());
   WalletState state = await WalletChannel().getWalletState();
+  unawaited(showServiceNotification());
   runApp(AnonApp(state));
 }
 
@@ -205,5 +209,54 @@ class LockScreen extends HookWidget {
     } finally {
       loading.value = false;
     }
+  }
+}
+
+const notificationId = 777;
+const notificationChannelId = "77";
+
+Future<void> showServiceNotification() async {
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  final isPermissionGiven = await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.requestPermission();
+
+  if (isPermissionGiven != true) {
+    if (kDebugMode) {
+      print("WARN: no notification permission given. That's sad.");
+    }
+    return;
+  }
+
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    notificationChannelId, // id
+    'MY FOREGROUND SERVICE', // title
+    description:
+        'This channel is used for important notifications.', // description
+    importance: Importance.low, // importance must be at low or higher level
+  );
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  while (true) {
+    await Future.delayed(const Duration(seconds: 1));
+    flutterLocalNotificationsPlugin.show(
+      notificationId,
+      'Anonero is running',
+      'Last heartbeat: ${DateTime.now()}',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          notificationChannelId,
+          'Anonero Foreground Service',
+          icon: 'anon_mono',
+          ongoing: true,
+        ),
+      ),
+    );
   }
 }
