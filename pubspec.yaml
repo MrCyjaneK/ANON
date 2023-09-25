@@ -46,6 +46,7 @@ dependencies:
   go_router: ^9.0.0
   flutter_local_notifications: ^15.1.1
   flutter_background_service: ^5.0.1
+  flutter_background_service_android: ^6.0.1
 
 dev_dependencies:
   flutter_test:

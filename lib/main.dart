@@ -14,6 +14,7 @@ import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/screens/landing_screen.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
+import 'package:anon_wallet/utils/json_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +23,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 void main() async {
   // I kinda lose logs at the beginning..
@@ -292,7 +292,7 @@ void onStart(ServiceInstance service) async {
   });
 
   // bring to foreground
-  Timer.periodic(const Duration(seconds: 1), (timer) async {
+  Timer.periodic(const Duration(seconds: 10), (timer) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
         /// OPTIONAL for use custom notification
@@ -307,14 +307,16 @@ void onStart(ServiceInstance service) async {
               'Anon Foreground Notification',
               icon: 'anon_mono',
               ongoing: true,
+              playSound: false,
+              enableVibration: false,
             ),
           ),
         );
-
+        final stats = await getStats();
         // if you don't using custom notification, uncomment this
         service.setForegroundNotificationInfo(
           title: "Anon Service",
-          content: "Updated at ${DateTime.now()}",
+          content: "Heartbeat at ${stats["updated"]} | ${stats["debug"]}",
         );
       }
     }

@@ -28,11 +28,11 @@ class WalletChannel {
   }
 
   Future<void> rescan() async {
-    dynamic value = await platform.invokeMethod("rescan");
+    await platform.invokeMethod("rescan");
   }
 
   Future<void> refresh() async {
-    dynamic value = await platform.invokeMethod("refresh");
+    await platform.invokeMethod("refresh");
   }
 
   Future<Wallet?> openWallet(String password) async {

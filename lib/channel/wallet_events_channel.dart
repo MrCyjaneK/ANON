@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/models/wallet.dart';
+import 'package:anon_wallet/utils/json_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 bool debugWalletEventsChannel =
-    false; // NOTE: set this to true to get that spammy logs
+    true; // NOTE: set this to true to get that spammy logs
 
 class WalletEventsChannel {
   static const channel = EventChannel("wallet.events");
@@ -45,8 +46,13 @@ class WalletEventsChannel {
         channel.receiveBroadcastStream().asBroadcastStream().listen((event) {
       try {
         var type = event['EVENT_TYPE'];
+        setStats({
+          "updated": DateTime.now().toIso8601String(),
+          "height": 0,
+          "debug": type,
+        });
         if (debugWalletEventsChannel) {
-          // print("walletEventsChannel: Sync:$type $event");
+          print("walletEventsChannel: Sync:$type $event");
         }
         switch (type) {
           case "NODE":
