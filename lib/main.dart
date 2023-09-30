@@ -23,6 +23,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   // I kinda lose logs at the beginning..
@@ -31,6 +32,7 @@ void main() async {
   }
   runApp(const SplashScreen());
   WalletState state = await WalletChannel().getWalletState();
+  await Permission.notification.request();
   unawaited(showServiceNotification());
   runApp(AnonApp(state));
 }
@@ -295,12 +297,10 @@ void onStart(ServiceInstance service) async {
   Timer.periodic(const Duration(seconds: 10), (timer) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
-        /// OPTIONAL for use custom notification
-        /// the notification id must be equals with AndroidConfiguration when you call configure() method.
         flutterLocalNotificationsPlugin.show(
           notificationId,
-          'Anon is running',
-          '${DateTime.now()}',
+          "[ΛИ0ИΞR0]",
+          await getStats(),
           const NotificationDetails(
             android: AndroidNotificationDetails(
               'anon_foreground',
@@ -311,12 +311,6 @@ void onStart(ServiceInstance service) async {
               enableVibration: false,
             ),
           ),
-        );
-        final stats = await getStats();
-        // if you don't using custom notification, uncomment this
-        service.setForegroundNotificationInfo(
-          title: "Anon Service",
-          content: "Heartbeat at ${stats["updated"]} | ${stats["debug"]}",
         );
       }
     }

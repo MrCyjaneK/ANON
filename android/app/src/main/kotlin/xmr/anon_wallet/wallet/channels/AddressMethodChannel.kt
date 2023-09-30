@@ -12,6 +12,7 @@ import xmr.anon_wallet.wallet.channels.WalletEventsChannel.sendEvent
 import xmr.anon_wallet.wallet.model.getLatestSubaddress
 import xmr.anon_wallet.wallet.model.toHashMap
 import xmr.anon_wallet.wallet.model.walletToHashMap
+import com.m2049r.xmrwallet.model.Wallet.ConnectionStatus
 
 class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
     AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
@@ -75,9 +76,12 @@ class AddressMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) :
     companion object {
         const val CHANNEL_NAME = "address.channel"
         public fun getSubAddressesEvent(): HashMap<String, Any> {
+            val wallet = WalletManager.getInstance().wallet
             return hashMapOf(
                 "EVENT_TYPE" to "SUB_ADDRESSES",
-                "addresses" to getAllSubAddresses().map { it.toHashMap() }.toList()
+                "addresses" to getAllSubAddresses().map { it.toHashMap() }.toList(),
+                "height" to wallet.blockChainHeight,
+                "isConnected" to wallet.connectionStatus.equals(ConnectionStatus.ConnectionStatus_Connected),
             )
         }
 

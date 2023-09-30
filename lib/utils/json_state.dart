@@ -15,19 +15,19 @@ Future<String> getStatsFilePath() async {
   return _filePath!;
 }
 
-Future<Map<String, dynamic>> getStats() async {
+Future<String> getStats() async {
   final f = File(await getStatsFilePath());
   if (!f.existsSync()) {
-    return {
+    return '''{
       "updated": DateTime.now().toIso8601String(),
       "height": 0,
-    };
+    }''';
   }
   final body = f.readAsStringSync();
-  return jsonDecode(body) as Map<String, dynamic>;
+  return body;
 }
 
-Future<void> setStats(Map<String, dynamic> stats) async {
+Future<void> setStats(String stats) async {
   final f = File(await getStatsFilePath());
-  f.writeAsStringSync(jsonEncode(stats));
+  f.writeAsStringSync(stats);
 }

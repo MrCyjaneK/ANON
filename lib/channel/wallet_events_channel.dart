@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/sub_address.dart';
@@ -46,11 +47,7 @@ class WalletEventsChannel {
         channel.receiveBroadcastStream().asBroadcastStream().listen((event) {
       try {
         var type = event['EVENT_TYPE'];
-        setStats({
-          "updated": DateTime.now().toIso8601String(),
-          "height": 0,
-          "debug": type,
-        });
+
         if (debugWalletEventsChannel) {
           print("walletEventsChannel: Sync:$type $event");
         }
@@ -67,6 +64,17 @@ class WalletEventsChannel {
             }
           case "SUB_ADDRESSES":
             {
+              if (kDebugMode) {
+                setStats(
+                  'DEBUG: ${event['isConnected']} | ${event['height']}',
+                );
+              } else {
+                if (event['isConnected'] == true) {
+                  setStats('Synced: ${event['height']}');
+                } else {
+                  setStats("Connecting...");
+                }
+              }
               List<SubAddress> addresses = [];
               try {
                 event['addresses'].forEach((item) {

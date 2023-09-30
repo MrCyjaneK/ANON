@@ -11,6 +11,7 @@ import 'package:anon_wallet/screens/onboard/restore/restore_from_seed.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_view_only.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -24,6 +25,12 @@ class LandingScreen extends StatefulWidget {
 }
 
 class _LandingScreenState extends State<LandingScreen> {
+  @override
+  void initState() {
+    Future.delayed(const Duration(seconds: 1)).then((_) => showBatteryDialog());
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -469,5 +476,35 @@ class _LandingScreenState extends State<LandingScreen> {
           );
         });
     return completer.future;
+  }
+
+  void showBatteryDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog.adaptive(
+        title: const Text(
+          "Battery optimization",
+        ),
+        content: const Text(
+          'In order for ΛИ0ИΞR0 to function properly in the background it is '
+          'recommended to disable battery optimization.\n'
+          'You can change this settings anytime in Android\'s app settings.',
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ),
+          OutlinedButton(
+            onPressed: () {
+              AppSettings.openAppSettings(
+                  type: AppSettingsType.batteryOptimization);
+              Navigator.of(context).pop();
+            },
+            child: const Text("Settings"),
+          ),
+        ],
+      ),
+    );
   }
 }
