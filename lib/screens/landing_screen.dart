@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
+import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/backup.dart';
 import 'package:anon_wallet/models/config.dart';
 import 'package:anon_wallet/screens/onboard/onboard_screen.dart';
@@ -11,7 +12,6 @@ import 'package:anon_wallet/screens/onboard/restore/restore_from_seed.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_view_only.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
-import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -497,8 +497,7 @@ class _LandingScreenState extends State<LandingScreen> {
           ),
           OutlinedButton(
             onPressed: () {
-              AppSettings.openAppSettings(
-                  type: AppSettingsType.batteryOptimization);
+              WalletChannel().optimizeBattery();
               Navigator.of(context).pop();
             },
             child: const Text("Settings"),

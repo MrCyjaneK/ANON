@@ -26,7 +26,9 @@ import xmr.anon_wallet.wallet.utils.Prefs
 import java.io.File
 import java.net.SocketException
 import java.util.Calendar
-
+import android.net.Uri
+import android.content.Intent
+import android.provider.Settings
 
 class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, private val activity: MainActivity) : AnonMethodChannel(messenger, CHANNEL_NAME, lifecycle) {
 
@@ -63,9 +65,22 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "importOutputsJ" -> importOutputsJ(call, result)
             "exportKeyImages" -> exportKeyImages(result)
             "signAndExportJ" -> signAndExportJ(call, result)
+            "optimizeBattery" -> optimizeBattery(call, result)
             "setTrustedDaemon" -> setTrustedDaemon(call, result)
             "lock" -> lock(call, result)
             "getUtxos" -> getUtxos(call, result)
+        }
+    }
+
+    private fun optimizeBattery(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                val intent = Intent();
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + AnonWallet.getAppContext().getPackageName()));
+                AnonWallet.getAppContext().startActivity(intent);
+            }
         }
     }
 

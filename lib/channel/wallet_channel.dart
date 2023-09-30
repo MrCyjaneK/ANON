@@ -127,4 +127,9 @@ class WalletChannel {
     return await platform.invokeMethod(
         "importFromFile", {"importType": type.type, "file": path});
   }
+
+  Future<Wallet?> optimizeBattery() async {
+    dynamic value = await platform.invokeMethod("optimizeBattery", {});
+    return Wallet.fromJson(value);
+  }
 }
