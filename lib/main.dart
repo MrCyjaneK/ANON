@@ -33,7 +33,7 @@ void main() async {
   runApp(const SplashScreen());
   WalletState state = await WalletChannel().getWalletState();
   await Permission.notification.request();
-  unawaited(showServiceNotification());
+  await showServiceNotification();
   runApp(AnonApp(state));
 }
 
@@ -248,27 +248,37 @@ Future<void> showServiceNotification() async {
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
+  print("here0");
 
-  await service.configure(
+  final confOk = await service.configure(
     androidConfiguration: AndroidConfiguration(
       // this will be executed when app is in foreground or background in separated isolate
       onStart: onStart,
 
       // auto start service
       autoStart: false,
-      isForegroundMode: true,
+      autoStartOnBoot: false,
+      isForegroundMode: false,
 
       notificationChannelId: 'anon_foreground',
-      initialNotificationTitle: 'Anon',
-      initialNotificationContent: 'Initializing',
+      initialNotificationTitle: 'anon',
+      initialNotificationContent: 'Loading wallet',
       foregroundServiceNotificationId: notificationId,
     ),
     iosConfiguration: IosConfiguration(
       autoStart: false,
     ),
   );
-
-  service.startService();
+  if (!confOk) {
+    print(
+      "WARN: Failed to service.configure. Background mode will not work as expected",
+    );
+  }
+  await setStats('Loading wallet...');
+  final startOk = await service.startService();
+  if (!startOk) {
+    print("WARN: failed to start service");
+  }
 }
 
 @pragma('vm:entry-point')
@@ -281,7 +291,7 @@ void onStart(ServiceInstance service) async {
 
   if (service is AndroidServiceInstance) {
     service.on('setAsForeground').listen((event) {
-      service.stopSelf();
+      service.setAsForegroundService();
     });
 
     service.on('setAsBackground').listen((event) {
@@ -294,25 +304,33 @@ void onStart(ServiceInstance service) async {
   });
 
   // bring to foreground
-  Timer.periodic(const Duration(seconds: 10), (timer) async {
+  Timer.periodic(const Duration(seconds: kDebugMode ? 1 : 10), (timer) async {
+    if (await getStatsExist() == false) {
+      await flutterLocalNotificationsPlugin.cancel(notificationId);
+      await service.stopSelf();
+      timer.cancel();
+      return;
+    }
     if (service is AndroidServiceInstance) {
-      if (await service.isForegroundService()) {
-        flutterLocalNotificationsPlugin.show(
-          notificationId,
-          "[ΛИ0ИΞR0]",
-          await getStats(),
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'anon_foreground',
-              'Anon Foreground Notification',
-              icon: 'anon_mono',
-              ongoing: true,
-              playSound: false,
-              enableVibration: false,
-            ),
+      flutterLocalNotificationsPlugin.show(
+        notificationId,
+        "[ΛИ0ИΞR0]",
+        await getStats(),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'anon_foreground',
+            'Anon Foreground Notification',
+            icon: 'anon_mono',
+            ongoing: true,
+            playSound: false,
+            enableVibration: false,
+            onlyAlertOnce: true,
+            showWhen: false,
+            importance: Importance.low,
+            priority: Priority.low,
           ),
-        );
-      }
+        ),
+      );
     }
   });
 }

@@ -21,8 +21,9 @@ import xmr.anon_wallet.wallet.channels.*
 import xmr.anon_wallet.wallet.model.walletToHashMap
 import xmr.anon_wallet.wallet.plugins.qrScanner.AnonQRCameraPlugin
 import xmr.anon_wallet.wallet.utils.AnonPreferences
-
-
+import io.flutter.util.PathUtils
+import java.io.File
+import android.util.Log
 class MainActivity : FlutterActivity() {
 
     override fun onStart() {
@@ -114,6 +115,10 @@ class MainActivity : FlutterActivity() {
         }
         scope.cancel()
         super.onDestroy()
+        val documentsDir = PathUtils.getDataDirectory(context)
+        val stateFile = File(documentsDir +"/appstate.json")
+        Log.d("MainActivity", "onDestroy "+documentsDir)
+        stateFile.delete()
         //kill process
         Process.killProcess(Process.myPid())
     }

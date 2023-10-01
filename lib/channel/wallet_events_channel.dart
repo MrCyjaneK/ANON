@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 bool debugWalletEventsChannel =
-    true; // NOTE: set this to true to get that spammy logs
+    false; // NOTE: set this to true to get that spammy logs
 
 class WalletEventsChannel {
   static const channel = EventChannel("wallet.events");

@@ -500,7 +500,7 @@ class _LandingScreenState extends State<LandingScreen> {
               WalletChannel().optimizeBattery();
               Navigator.of(context).pop();
             },
-            child: const Text("Settings"),
+            child: const Text("Disable"),
           ),
         ],
       ),

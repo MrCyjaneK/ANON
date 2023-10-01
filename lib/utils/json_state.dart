@@ -4,6 +4,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 String? _filePath;
@@ -15,15 +16,18 @@ Future<String> getStatsFilePath() async {
   return _filePath!;
 }
 
+Future<bool> getStatsExist() async {
+  final f = File(await getStatsFilePath());
+  return f.existsSync();
+}
+
 Future<String> getStats() async {
   final f = File(await getStatsFilePath());
   if (!f.existsSync()) {
-    return '''{
-      "updated": DateTime.now().toIso8601String(),
-      "height": 0,
-    }''';
+    f.createSync();
+    return '';
   }
-  final body = f.readAsStringSync();
+  var body = f.readAsStringSync();
   return body;
 }
 
