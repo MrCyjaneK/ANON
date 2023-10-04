@@ -1,6 +1,6 @@
 FROM debian:oldstable
 
-RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python libtool libtinfo5
+RUN set -x && apt-get update && apt-get install -y unzip automake build-essential curl file pkg-config git python libtool libtinfo5 bison
 
 WORKDIR /opt/android
 ## INSTALL ANDROID SDK
