@@ -1,8 +1,15 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
+import 'package:anon_wallet/models/config.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_node_setup.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
+import 'package:anon_wallet/widgets/qr_scanner.dart';
 import 'package:anon_wallet/widgets/show_passphrase_dialog.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,6 +22,8 @@ class RestoreViewOnlyWallet extends StatefulWidget {
 
 class _RestoreViewOnlyWalletState extends State<RestoreViewOnlyWallet> {
   final PageController _pageController = PageController();
+
+  bool canScan = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +54,9 @@ class _RestoreViewOnlyWalletState extends State<RestoreViewOnlyWallet> {
                     _pageController.nextPage(
                         duration: const Duration(milliseconds: 500),
                         curve: Curves.ease);
+                    setState(() {
+                      canScan = true;
+                    });
                   },
                   skipAppBar: true,
                   pageController: _pageController),
@@ -52,8 +64,12 @@ class _RestoreViewOnlyWalletState extends State<RestoreViewOnlyWallet> {
           ],
         ),
         ImportViewOnlyKeys(
-          pageController: _pageController,
-        ),
+            pageController: _pageController,
+            onDone: () {
+              setState(() {
+                canScan = false;
+              });
+            }),
         Scaffold(
           body: Center(
             child: Column(
@@ -62,7 +78,7 @@ class _RestoreViewOnlyWalletState extends State<RestoreViewOnlyWallet> {
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    Container(
+                    const SizedBox(
                       width: 280,
                       height: 280,
                       child: CircularProgressIndicator(strokeWidth: 2),
@@ -90,19 +106,22 @@ class _RestoreViewOnlyWalletState extends State<RestoreViewOnlyWallet> {
 class ImportViewOnlyKeys extends StatefulWidget {
   final PageController pageController;
 
-  const ImportViewOnlyKeys({Key? key, required this.pageController})
+  const ImportViewOnlyKeys(
+      {Key? key, required this.pageController, required this.onDone})
       : super(key: key);
+
+  final Function() onDone;
 
   @override
   State<ImportViewOnlyKeys> createState() => _ImportViewOnlyKeysState();
 }
 
 class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
-  String _primaryAddress = "";
-  String? _primaryAddressError = null;
-  String? _privateViewKeyError = null;
-  String _privateViewKey = "";
-  num? _restoreHeight;
+  final TextEditingController _primaryAddress = TextEditingController();
+  String? _primaryAddressError;
+  String? _privateViewKeyError;
+  final TextEditingController _privateViewKey = TextEditingController();
+  final TextEditingController _restoreHeight = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +141,7 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
           SliverToBoxAdapter(
             child: Center(
               child: Text(
-                "NODE CONNECTION",
+                "VIEW ONLY KEYS",
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
@@ -138,10 +157,9 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
               ),
               subtitle: TextField(
                 onChanged: (value) {
-                  setState(() {
-                    _primaryAddress = value;
-                  });
+                  setState(() {});
                 },
+                controller: _primaryAddress,
                 maxLines: 1,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.done,
@@ -169,11 +187,10 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
               ),
               subtitle: TextField(
                 onChanged: (value) {
-                  setState(() {
-                    _privateViewKey = value;
-                  });
+                  setState(() {});
                 },
                 maxLines: 1,
+                controller: _privateViewKey,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
@@ -200,10 +217,9 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
               ),
               subtitle: TextField(
                 onChanged: (value) {
-                  setState(() {
-                    _restoreHeight = num.tryParse(value);
-                  });
+                  setState(() {});
                 },
+                controller: _restoreHeight,
                 maxLines: 1,
                 keyboardType: const TextInputType.numberWithOptions(
                     decimal: false, signed: true),
@@ -220,6 +236,34 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
               ),
             ),
           ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(48.0),
+              child: Container(
+                alignment: Alignment.center,
+                child: IconButton(
+                  iconSize: 72,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => QRScannerView(
+                        onScanCallback: (value) async {
+                          final data = json.decode(value.text);
+                          setState(() {
+                            _primaryAddress.text = data['primaryAddress'];
+                            _privateViewKey.text = data['privateViewKey'];
+                            _restoreHeight.text =
+                                data['restoreHeight'].toString();
+                          });
+                        },
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.crop_free_sharp),
+                ),
+              ),
+            ),
+          )
         ],
       ),
       bottomNavigationBar: Container(
@@ -227,16 +271,16 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         alignment: Alignment.bottomRight,
         child: Builder(builder: (context) {
-          bool isActive = (_primaryAddress.isNotEmpty &&
-              _privateViewKey.isNotEmpty &&
-              _restoreHeight != null);
+          bool isActive = (_primaryAddress.text.isNotEmpty &&
+              _privateViewKey.text.isNotEmpty &&
+              num.tryParse(_restoreHeight.text) != null);
           return OutlinedButton(
             style: OutlinedButton.styleFrom(
+                foregroundColor: isActive ? Colors.white : Colors.white24,
                 side: BorderSide(
                   width: 1.0,
                   color: isActive ? Colors.white : Colors.white24,
                 ),
-                primary: isActive ? Colors.white : Colors.white24,
                 shape: RoundedRectangleBorder(
                     side: BorderSide(
                         width: 12,
@@ -259,9 +303,9 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
                             duration: const Duration(milliseconds: 500),
                             curve: Curves.ease);
                         await BackUpRestoreChannel().restoreViewOnly(
-                            _primaryAddress,
-                            _privateViewKey,
-                            _restoreHeight!,
+                            _primaryAddress.text,
+                            _privateViewKey.text,
+                            num.parse(_restoreHeight.text),
                             pin);
                       }
                     } on PlatformException catch (exception) {

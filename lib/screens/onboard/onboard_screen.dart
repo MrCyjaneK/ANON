@@ -1,3 +1,4 @@
+import 'package:anon_wallet/models/config.dart';
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
@@ -92,6 +93,9 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
         }
       },
       child: Scaffold(
+        appBar: AppBar(
+          title: Text(anonConfigState.isViewOnly ? "[ИΞR0]" : "[ΛИ0И]"),
+        ),
         body: Column(
           children: [
             Expanded(
