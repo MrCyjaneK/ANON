@@ -606,11 +606,6 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Text(
-                      "ΛNON will only connect\nto the node specified above\n",
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
                   ],
                 ),
               ),

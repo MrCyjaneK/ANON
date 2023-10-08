@@ -269,7 +269,7 @@ class _TransactionsListState extends State<TransactionsList> {
         PopupMenuItem<int>(
           enabled: isAirgapEnabled,
           value: 5,
-          child: const Text('Import Wallet Output'),
+          child: const Text('Import Wallet Outputs'),
         ),
         const PopupMenuItem<int>(
           value: 4,
@@ -341,7 +341,7 @@ void exportKeyImages(BuildContext context) async {
   Navigator.push(context, MaterialPageRoute(
     builder: (context) {
       return ExportQRScreen(
-        title: "Key Images",
+        title: "KEY IMAGES",
         buttonText: "Save as File",
         exportType: UrType.xmrKeyImage,
         counterScanCalled: () {},
@@ -394,7 +394,7 @@ String formatTime(int? timestamp) {
     return "";
   }
   var dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-  return DateFormat("H:mm\ndd/M").format(dateTime);
+  return DateFormat("HH:mm\ndd/M").format(dateTime);
 }
 
 void importKeyImages(BuildContext context) async {

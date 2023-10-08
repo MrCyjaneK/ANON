@@ -243,7 +243,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                     ))
                                   : const SizedBox.shrink(),
                               Text(!loadingFile.value
-                                  ? "Restore from anon backup"
+                                  ? "RESTORE FROM BACKUP"
                                   : "Reading file..."),
                             ],
                           )),
@@ -259,7 +259,7 @@ class _LandingScreenState extends State<LandingScreen> {
                             navigator.push(MaterialPageRoute(
                                 builder: (context) => const RestoreFromSeed()));
                           },
-                          child: const Text("Restore from seed"))
+                          child: const Text("RESTORE FROM SEED"))
                     else
                       TextButton(
                           onPressed: () async {
@@ -271,7 +271,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                 builder: (context) =>
                                     const RestoreViewOnlyWallet()));
                           },
-                          child: const Text("Restore from keys")),
+                          child: const Text("RESTORE FROM KEYS")),
                     const Padding(padding: EdgeInsets.all(12))
                   ],
                   actionsOverflowDirection: VerticalDirection.down,

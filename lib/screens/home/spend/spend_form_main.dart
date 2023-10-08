@@ -146,7 +146,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
       navigator.pushReplacement(MaterialPageRoute(
         builder: (context) {
           return ExportQRScreen(
-            title: "SIGN TX",
+            title: "SIGNED TX",
             isInTxComposeMode: true,
             exportType: UrType.xmrTxSigned,
             buttonText: "IMPORT SIGNED TX",
@@ -502,7 +502,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
           navigatorState.push(MaterialPageRoute(
             builder: (context) {
               return ExportQRScreen(
-                title: "OUTPUT",
+                title: "OUTPUTS",
                 isInTxComposeMode: true,
                 exportType: UrType.xmrOutPut,
                 buttonText: "IMPORT KEY IMAGES",
