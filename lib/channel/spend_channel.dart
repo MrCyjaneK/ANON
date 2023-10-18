@@ -39,12 +39,14 @@ class SpendMethodChannel {
   dynamic compose(
     String amount,
     String address,
+    bool sweepAll,
     String notes,
     List<String> keyImages,
   ) async {
     return await platform.invokeMethod("composeTransaction", {
       "amount": amount,
       "address": address,
+      "sweepAll": sweepAll,
       "notes": notes,
       "keyImages": keyImages.join(",")
     });
@@ -53,6 +55,7 @@ class SpendMethodChannel {
   Future<dynamic> composeAndBroadcast(
     String amount,
     String address,
+    bool sweepAll,
     String notes,
     List<String> keyImages,
   ) async {
@@ -62,6 +65,7 @@ class SpendMethodChannel {
     return await platform.invokeMethod("composeAndBroadcast", {
       "amount": amount,
       "address": address,
+      "sweepAll": sweepAll,
       "notes": notes,
       "keyImages": keyImages.join(",")
     });
@@ -84,8 +88,8 @@ class SpendMethodChannel {
     return outs;
   }
 
-  Future<Map> composeAndSave(String amount, String address, String notes,
-      List<String> keyImages) async {
+  Future<Map> composeAndSave(String amount, String address, bool sweepAll,
+      String notes, List<String> keyImages) async {
     if (keyImages.isEmpty) {
       keyImages = await getAllKeyImages();
     }
@@ -93,6 +97,7 @@ class SpendMethodChannel {
       "composeAndSave",
       {
         "amount": amount,
+        "sweepAll": sweepAll,
         "sign": (!isViewOnly && isAirgapEnabled),
         "address": address,
         "keyImages": keyImages.join(","),

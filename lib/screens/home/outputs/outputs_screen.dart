@@ -1,6 +1,7 @@
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/screens/home/outputs/tx_output_element.dart';
 import 'package:anon_wallet/screens/home/spend/spend_form_main.dart';
+import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/material.dart';
 
 class OutputsScreen extends StatefulWidget {
@@ -88,7 +89,7 @@ class _OutputsScreenState extends State<OutputsScreen> {
                     ),
                   );
                 },
-          child: Text("Send ${getPrettyAmount(getOutputTotal())} XMR"),
+          child: Text("Send ${formatMonero(getOutputTotal())} XMR"),
         ),
       ),
     );
@@ -127,6 +128,5 @@ class _OutputsScreenState extends State<OutputsScreen> {
     return amt;
   }
 
-  String getPrettyAmount(num amt) => ((amt / 1e12)).toStringAsFixed(4);
   String getAmountFull(num amt) => ((amt / 1e12)).toStringAsFixed(12);
 }

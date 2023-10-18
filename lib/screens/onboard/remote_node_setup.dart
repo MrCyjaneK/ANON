@@ -9,7 +9,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class RemoteNodeWidget extends ConsumerWidget {
-  const RemoteNodeWidget({Key? key}) : super(key: key);
+  const RemoteNodeWidget({
+    Key? key,
+    required this.heroEnabled,
+  }) : super(key: key);
+
+  final bool heroEnabled;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -23,18 +28,32 @@ class RemoteNodeWidget extends ConsumerWidget {
         height: MediaQuery.of(context).size.height - 120,
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: SizedBox(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Hero(
+            if (heroEnabled)
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Hero(
                         tag: "anon_logo",
                         child: SizedBox(
-                            width: 180,
-                            child: Image.asset("assets/anon_logo.png"))),
-                  ],
+                          width: 180,
+                          child: Image.asset("assets/anon_logo.png"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            SliverToBoxAdapter(
+              child: Center(
+                child: Text(
+                  "NODE CONNECTION",
+                  style: Theme.of(context)
+                      .textTheme
+                      .displaySmall
+                      ?.copyWith(fontSize: 22),
                 ),
               ),
             ),
@@ -42,10 +61,12 @@ class RemoteNodeWidget extends ConsumerWidget {
               child: ListTile(
                 title: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text("NODE",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary)),
+                  child: Text(
+                    "NODE",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary),
+                  ),
                 ),
                 subtitle: Column(
                   children: [
@@ -93,10 +114,12 @@ class RemoteNodeWidget extends ConsumerWidget {
               child: ListTile(
                 title: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text("USERNAME",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary)),
+                  child: Text(
+                    "USERNAME",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary),
+                  ),
                 ),
                 subtitle: TextField(
                   textInputAction: TextInputAction.next,
@@ -149,11 +172,10 @@ class RemoteNodeWidget extends ConsumerWidget {
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 padding: const EdgeInsets.only(top: 24),
-                child: Column(
+                child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
-                  children: [
-                  ],
+                  children: [],
                 ),
               ),
             ),

@@ -93,18 +93,31 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(anonConfigState.isViewOnly ? "[ИΞR0]" : "[ΛИ0И]"),
-        ),
         body: Column(
           children: [
+            Center(
+              child: Center(
+                child: Hero(
+                  tag: "anon_logo",
+                  child: SafeArea(
+                    child: SizedBox(
+                      width: 180,
+                      child: Image.asset("assets/anon_logo.png"),
+                    ),
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: PageView(
                 physics: const NeverScrollableScrollPhysics(),
                 controller: pageController,
                 children: [
-                  const RemoteNodeWidget(),
+                  const RemoteNodeWidget(
+                    heroEnabled: false,
+                  ),
                   WalletPassphraseWidget(
+                    heroEnabled: false,
                     onPassSeedPhraseAdded: (value) {
                       ref.read(walletSeedPhraseProvider.state).state = value;
                     },
@@ -130,11 +143,14 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                     ),
                   ),
                   Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 2, horizontal: 26),
-                      child: PolySeedWidget(
-                          seedWords: wallet == null ? [] : wallet.seed)),
+                    alignment: Alignment.center,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 2, horizontal: 26),
+                    child: PolySeedWidget(
+                      heroEnabled: false,
+                      seedWords: wallet == null ? [] : wallet.seed,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -146,7 +162,9 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                 Node? connection = ref.watch(nodeConnectionState).value;
                 String nextButton = "Connect";
                 if (page == 0) {
-                  if (connection != null && connection.isConnected()) {
+                  if (rHost.isEmpty) {
+                    nextButton = "Skip";
+                  } else if (connection != null && connection.isConnected()) {
                     nextButton = "Next";
                   } else {
                     nextButton = "Connect";

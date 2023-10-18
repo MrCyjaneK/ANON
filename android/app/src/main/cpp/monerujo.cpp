@@ -1089,8 +1089,10 @@ Java_com_m2049r_xmrwallet_model_Wallet_createSweepTransaction(JNIEnv *env, jobje
                                                               jstring dst_addr, jstring payment_id,
                                                               jint mixin_count,
                                                               jint priority,
-                                                              jint accountIndex) {
+                                                              jint accountIndex,
+                                                              jobject key_images) {
 
+    const std::set<std::string> _key_images = java2cpp_set(env, key_images);
     const char *_dst_addr = env->GetStringUTFChars(dst_addr, nullptr);
     const char *_payment_id = env->GetStringUTFChars(payment_id, nullptr);
     Monero::PendingTransaction::Priority _priority =
@@ -1102,8 +1104,7 @@ Java_com_m2049r_xmrwallet_model_Wallet_createSweepTransaction(JNIEnv *env, jobje
     Monero::PendingTransaction *tx = wallet->createTransaction(_dst_addr, _payment_id,
                                                                   empty, (uint32_t) mixin_count,
                                                                   _priority,
-                                                                  (uint32_t) accountIndex);
-
+                                                                  (uint32_t) accountIndex, {}, _key_images);
     env->ReleaseStringUTFChars(dst_addr, _dst_addr);
     env->ReleaseStringUTFChars(payment_id, _payment_id);
     return reinterpret_cast<jlong>(tx);

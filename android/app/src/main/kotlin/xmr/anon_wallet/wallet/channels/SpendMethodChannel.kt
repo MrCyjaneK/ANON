@@ -164,6 +164,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
     private fun composeAndBroadcast(call: MethodCall, result: Result) {
         val address = call.argument<String?>("address")
         val amount = call.argument<String>("amount")
+        val sweepAll = call.argument<Boolean?>("sweepAll")!!
         val notes = call.argument<String>("notes")
         val rawKeyImages = call.argument<String>("keyImages")
         val keyImages = arrayListOf<String>()
@@ -182,7 +183,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
                 pendingTx = null;
                 var success = false;
                 try {
-                    pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default, selectedUtxos)
+                    pendingTx = wallet.createTransaction(address, amountNumeric, sweepAll, 1, PendingTransaction.Priority.Priority_Default, selectedUtxos)
                     txId = pendingTx.firstTxIdJ;
                     success = pendingTx.commit("", true)
                     if (success) {
@@ -213,6 +214,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
     private fun composeTransaction(call: MethodCall, result: Result) {
         val address = call.argument<String?>("address")
         val amount = call.argument<String>("amount")
+        val sweepAll = call.argument<Boolean?>("sweepAll")!!
         val rawKeyImages = call.argument<String>("keyImages")
         val keyImages = arrayListOf<String>()
         keyImages.addAll(rawKeyImages!!.split(","))
@@ -225,7 +227,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
                 try {
                     val wallet = WalletManager.getInstance().wallet
                     val selectedUtxos = keyImages
-                    val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default, selectedUtxos)
+                    val pendingTx = wallet.createTransaction(address, amountNumeric, sweepAll, 1, PendingTransaction.Priority.Priority_Default, selectedUtxos)
                     result.success(
                         hashMapOf(
                             "fee" to pendingTx.fee,
@@ -251,6 +253,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
     private fun composeAndSave(call: MethodCall, result: Result) {
         val address = call.argument<String?>("address")
         val amount = call.argument<String>("amount")
+        val sweepAll = call.argument<Boolean?>("sweepAll")!!
         val sign = call.argument<Boolean?>("sign") ?: true
         val amountNumeric = Wallet.getAmountFromString(amount)
         if (address == null || amount == null) {
@@ -262,7 +265,7 @@ class SpendMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle) : Ano
         this.scope.launch {
             withContext(Dispatchers.IO) {
                 val wallet = WalletManager.getInstance().wallet
-                val pendingTx = wallet.createTransaction(address, amountNumeric, 1, PendingTransaction.Priority.Priority_Default, keyImages);
+                val pendingTx = wallet.createTransaction(address, amountNumeric, sweepAll, 1, PendingTransaction.Priority.Priority_Default, keyImages);
                 val txId = pendingTx.firstTxIdJ;
                 var error = "";
                 var success = false

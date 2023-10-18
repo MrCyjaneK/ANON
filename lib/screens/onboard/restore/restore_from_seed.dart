@@ -27,12 +27,22 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
             Center(
               child: Center(
                 child: Hero(
-                    tag: "anon_logo",
-                    child: SafeArea(
-                        child: SizedBox(
-                            width: 180,
-                            child: Image.asset("assets/anon_logo.png")))),
+                  tag: "anon_logo",
+                  child: SafeArea(
+                    child: SizedBox(
+                      width: 180,
+                      child: Image.asset("assets/anon_logo.png"),
+                    ),
+                  ),
+                ),
               ),
+            ),
+            Text(
+              "NODE CONNECTION",
+              style: Theme.of(context)
+                  .textTheme
+                  .displaySmall
+                  ?.copyWith(fontSize: 22),
             ),
             Expanded(
               child: RestoreNodeSetup(
@@ -46,10 +56,33 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
             )
           ],
         ),
-        SeedEntry(
-          onSeedEntered: (List<String> seed, num height) {
-            onSeedEntered(seed, height, context);
-          },
+        Column(
+          children: [
+            Hero(
+              tag: "anon_logo",
+              child: SafeArea(
+                child: SizedBox(
+                  width: 180,
+                  child: Image.asset("assets/anon_logo.png"),
+                ),
+              ),
+            ),
+            Text(
+              "MNEMONIC SEED",
+              style: Theme.of(context)
+                  .textTheme
+                  .displaySmall
+                  ?.copyWith(fontSize: 22),
+            ),
+            Expanded(
+              child: SeedEntry(
+                heroEnabled: false,
+                onSeedEntered: (List<String> seed, num height) {
+                  onSeedEntered(seed, height, context);
+                },
+              ),
+            ),
+          ],
         ),
         Scaffold(
           body: Center(
@@ -107,8 +140,10 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
 
 class SeedEntry extends StatefulWidget {
   final Function(List<String> seed, num height) onSeedEntered;
-
-  const SeedEntry({Key? key, required this.onSeedEntered}) : super(key: key);
+  final bool heroEnabled;
+  const SeedEntry(
+      {Key? key, required this.onSeedEntered, required this.heroEnabled})
+      : super(key: key);
 
   @override
   State<SeedEntry> createState() => _SeedEntryState();
@@ -119,30 +154,32 @@ class _SeedEntryState extends State<SeedEntry> {
   String? seedPassphrase;
   final TextEditingController _restoreHeightController =
       TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                Hero(
-                    tag: "anon_logo",
-                    child: SafeArea(
-                        child: SizedBox(
-                            width: 180,
-                            child: Image.asset("assets/anon_logo.png")))),
-                Text(
-                  "MNEMONIC SEED",
-                  style: Theme.of(context)
-                      .textTheme
-                      .displaySmall
-                      ?.copyWith(fontSize: 22),
-                )
-              ],
+          if (widget.heroEnabled)
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  Hero(
+                      tag: "anon_logo",
+                      child: SafeArea(
+                          child: SizedBox(
+                              width: 180,
+                              child: Image.asset("assets/anon_logo.png")))),
+                  Text(
+                    "MNEMONIC SEED",
+                    style: Theme.of(context)
+                        .textTheme
+                        .displaySmall
+                        ?.copyWith(fontSize: 22),
+                  )
+                ],
+              ),
             ),
-          ),
           const SliverPadding(padding: EdgeInsets.all(24)),
           SliverToBoxAdapter(
             child: ListTile(

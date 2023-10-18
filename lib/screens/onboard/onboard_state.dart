@@ -50,6 +50,9 @@ class ConnectToNodeState extends StateNotifier<Node?> {
 
   Future connect() async {
     String host = ref.read(remoteHost);
+    if (!host.startsWith("http://") && !host.startsWith("https://")) {
+      host = "http://$host";
+    }
     String? username = ref.read(remoteUserName);
     String? password = ref.read(remotePassword);
     int port = 38081;

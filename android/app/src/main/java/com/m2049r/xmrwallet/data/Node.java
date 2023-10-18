@@ -277,7 +277,7 @@ public class Node {
 
     public void setHost(String host) throws UnknownHostException {
         if ((host == null) || (host.isEmpty()))
-            throw new UnknownHostException("loopback not supported (yet?)");
+            throw new UnknownHostException("loopback not supported (yet?) - $host");
         this.host = host;
         this.hostAddress = Address.of(host);
     }

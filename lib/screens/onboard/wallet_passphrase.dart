@@ -4,9 +4,14 @@ import 'package:flutter/material.dart';
 class WalletPassphraseWidget extends StatelessWidget {
   final Function(String value) onPassSeedPhraseAdded;
 
-  WalletPassphraseWidget({Key? key, required this.onPassSeedPhraseAdded})
+  WalletPassphraseWidget(
+      {Key? key,
+      required this.onPassSeedPhraseAdded,
+      required this.heroEnabled})
       : super(key: key);
   final TextEditingController passPhraseController = TextEditingController();
+
+  final bool heroEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -15,17 +20,29 @@ class WalletPassphraseWidget extends StatelessWidget {
         height: MediaQuery.of(context).size.height - 120,
         child: CustomScrollView(
           slivers: [
+            if (heroEnabled)
+              SliverToBoxAdapter(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Hero(
+                        tag: "anon_logo",
+                        child: SizedBox(
+                            width: 180,
+                            child: Image.asset("assets/anon_logo.png"))),
+                  ],
+                ),
+              ),
             SliverToBoxAdapter(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Hero(
-                      tag: "anon_logo",
-                      child: SizedBox(
-                          width: 180,
-                          child: Image.asset("assets/anon_logo.png"))),
-                ],
+              child: Center(
+                child: Text(
+                  "ENCRYPTION PASSPHRASE",
+                  style: Theme.of(context)
+                      .textTheme
+                      .displaySmall
+                      ?.copyWith(fontSize: 22),
+                ),
               ),
             ),
             SliverToBoxAdapter(

@@ -40,6 +40,8 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
 
   bool isKeyboardVisible = false;
 
+  bool sweepAll = false;
+
   @override
   void initState() {
     super.initState();
@@ -264,6 +266,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                                                 .primaryColor)),
                                 const Padding(padding: EdgeInsets.all(12)),
                                 TextFormField(
+                                  enabled: !sweepAll,
                                   controller: amountEditingController,
                                   textAlign: TextAlign.center,
                                   onChanged: (value) {
@@ -274,11 +277,10 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                                   keyboardType: TextInputType.number,
                                   decoration: InputDecoration(
                                     alignLabelWithHint: true,
-                                    hintText: "0.0000",
                                     errorText: validAmount == false
                                         ? "Invalid Amount"
                                         : null,
-                                    suffixText: "XMR",
+                                    //suffixText: "XMR",
                                     border: unFocusedBorder,
                                     enabledBorder: unFocusedBorder,
                                     focusedBorder: enabledBorder,
@@ -330,22 +332,38 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                           ),
                         ],
                       ),
-                      Container(
-                        alignment: Alignment.center,
-                        width: double.infinity,
-                        height: 80,
-                        child: Consumer(
-                          builder: (context, ref, c) {
-                            num amount =
-                                ref.watch(walletAvailableBalanceProvider);
-                            if (widget.maxAmount != 0) {
-                              amount = widget.maxAmount;
-                            }
-                            return Text(
-                              "Available Balance  : ${formatMonero(amount, minimumFractions: 8)} XMR",
-                              style: Theme.of(context).textTheme.bodySmall,
-                            );
-                          },
+                      InkWell(
+                        onTap: (() {
+                          num amount =
+                              ref.watch(walletAvailableBalanceProvider);
+                          if (widget.maxAmount != 0) {
+                            amount = widget.maxAmount;
+                          }
+                          setState(() {
+                            sweepAll = !sweepAll;
+                            amountEditingController.text =
+                                sweepAll ? formatMonero(amount) : '';
+                          });
+                        }),
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: double.infinity,
+                          height: 80,
+                          child: Consumer(
+                            builder: (context, ref, c) {
+                              num amount =
+                                  ref.watch(walletAvailableBalanceProvider);
+                              if (widget.maxAmount != 0) {
+                                amount = widget.maxAmount;
+                              }
+                              return Text(
+                                sweepAll
+                                    ? "Sending ${formatMonero(amount)} (minus fee)"
+                                    : "Available Balance : ${formatMonero(amount)}",
+                                style: Theme.of(context).textTheme.bodySmall,
+                              );
+                            },
+                          ),
                         ),
                       ),
                       Container(
@@ -408,9 +426,8 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
         String notes = ref.read(notesStateProvider);
         if (isViewOnly) {
           try {
-            ref
-                .read(transactionStateProvider.notifier)
-                .composeAndSave(amountStr, address, notes, widget.outputs);
+            ref.read(transactionStateProvider.notifier).composeAndSave(
+                amountStr, address, sweepAll, notes, widget.outputs);
             navigator.push(MaterialPageRoute(
               builder: (context) => AnonSpendReview(
                 onActionClicked: () {
@@ -429,9 +446,8 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
             print(e);
           }
         } else {
-          ref
-              .read(transactionStateProvider.notifier)
-              .createPreview(amountStr, address, notes, widget.outputs);
+          ref.read(transactionStateProvider.notifier).createPreview(
+              amountStr, address, sweepAll, notes, widget.outputs);
           navigator.push(MaterialPageRoute(
             builder: (context) => const AnonSpendReview(),
           ));
@@ -493,7 +509,8 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
     String amountStr = ref.read(amountStateProvider);
     String address = ref.read(addressStateProvider);
     SpendValidationNotifier validationNotifier = ref.read(validationProvider);
-    bool valid = await validationNotifier.validate(amountStr, address);
+    bool valid =
+        await validationNotifier.validate(amountStr, address) || sweepAll;
     if (valid) {
       //if view only then export outputs and start working unsigned tx
       if (isViewOnly) {
@@ -520,9 +537,8 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
           //create signed tx and show qr
           try {
             navigatorState.pushNamed("/loading-tx-construct");
-            await ref
-                .read(transactionStateProvider.notifier)
-                .composeAndSave(amountStr, address, "", widget.outputs);
+            await ref.read(transactionStateProvider.notifier).composeAndSave(
+                amountStr, address, sweepAll, "", widget.outputs);
             navigatorState.push(MaterialPageRoute(
               builder: (context) => ExportQRScreen(
                 exportType: UrType.xmrTxSigned,
@@ -543,17 +559,15 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
           String amountStr = ref.read(amountStateProvider);
           String address = ref.read(addressStateProvider);
           String notes = ref.read(notesStateProvider);
-          ref
-              .read(transactionStateProvider.notifier)
-              .createPreview(amountStr, address, notes, widget.outputs);
+          ref.read(transactionStateProvider.notifier).createPreview(
+              amountStr, address, sweepAll, notes, widget.outputs);
           navigatorState.push(MaterialPageRoute(
             builder: (context) {
               return AnonSpendReview(
                 onActionClicked: () async {
                   navigatorState.pushNamed("/loading-broadcast-tx");
-                  await ref
-                      .read(transactionStateProvider.notifier)
-                      .broadcast(amountStr, address, notes, widget.outputs);
+                  await ref.read(transactionStateProvider.notifier).broadcast(
+                      amountStr, address, sweepAll, notes, widget.outputs);
                   ref.read(amountStateProvider.notifier).state = "";
                   ref.read(addressStateProvider.notifier).state = "";
                   ref.read(notesStateProvider.notifier).state = "";

@@ -144,9 +144,9 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                             (activeNodeDaemonHeight >
                                                     connectedNode!.height)
                                                 ? activeNodeDaemonHeight
-                                                : connectedNode!.height;
+                                                : connectedNode.height;
                                         return Text(
-                                            connectedNode!.isActive == true
+                                            connectedNode.isActive == true
                                                 ? "Daemon Height: $activeHeight"
                                                 : "Inactive",
                                             style: Theme.of(context)
@@ -602,11 +602,10 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 padding: const EdgeInsets.only(top: 18),
-                child: Column(
+                child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
-                  children: [
-                  ],
+                  children: [],
                 ),
               ),
             ),
@@ -696,10 +695,14 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
       BuildContext context,
       WidgetRef ref) async {
     int port = 38081;
+    if (!host.startsWith("https://") && !host.startsWith("http://")) {
+      host = "http://$host";
+    }
     Uri uri = Uri.parse(host);
     if (uri.hasPort) {
       port = uri.port;
     }
+
     try {
       isLoading.value = true;
       Node? node =

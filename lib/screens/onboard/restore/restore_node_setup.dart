@@ -152,11 +152,10 @@ class RestoreNodeSetup extends ConsumerWidget {
             child: Container(
               width: MediaQuery.of(context).size.width,
               padding: const EdgeInsets.only(top: 24),
-              child: Column(
+              child: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
-                children: [
-                ],
+                children: [],
               ),
             ),
           ),

@@ -139,7 +139,7 @@ class AnonSpendReview extends ConsumerWidget {
               child: SpendListItem(
                 title: "Amount",
                 isLoading: loading,
-                subTitle: "${formatMonero(amount)} XMR",
+                subTitle: formatMonero(amount),
               ),
             ),
           ),
@@ -149,8 +149,7 @@ class AnonSpendReview extends ConsumerWidget {
               child: SpendListItem(
                 title: "Fee",
                 isLoading: loading,
-                subTitle:
-                    "${formatMonero((fees ?? 0), minimumFractions: 8)} XMR",
+                subTitle: formatMonero((fees ?? 0)),
               ),
             ),
           ),
@@ -160,8 +159,7 @@ class AnonSpendReview extends ConsumerWidget {
               child: SpendListItem(
                 title: "Total",
                 isLoading: loading,
-                subTitle:
-                    "${formatMonero((fees ?? 0) + (amount ?? 0), minimumFractions: 8)} XMR",
+                subTitle: formatMonero((fees ?? 0) + (amount ?? 0)),
               ),
             ),
           ),

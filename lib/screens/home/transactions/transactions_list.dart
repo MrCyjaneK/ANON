@@ -131,7 +131,7 @@ class _TransactionsListState extends State<TransactionsList> {
                     builder: (context, ref, c) {
                       var amount = ref.watch(walletBalanceProvider);
                       return Text(
-                        "${formatMonero(amount)} XMR",
+                        formatMonero(amount),
                         style: Theme.of(context).textTheme.headlineMedium,
                       );
                     },
@@ -211,6 +211,13 @@ class _TransactionsListState extends State<TransactionsList> {
           case 4:
             importKeyImages(context);
             break;
+          case 6:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const OutputsScreen(),
+              ),
+            );
+            break;
         }
       },
       itemBuilder: (context) => [
@@ -230,6 +237,10 @@ class _TransactionsListState extends State<TransactionsList> {
         const PopupMenuItem<int>(
           value: 4,
           child: Text('Import Key Images'),
+        ),
+        const PopupMenuItem<int>(
+          value: 6,
+          child: Text('Coin Control'),
         ),
       ],
     );
@@ -254,6 +265,13 @@ class _TransactionsListState extends State<TransactionsList> {
           case 4:
             importUnsignedTx(context);
             break;
+          case 6:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const OutputsScreen(),
+              ),
+            );
+            break;
         }
       },
       itemBuilder: (context) => [
@@ -274,6 +292,10 @@ class _TransactionsListState extends State<TransactionsList> {
         const PopupMenuItem<int>(
           value: 4,
           child: Text('Sign Tx'),
+        ),
+        const PopupMenuItem<int>(
+          value: 6,
+          child: Text('Coin Control'),
         ),
       ],
     );

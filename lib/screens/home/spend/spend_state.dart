@@ -28,7 +28,7 @@ class SpendValidationNotifier extends ChangeNotifier {
 class TransactionStateNotifier extends StateNotifier<TxState> {
   TransactionStateNotifier() : super(TxState());
 
-  createPreview(String amount, String address, String notes,
+  createPreview(String amount, String address, bool sweepAll, String notes,
       List<String> keyImages) async {
     if (keyImages.isEmpty) {
       print("WARN: keyImages is empty. Filling with all keys");
@@ -61,8 +61,8 @@ class TransactionStateNotifier extends StateNotifier<TxState> {
     broadcastState.state = "waiting";
     state = broadcastState;
     try {
-      var returnValue =
-          await SpendMethodChannel().compose(amount, address, notes, keyImages);
+      var returnValue = await SpendMethodChannel()
+          .compose(amount, address, sweepAll, notes, keyImages);
       print(returnValue);
       if (returnValue["errorString"] != null &&
           returnValue["errorString"] != "") {
@@ -79,25 +79,25 @@ class TransactionStateNotifier extends StateNotifier<TxState> {
     }
   }
 
-  broadcast(String amount, String address, String notes,
+  broadcast(String amount, String address, bool sweepAll, String notes,
       List<String> keyImages) async {
     var broadcastState = TxState();
     broadcastState.state = "waiting";
     state = broadcastState;
     var returnValue = await SpendMethodChannel()
-        .composeAndBroadcast(amount, address, notes, keyImages);
+        .composeAndBroadcast(amount, address, sweepAll, notes, keyImages);
     state = TxState.fromJson(returnValue);
     AppHaptics.mediumImpact();
     AppHaptics.mediumImpact();
   }
 
-  Future composeAndSave(String amount, String address, String notes,
-      List<String> keyImages) async {
+  Future composeAndSave(String amount, String address, bool sweepAll,
+      String notes, List<String> keyImages) async {
     var broadcastState = TxState();
     broadcastState.state = "waiting";
     state = broadcastState;
     var returnValue = await SpendMethodChannel()
-        .composeAndSave(amount, address, notes, keyImages);
+        .composeAndSave(amount, address, sweepAll, notes, keyImages);
     state = TxState.fromJson(returnValue);
   }
 

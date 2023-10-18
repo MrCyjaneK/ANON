@@ -32,7 +32,8 @@ class TransactionItem extends StatelessWidget {
           children: [
             getStats(transaction, context),
             Text(
-              formatMonero(transaction.amount, minimumFractions: 4),
+              (((transaction.amount! / 1e12 * 1e4)).floor() / 1e4)
+                  .toStringAsFixed(4),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             Column(

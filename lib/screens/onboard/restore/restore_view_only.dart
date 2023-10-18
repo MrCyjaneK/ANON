@@ -45,31 +45,53 @@ class _RestoreViewOnlyWalletState extends State<RestoreViewOnlyWallet> {
             Center(
               child: Text(
                 "NODE CONNECTION",
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context)
+                    .textTheme
+                    .displaySmall
+                    ?.copyWith(fontSize: 22),
               ),
             ),
             Expanded(
               child: RestoreNodeSetup(
-                  onButtonPressed: () {
-                    _pageController.nextPage(
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.ease);
-                    setState(() {
-                      canScan = true;
-                    });
-                  },
-                  skipAppBar: true,
-                  pageController: _pageController),
+                onButtonPressed: () {
+                  _pageController.nextPage(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.ease);
+                  setState(() {
+                    canScan = true;
+                  });
+                },
+                skipAppBar: true,
+                pageController: _pageController,
+              ),
             )
           ],
         ),
-        ImportViewOnlyKeys(
-            pageController: _pageController,
-            onDone: () {
-              setState(() {
-                canScan = false;
-              });
-            }),
+        Column(
+          children: [
+            Center(
+              child: Hero(
+                  tag: "anon_logo",
+                  child: SafeArea(
+                      child: SizedBox(
+                          width: 180,
+                          child: Image.asset("assets/anon_logo.png")))),
+            ),
+            Text(
+              "VIEW ONLY KEYS",
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Expanded(
+              child: ImportViewOnlyKeys(
+                  pageController: _pageController,
+                  onDone: () {
+                    setState(() {
+                      canScan = false;
+                    });
+                  }),
+            ),
+          ],
+        ),
         Scaffold(
           body: Center(
             child: Column(
@@ -128,24 +150,6 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Center(
-              child: Hero(
-                  tag: "anon_logo",
-                  child: SafeArea(
-                      child: SizedBox(
-                          width: 180,
-                          child: Image.asset("assets/anon_logo.png")))),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Center(
-              child: Text(
-                "VIEW ONLY KEYS",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-          ),
           SliverToBoxAdapter(
             child: ListTile(
               title: Padding(

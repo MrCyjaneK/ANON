@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 class PolySeedWidget extends StatefulWidget {
   final List<String> seedWords;
+  final bool heroEnabled;
 
-  const PolySeedWidget({Key? key, required this.seedWords}) : super(key: key);
+  const PolySeedWidget(
+      {Key? key, required this.seedWords, required this.heroEnabled})
+      : super(key: key);
 
   @override
   State<PolySeedWidget> createState() => _PolySeedWidgetState();
@@ -25,19 +28,20 @@ class _PolySeedWidgetState extends State<PolySeedWidget> {
     return SafeArea(
       child: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Hero(
-                    tag: "anon_logo",
-                    child: SizedBox(
-                        width: 180,
-                        child: Image.asset("assets/anon_logo.png"))),
-              ],
+          if (widget.heroEnabled)
+            SliverToBoxAdapter(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Hero(
+                      tag: "anon_logo",
+                      child: SizedBox(
+                          width: 180,
+                          child: Image.asset("assets/anon_logo.png"))),
+                ],
+              ),
             ),
-          ),
           SliverGrid(
             delegate: SliverChildBuilderDelegate(
               (context, index) {

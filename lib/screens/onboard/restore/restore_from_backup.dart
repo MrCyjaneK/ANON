@@ -261,7 +261,7 @@ class BackupPreviewScreen extends StatelessWidget {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      "${formatMonero(model.balanceAll)} XMR",
+                      formatMonero(model.balanceAll ?? 0),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),

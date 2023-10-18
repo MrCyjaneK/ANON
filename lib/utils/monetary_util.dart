@@ -1,22 +1,20 @@
-import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
-
-String formatMonero(num? value, {int minimumFractions = 4}) {
-  if (value == null) {
+String formatMonero(num? amt) {
+  if (amt == null) {
     return "";
   }
-  if (value == 0) {
+  if (amt == 0) {
     return "0";
   }
-  var formatter = NumberFormat("###.####");
-  formatter.maximumFractionDigits = minimumFractions;
-  formatter.minimumFractionDigits = minimumFractions;
-  try {
-    return formatter.format(value / 1e12);
-  } catch (e) {
-    if (kDebugMode) {
-      print(e);
-    }
-    return "";
-  }
+  return (((amt / 1e12 * 1e8)).floor() / 1e8).toStringAsFixed(8);
+  // var formatter = NumberFormat("###.####");
+  // formatter.maximumFractionDigits = minimumFractions;
+  // formatter.minimumFractionDigits = minimumFractions;
+  // try {
+  //   return formatter.format(value / 1e12);
+  // } catch (e) {
+  //   if (kDebugMode) {
+  //     print(e);
+  //   }
+  //   return "";
+  // }
 }

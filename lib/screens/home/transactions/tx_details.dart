@@ -100,7 +100,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                 onTap: () {
                   showPassphraseDialog(context, transaction);
                 },
-                trailing: Icon(Icons.edit),
+                trailing: const Icon(Icons.edit),
                 title: Text(
                   "DESCRIPTION",
                   style: titleStyle,
@@ -155,7 +155,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                       subtitle: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: SelectableText(transaction.fee != null
-                            ? formatMonero(transaction.fee, minimumFractions: 8)
+                            ? formatMonero(transaction.fee)
                             : '-'),
                       ),
                     ),
@@ -317,7 +317,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
           loading = false;
         });
         ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
-          content: Text("Error ${e}"),
+          content: Text("Error $e"),
           leading: const Icon(Icons.info_outline),
           actions: [
             IconButton(

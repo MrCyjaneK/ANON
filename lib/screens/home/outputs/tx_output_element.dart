@@ -1,3 +1,4 @@
+import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/material.dart';
 
 class TxOutputElement extends StatelessWidget {
@@ -47,6 +48,6 @@ class TxOutputElement extends StatelessWidget {
     );
   }
 
-  String getPrettyAmount() =>
-      ((utxo["amount"] / 1e12) as num).toStringAsFixed(4);
+  String getPrettyAmount() => formatMonero(utxo["amount"]);
+//      ((utxo["amount"] / 1e12) as num).toStringAsFixed(4);
 }

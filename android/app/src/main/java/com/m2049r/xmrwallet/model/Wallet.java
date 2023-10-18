@@ -407,13 +407,14 @@ public class Wallet {
         return createTransaction(
                 txData.getDestinationAddress(),
                 txData.getAmount(),
+                false,
                 txData.getMixin(),
                 txData.getPriority(),
                 selectedUtxos);
     }
 
     public PendingTransaction createTransaction(String dst_addr,
-                                                long amount, int mixin_count,
+                                                long amount, boolean sweepAll, int mixin_count,
                                                 PendingTransaction.Priority priority,
                                                 ArrayList<String> selectedUtxos) throws Exception {
         disposePendingTransaction();
@@ -427,9 +428,9 @@ public class Wallet {
             checkSelectedAmounts(preferredInputs, amount, false);
         }
         long txHandle =
-                (amount == SWEEP_ALL ?
+                (sweepAll ?
                         createSweepTransaction(dst_addr, "", mixin_count, _priority,
-                                accountIndex) :
+                                accountIndex, preferredInputs) :
                         createTransactionJ(dst_addr, "", amount, mixin_count, _priority,
                                 accountIndex, preferredInputs));
         pendingTransaction = new PendingTransaction(txHandle);
@@ -466,7 +467,7 @@ public class Wallet {
 
     private native long createSweepTransaction(String dst_addr, String payment_id,
                                                int mixin_count,
-                                               int priority, int accountIndex);
+                                               int priority, int accountIndex,  ArrayList<String> key_images);
 
 
     public PendingTransaction createSweepUnmixableTransaction() {
