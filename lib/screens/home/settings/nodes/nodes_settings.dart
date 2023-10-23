@@ -282,8 +282,9 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                                   } catch (e) {
                                                     ref.refresh(
                                                         _nodesListProvider);
-                                                    print(e);
+                                                    debugPrint(e.toString());
                                                   }
+                                                  if (!mounted) return;
                                                   Navigator.pop(context);
                                                 },
                                                 child: const Text("Delete")),
@@ -459,7 +460,7 @@ class _NodeDetailsState extends ConsumerState<NodeDetails> {
         loading = false;
         error = "$e";
       });
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -505,183 +506,177 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Container(
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              automaticallyImplyLeading: true,
-              title: const Text("Add Node"),
-              centerTitle: false,
-              bottom: isLoading.value
-                  ? const PreferredSize(
-                      preferredSize: Size.fromHeight(1),
-                      child: LinearProgressIndicator(minHeight: 1))
-                  : null,
-            ),
-            SliverToBoxAdapter(
-              child: ListTile(
-                title: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text("NODE",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary)),
-                ),
-                subtitle: TextField(
-                  controller: nodeTextController,
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          const BorderSide(color: Colors.white, width: 1),
-                    ),
-                    helperText: nodeStatus.value,
-                    helperMaxLines: 3,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    hintText: 'http://address.onion:port',
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            automaticallyImplyLeading: true,
+            title: const Text("Add Node"),
+            centerTitle: false,
+            bottom: isLoading.value
+                ? const PreferredSize(
+                    preferredSize: Size.fromHeight(1),
+                    child: LinearProgressIndicator(minHeight: 1))
+                : null,
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text("NODE",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary)),
+              ),
+              subtitle: TextField(
+                controller: nodeTextController,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white, width: 1),
                   ),
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: ListTile(
-                title: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text("USERNAME",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary)),
-                ),
-                subtitle: TextField(
-                  controller: userNameTextController,
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          const BorderSide(color: Colors.white, width: 1),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    hintText: '(optional)',
+                  helperText: nodeStatus.value,
+                  helperMaxLines: 3,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  hintText: 'http://address.onion:port',
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: ListTile(
-                title: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text("PASSWORD",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary)),
-                ),
-                subtitle: TextField(
-                  controller: passWordTextController,
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          const BorderSide(color: Colors.white, width: 1),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    hintText: '(optional)',
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text("USERNAME",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary)),
+              ),
+              subtitle: TextField(
+                controller: userNameTextController,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white, width: 1),
                   ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  hintText: '(optional)',
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                padding: const EdgeInsets.only(top: 18),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [],
+          ),
+          SliverToBoxAdapter(
+            child: ListTile(
+              title: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text("PASSWORD",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary)),
+              ),
+              subtitle: TextField(
+                controller: passWordTextController,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.white, width: 1),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  hintText: '(optional)',
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: HookConsumer(
-                builder: (c, ref, child) {
-                  Proxy proxy = ref.watch(proxyStateProvider);
-                  useEffect(() {
-                    ref.read(proxyStateProvider.notifier).getState();
-                    return null;
-                  }, []);
-                  return Container(
-                    width: MediaQuery.of(context).size.width,
-                    padding: const EdgeInsets.only(top: 8),
-                    child: TextButton.icon(
-                      style: ButtonStyle(
-                          foregroundColor: proxy.isConnected()
-                              ? MaterialStateColor.resolveWith(
-                                  (states) => Colors.green)
-                              : MaterialStateColor.resolveWith(
-                                  (states) => Theme.of(context).primaryColor)),
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) {
-                            return const ProxySettings();
-                          },
-                        ));
-                      },
-                      label: const Text("Proxy Settings"),
-                      icon: const Icon(Icons.shield_outlined),
-                    ),
-                  );
-                },
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              padding: const EdgeInsets.only(top: 18),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [],
               ),
             ),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              fillOverscroll: false,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                          side:
-                              const BorderSide(width: 1.0, color: Colors.white),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                  width: 12, color: Colors.white),
-                              borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 6)),
-                      onPressed: () async {
-                        await connect(
-                            nodeTextController.text,
-                            userNameTextController.text,
-                            passWordTextController.text,
-                            isLoading,
-                            nodeStatus,
-                            context,
-                            ref);
-                        await Future.delayed(const Duration(milliseconds: 200));
-                        ref.refresh(_nodesListProvider);
-                      },
-                      child: Text("Connect",
-                          style: Theme.of(context).textTheme.labelLarge),
-                    ),
-                  )
-                ],
-              ),
-            )
-          ],
-        ),
+          ),
+          SliverToBoxAdapter(
+            child: HookConsumer(
+              builder: (c, ref, child) {
+                Proxy proxy = ref.watch(proxyStateProvider);
+                useEffect(() {
+                  ref.read(proxyStateProvider.notifier).getState();
+                  return null;
+                }, []);
+                return Container(
+                  width: MediaQuery.of(context).size.width,
+                  padding: const EdgeInsets.only(top: 8),
+                  child: TextButton.icon(
+                    style: ButtonStyle(
+                        foregroundColor: proxy.isConnected()
+                            ? MaterialStateColor.resolveWith(
+                                (states) => Colors.green)
+                            : MaterialStateColor.resolveWith(
+                                (states) => Theme.of(context).primaryColor)),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) {
+                          return const ProxySettings();
+                        },
+                      ));
+                    },
+                    label: const Text("Proxy Settings"),
+                    icon: const Icon(Icons.shield_outlined),
+                  ),
+                );
+              },
+            ),
+          ),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            fillOverscroll: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                        side: const BorderSide(width: 1.0, color: Colors.white),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                                width: 12, color: Colors.white),
+                            borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 6)),
+                    onPressed: () async {
+                      await connect(
+                          nodeTextController.text,
+                          userNameTextController.text,
+                          passWordTextController.text,
+                          isLoading,
+                          nodeStatus,
+                          context,
+                          ref);
+                      await Future.delayed(const Duration(milliseconds: 200));
+                      ref.refresh(_nodesListProvider);
+                    },
+                    child: Text("Connect",
+                        style: Theme.of(context).textTheme.labelLarge),
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
@@ -719,7 +714,7 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
           .showSnackBar(SnackBar(content: Text("${e.message}")));
       Navigator.pop(context);
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 }

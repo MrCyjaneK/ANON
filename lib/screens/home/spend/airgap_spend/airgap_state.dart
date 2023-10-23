@@ -1,4 +1,3 @@
-import 'package:anon_wallet/channel/spend_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

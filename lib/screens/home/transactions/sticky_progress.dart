@@ -114,7 +114,7 @@ class ProgressStickyRender extends RenderSliverSingleBoxAdapter {
     var constraints = this.constraints;
     geometry = SliverGeometry.zero;
     child!.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-    double childExtend = child!.size.height ?? 0;
+    double childExtend = child?.size.height ?? 0;
     geometry = SliverGeometry(
       paintExtent: childExtend,
       maxPaintExtent: childExtend,

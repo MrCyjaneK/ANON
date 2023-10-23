@@ -118,11 +118,15 @@ public class WalletManager {
         managedWallet = null;
     }
 
-    public Wallet createWallet(File aFile, String password, String language, long height) {
-        long walletHandle = createWalletJ(aFile.getAbsolutePath(), password, language, getNetworkType().getValue());
+    public Wallet createWallet(File aFile, String password, String seed_offset, String language, long height) {
+        long walletHandle = createWalletJ(aFile.getAbsolutePath(), password, seed_offset, language, getNetworkType().getValue());
         Wallet wallet = new Wallet(walletHandle);
+        wallet.init(0, proxy);
         manageWallet(wallet);
+        // check if online
+        Log.d("WalletManager.java", "wallet.getStatus().isOk()");
         if (wallet.getStatus().isOk()) {
+            Log.d("WalletManager.java", "wallet.getStatus().isOk(): true");
             // (Re-)Estimate restore height based on what we know
             final long oldHeight = wallet.getRestoreHeight();
             // Go back 4 days if we don't have a precise restore height
@@ -133,12 +137,14 @@ public class WalletManager {
             wallet.setRestoreHeight(restoreHeight);
             Timber.d("Changed Restore Height from %d to %d", oldHeight, wallet.getRestoreHeight());
             wallet.setPassword(password); // this rewrites the keys file (which contains the restore height)
-        } else
+        } else {
             Timber.e(wallet.getStatus().toString());
+        }
+
         return wallet;
     }
 
-    private native long createWalletJ(String path, String password, String language, int networkType);
+    private native long createWalletJ(String path, String password, String seed_offset, String language, int networkType);
 
     public Wallet openAccount(String path, int accountIndex, String password) {
         Log.d("WalletManager.java", "openAccount(" + path + ", accountIndex, '****')");
@@ -187,6 +193,20 @@ public class WalletManager {
     private native long recoveryWalletJ(String path, String password,
                                         String mnemonic, String offset,
                                         int networkType, long restoreHeight);
+
+    public Wallet recoveryWalletPolyseed(File aFile, String password,
+                                 String mnemonic, String offset) {
+        long walletHandle = recoveryWalletPolyseedJ(aFile.getAbsolutePath(), password,
+                mnemonic, offset,
+                getNetworkType().getValue());
+        Wallet wallet = new Wallet(walletHandle);
+        manageWallet(wallet);
+        return wallet;
+    }
+
+    private native long recoveryWalletPolyseedJ(String path, String password,
+                                        String mnemonic, String offset,
+                                        int networkType);
 
     public Wallet createWalletWithKeys(File aFile, String password, String language, long restoreHeight,
                                        String addressString, String viewKeyString, String spendKeyString) {

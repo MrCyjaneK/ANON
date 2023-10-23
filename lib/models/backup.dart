@@ -14,7 +14,7 @@ class AnonBackupModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     if (node != null) {
       data['node'] = node!.toJson();
     }
@@ -54,13 +54,13 @@ class NodeBackupModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['host'] = this.host;
-    data['password'] = this.password;
-    data['username'] = this.username;
-    data['rpcPort'] = this.rpcPort;
-    data['networkType'] = this.networkType;
-    data['isOnion'] = this.isOnion;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['host'] = host;
+    data['password'] = password;
+    data['username'] = username;
+    data['rpcPort'] = rpcPort;
+    data['networkType'] = networkType;
+    data['isOnion'] = isOnion;
     return data;
   }
 }
@@ -97,7 +97,7 @@ class WalletBackupModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['address'] = address;
     data['seed'] = seed;
     data['restoreHeight'] = restoreHeight;
@@ -122,9 +122,9 @@ class Meta {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['timestamp'] = this.timestamp;
-    data['network'] = this.network;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['timestamp'] = timestamp;
+    data['network'] = network;
     return data;
   }
 }

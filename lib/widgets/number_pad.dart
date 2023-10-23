@@ -1,7 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 typedef OnKeyboardTapCallBack = void Function(String key);
 typedef OnDoneCallback = void Function();
+List<String> numberList = kDebugMode
+    ? ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    : (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']..shuffle());
 
 class NumberPad extends StatelessWidget {
   final GestureTapCallback onDeleteCancelTap;
@@ -31,25 +35,25 @@ class NumberPad extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            _buildKeyboardDigit('1', context),
-            _buildKeyboardDigit('2', context),
-            _buildKeyboardDigit('3', context),
+            _buildKeyboardDigit(numberList[1], context),
+            _buildKeyboardDigit(numberList[2], context),
+            _buildKeyboardDigit(numberList[3], context),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            _buildKeyboardDigit('4', context),
-            _buildKeyboardDigit('5', context),
-            _buildKeyboardDigit('6', context),
+            _buildKeyboardDigit(numberList[4], context),
+            _buildKeyboardDigit(numberList[5], context),
+            _buildKeyboardDigit(numberList[6], context),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            _buildKeyboardDigit('7', context),
-            _buildKeyboardDigit('8', context),
-            _buildKeyboardDigit('9', context),
+            _buildKeyboardDigit(numberList[7], context),
+            _buildKeyboardDigit(numberList[8], context),
+            _buildKeyboardDigit(numberList[9], context),
           ],
         ),
         Row(
@@ -79,7 +83,7 @@ class NumberPad extends StatelessWidget {
                 ),
               ),
             ),
-            Center(child: _buildKeyboardDigit('0', context)),
+            Center(child: _buildKeyboardDigit(numberList[0], context)),
             Align(
               alignment: Alignment.topRight,
               child: AnimatedScale(

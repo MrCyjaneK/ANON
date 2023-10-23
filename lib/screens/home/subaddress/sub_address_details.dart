@@ -102,21 +102,28 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                 child: Material(
                   color: Colors.transparent,
                   child: ListTile(
-                    title: Text(
-                      subAddress.label ?? '',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(color: Theme.of(context).primaryColor),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            subAddress.label ?? '',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                    color: Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        Text(
+                          formatMonero(subAddress.totalAmount),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(color: Theme.of(context).primaryColor),
+                        ),
+                      ],
                     ),
                     subtitle: Text(subAddress.address ?? ''),
-                    trailing: Text(
-                      formatMonero(subAddress.totalAmount),
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(color: Theme.of(context).primaryColor),
-                    ),
                   ),
                 ),
               ),

@@ -266,10 +266,26 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                                                 .primaryColor)),
                                 const Padding(padding: EdgeInsets.all(12)),
                                 TextFormField(
-                                  enabled: !sweepAll,
+                                  // enabled: !sweepAll,
                                   controller: amountEditingController,
                                   textAlign: TextAlign.center,
                                   onChanged: (value) {
+                                    num amount = ref
+                                        .watch(walletAvailableBalanceProvider);
+                                    if (widget.maxAmount != 0) {
+                                      amount = widget.maxAmount;
+                                    }
+                                    num? amtInput = num.tryParse(value);
+                                    if (amtInput == null) {
+                                      setState(() {
+                                        sweepAll = false;
+                                      });
+                                    } else {
+                                      amtInput = amtInput * 1e12;
+                                      setState(() {
+                                        sweepAll = amount == amtInput;
+                                      });
+                                    }
                                     ref.read(amountStateProvider.state).state =
                                         value;
                                   },
@@ -333,6 +349,8 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                         ],
                       ),
                       InkWell(
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: (() {
                           num amount =
                               ref.watch(walletAvailableBalanceProvider);
@@ -358,7 +376,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                               }
                               return Text(
                                 sweepAll
-                                    ? "Sending ${formatMonero(amount)} (minus fee)"
+                                    ? "Sweeping ${formatMonero(amount)} (minus fee)"
                                     : "Available Balance : ${formatMonero(amount)}",
                                 style: Theme.of(context).textTheme.bodySmall,
                               );

@@ -341,20 +341,30 @@ extern "C"
 /**********************************/
 JNIEXPORT jlong JNICALL
 Java_com_m2049r_xmrwallet_model_WalletManager_createWalletJ(JNIEnv *env, jobject instance,
-                                                            jstring path, jstring password,
+                                                            jstring path, jstring password, jstring passpharse,
                                                             jstring language,
                                                             jint networkType) {
+    std::string seed_words;
+    std::string err;
+    bool _polyseedCreate = Monero::Wallet::createPolyseed(seed_words, err);
+    if (!_polyseedCreate) {
+        LOGE("Failed to polyseedCreate");
+    }    
+
+    // wallet->createPolyseed(seed_words, err);
+
     const char *_path = env->GetStringUTFChars(path, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
-    const char *_language = env->GetStringUTFChars(language, nullptr);
+    const char *_passpharse = env->GetStringUTFChars(passpharse, nullptr);
+    const char *_language = env->GetStringUTFChars(language, nullptr); // NOT USED ANYMORE?????
     Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
-
     Monero::Wallet *wallet =
-            Monero::WalletManagerFactory::getWalletManager()->createWallet(
+            Monero::WalletManagerFactory::getWalletManager()->createWalletFromPolyseed(
                     std::string(_path),
                     std::string(_password),
-                    std::string(_language),
-                    _networkType);
+                    _networkType,
+                    seed_words,
+                    std::string(_passpharse), true);
 
     env->ReleaseStringUTFChars(path, _path);
     env->ReleaseStringUTFChars(password, _password);
@@ -401,6 +411,32 @@ Java_com_m2049r_xmrwallet_model_WalletManager_recoveryWalletJ(JNIEnv *env, jobje
                     (uint64_t) restoreHeight,
                     1, // kdf_rounds
                     std::string(_offset));
+
+    env->ReleaseStringUTFChars(path, _path);
+    env->ReleaseStringUTFChars(password, _password);
+    env->ReleaseStringUTFChars(mnemonic, _mnemonic);
+    env->ReleaseStringUTFChars(offset, _offset);
+    return reinterpret_cast<jlong>(wallet);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_m2049r_xmrwallet_model_WalletManager_recoveryWalletPolyseedJ(JNIEnv *env, jobject instance,
+                                                              jstring path, jstring password,
+                                                              jstring mnemonic, jstring offset,
+                                                              jint networkType) {
+    const char *_path = env->GetStringUTFChars(path, nullptr);
+    const char *_password = env->GetStringUTFChars(password, nullptr);
+    const char *_mnemonic = env->GetStringUTFChars(mnemonic, nullptr);
+    const char *_offset = env->GetStringUTFChars(offset, nullptr);
+    Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
+
+    Monero::Wallet *wallet =
+            Monero::WalletManagerFactory::getWalletManager()->createWalletFromPolyseed(
+                    std::string(_path),
+                    std::string(_password),
+                    _networkType,
+                    std::string(_mnemonic), 
+                    std::string(_offset), false);
 
     env->ReleaseStringUTFChars(path, _path);
     env->ReleaseStringUTFChars(password, _password);
@@ -657,14 +693,63 @@ Java_com_m2049r_xmrwallet_model_WalletManager_closeJ(JNIEnv *env, jobject instan
 /************ Wallet **************/
 /**********************************/
 
+// For backwards compatibility reasons, getSeed will continue silently fallback to legacy mnemonic
+// seed.
+// Since the changes aren't upstremead yet, and we don't know how polyseed will evolve / if there
+// will be any changes we wouldn't like to have the users stuck with not working wallet that they
+// can't backup.
 JNIEXPORT jstring JNICALL
 Java_com_m2049r_xmrwallet_model_Wallet_getSeed(JNIEnv *env, jobject instance, jstring seedOffset) {
     const char *_seedOffset = env->GetStringUTFChars(seedOffset, nullptr);
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
-    jstring seed = env->NewStringUTF(wallet->seed(std::string(_seedOffset)).c_str());
+
+    std::string _seed;
+    std::string seedOffsetStr(_seedOffset);
+    bool _getPolyseed = wallet->getPolyseed(_seed, seedOffsetStr);
+    
+    if (_getPolyseed) {
+        LOGD("_getPolyseed: true");
+    } else {
+        LOGD("_getPolyseed: false");
+        LOGE("wallet->getSeed() %s", wallet->errorString().c_str());
+        LOGD("Falling back to normal, boring, seed");
+        _seed = wallet->seed(std::string(_seedOffset));
+    }
+
     env->ReleaseStringUTFChars(seedOffset, _seedOffset);
+
+    jstring seed = env->NewStringUTF(_seed.c_str());
     return seed;
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_getLegacySeed(JNIEnv *env, jobject instance, jstring seedOffset) {
+    const char *_seedOffset = env->GetStringUTFChars(seedOffset, nullptr);
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+
+    std::string _seed;
+    std::string seedOffsetStr(_seedOffset);
+    _seed = wallet->seed(std::string(_seedOffset));
+
+    env->ReleaseStringUTFChars(seedOffset, _seedOffset);
+
+    jstring seed = env->NewStringUTF(_seed.c_str());
+    return seed;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_isPolyseedSupported(JNIEnv *env, jobject instance, jstring seedOffset) {
+    const char *_seedOffset = env->GetStringUTFChars(seedOffset, nullptr);
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+
+    std::string _seed;
+    std::string seedOffsetStr(_seedOffset);
+    bool _getPolyseed = wallet->getPolyseed(_seed, seedOffsetStr);
+    
+    env->ReleaseStringUTFChars(seedOffset, _seedOffset);
+    return _getPolyseed;
+}
+
 
 JNIEXPORT jstring JNICALL
 Java_com_m2049r_xmrwallet_model_Wallet_getSeedLanguage(JNIEnv *env, jobject instance) {
@@ -843,7 +928,7 @@ Java_com_m2049r_xmrwallet_model_Wallet_setTrustedDaemon(JNIEnv *env, jobject ins
 }
 
 
-//TODO virtual bool trustedDaemon() const = 0;
+// TODO virtual bool trustedDaemon() const = 0;
 
 JNIEXPORT jboolean JNICALL
 Java_com_m2049r_xmrwallet_model_Wallet_setProxyJ(JNIEnv *env, jobject instance,
@@ -1161,7 +1246,7 @@ Java_com_m2049r_xmrwallet_model_Wallet_importKeyImages(JNIEnv *env, jobject inst
         return env->NewStringUTF("Imported");
     }
     LOGD("monerujo.cpp: importKeyImages: error");
-    LOGD(wallet->errorString().c_str());
+    //LOGD(wallet->errorString().c_str());
     isImportKeyImagesLocked = false;
     return env->NewStringUTF(wallet->errorString().c_str());
 }

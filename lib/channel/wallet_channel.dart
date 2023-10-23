@@ -97,7 +97,7 @@ class WalletChannel {
   }
 
   Future wipe(String seedPassphrase) async {
-    dynamic value = await platform
+    return platform
         .invokeMethod("wipeWallet", {"seedPassphrase": seedPassphrase});
   }
 
@@ -120,7 +120,7 @@ class WalletChannel {
   }
 
   Future lock() async {
-    dynamic value = await platform.invokeMethod("lock");
+    return platform.invokeMethod("lock");
   }
 
   Future<bool> importFromFile(UrType type, String path) async {

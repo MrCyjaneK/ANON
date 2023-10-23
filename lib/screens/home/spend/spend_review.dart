@@ -12,6 +12,33 @@ class AnonSpendReview extends ConsumerWidget {
   final Function? onActionClicked;
 
   const AnonSpendReview({Key? key, this.onActionClicked}) : super(key: key);
+  void showFeeNotification(
+      BuildContext context, Function? onActionClicked) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog.adaptive(
+        title: const Text(
+          "Huge fee detected!",
+        ),
+        content: const Text(
+            'It looks like you are trying to send a transaction with a huge fee '
+            'while this may be intentional (you are sending a small amount of '
+            'monero), chances are that you are connected to malicious node.\n'
+            'We recommend you to switch node and make sure that you want to '
+            'pay fee this big.'),
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ),
+          OutlinedButton(
+            onPressed: () => onActionClicked?.call(),
+            child: const Text("Send anyway"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -150,6 +177,11 @@ class AnonSpendReview extends ConsumerWidget {
                 title: "Fee",
                 isLoading: loading,
                 subTitle: formatMonero((fees ?? 0)),
+                color: (((fees ?? 0) == 0) ||
+                        ((amount ?? 0) == 0) ||
+                        (amount ?? 0) * 0.10 < (fees ?? 0))
+                    ? Colors.red
+                    : null,
               ),
             ),
           ),
@@ -187,7 +219,13 @@ class AnonSpendReview extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 6)),
                   onPressed: () {
-                    onActionClicked?.call();
+                    final fee = fees ?? 0;
+                    final amt = amount ?? 0;
+                    if ((fee == 0) || (amt == 0) || (amt * 0.10 < fee)) {
+                      showFeeNotification(context, onActionClicked);
+                    } else {
+                      onActionClicked?.call();
+                    }
                   },
                   child: const Text("Confirm")),
             ),
@@ -202,22 +240,25 @@ class SpendListItem extends StatelessWidget {
   final String title;
   final String subTitle;
   final bool isLoading;
-
+  final Color? color;
   const SpendListItem(
       {Key? key,
       required this.title,
       this.isLoading = false,
-      required this.subTitle})
+      required this.subTitle,
+      this.color})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(title,
-          style: Theme.of(context)
-              .textTheme
-              .titleLarge
-              ?.copyWith(color: Theme.of(context).primaryColor)),
+      title: Text(
+        title,
+        style: Theme.of(context)
+            .textTheme
+            .titleLarge
+            ?.copyWith(color: Theme.of(context).primaryColor),
+      ),
       trailing: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: isLoading
@@ -231,7 +272,7 @@ class SpendListItem extends StatelessWidget {
                 style: Theme.of(context)
                     .textTheme
                     .bodyLarge
-                    ?.copyWith(fontSize: 18),
+                    ?.copyWith(fontSize: 18, color: color),
               ),
       ),
     );

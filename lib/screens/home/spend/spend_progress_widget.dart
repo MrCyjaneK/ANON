@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:anon_wallet/models/broadcast_tx_state.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:flutter/material.dart';
@@ -152,9 +151,6 @@ class SpendSuccessWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     TxState txState = ref.watch(transactionStateProvider);
-    String state = txState.state;
-    bool hasError = txState.hasError();
-    bool isLoading = txState.isLoading();
 
     return WillPopScope(
       onWillPop: () {

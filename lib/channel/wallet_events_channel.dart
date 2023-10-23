@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/sub_address.dart';
@@ -13,6 +12,7 @@ bool debugWalletEventsChannel =
 
 class WalletEventsChannel {
   static const channel = EventChannel("wallet.events");
+  // ignore: unused_field
   late StreamSubscription _events;
   final StreamController<Node?> _nodeStream = StreamController<Node?>();
   final StreamController<Wallet?> _walletStream = StreamController<Wallet?>();
@@ -49,7 +49,7 @@ class WalletEventsChannel {
         var type = event['EVENT_TYPE'];
 
         if (debugWalletEventsChannel) {
-          print("walletEventsChannel: Sync:$type $event");
+          debugPrint("walletEventsChannel: Sync:$type $event");
         }
         switch (type) {
           case "NODE":

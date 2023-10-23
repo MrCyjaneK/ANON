@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../models/node.dart';
@@ -40,7 +41,7 @@ class NodeChannel {
 
   Future setNode(
       String host, int port, String? username, String? password) async {
-    print(
+    debugPrint(
         "node_channel.dart: setNode($host, $port, '[redacted]', '[redacted]')");
     dynamic value = await platform.invokeMethod("setNode", {
       "host": host,
@@ -53,7 +54,7 @@ class NodeChannel {
 
   Future addNode(
       String host, int port, String? username, String? password) async {
-    print("addNode($host, $port, $username, $password");
+    debugPrint("addNode($host, $port, $username, $password");
     dynamic value = await platform.invokeMethod("addNewNode", {
       "host": host,
       "port": port,
@@ -97,8 +98,8 @@ class NodeChannel {
   }
 
   Future setCurrentNode(Node node) async {
-    print("setCurrentNode($node)");
-    dynamic value = await platform.invokeMethod("setCurrentNode", {
+    debugPrint("setCurrentNode($node)");
+    return platform.invokeMethod("setCurrentNode", {
       "host": node.host,
       "port": node.port,
       "password": node.password,

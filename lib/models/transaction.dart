@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:flutter/material.dart';
 
@@ -66,13 +64,13 @@ class Transaction {
           try {
             subAddress = SubAddress.fromJson(json["addressDetail"]);
           } catch (e) {
-            print(e);
+            debugPrint(e.toString());
           }
         }
       }
     } catch (e, s) {
       debugPrintStack(stackTrace: s);
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -106,7 +104,7 @@ class Transfer {
       amount = json['amount'];
     } catch (e, s) {
       debugPrintStack(stackTrace: s);
-      print(e);
+      debugPrint(e.toString());
     }
   }
 }

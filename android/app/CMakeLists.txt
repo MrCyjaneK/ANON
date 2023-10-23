@@ -79,6 +79,14 @@ add_library(wallet STATIC IMPORTED)
 set_target_properties(wallet PROPERTIES IMPORTED_LOCATION
     ${EXTERNAL_LIBS_DIR}/${ANDROID_ABI}/monero/libwallet.a)
 
+add_library(polyseed STATIC IMPORTED) 	 
+set_target_properties(polyseed PROPERTIES IMPORTED_LOCATION 
+        ${EXTERNAL_LIBS_DIR}/${ANDROID_ABI}/libpolyseed.a)
+
+add_library(polyseed-wrapper STATIC IMPORTED) 	 
+set_target_properties(polyseed-wrapper PROPERTIES IMPORTED_LOCATION 
+        ${EXTERNAL_LIBS_DIR}/${ANDROID_ABI}/monero/libpolyseed_wrapper.a)
+
 add_library(cryptonote_core STATIC IMPORTED)
 set_target_properties(cryptonote_core PROPERTIES IMPORTED_LOCATION
     ${EXTERNAL_LIBS_DIR}/${ANDROID_ABI}/monero/libcryptonote_core.a)
@@ -155,6 +163,10 @@ add_library(net STATIC IMPORTED)
 set_target_properties(net PROPERTIES IMPORTED_LOCATION
         ${EXTERNAL_LIBS_DIR}/${ANDROID_ABI}/monero/libnet.a)
 
+add_library(utf8proc STATIC IMPORTED)
+set_target_properties(utf8proc PROPERTIES IMPORTED_LOCATION
+        ${EXTERNAL_LIBS_DIR}/${ANDROID_ABI}/libutf8proc.a)
+
 add_library(hardforks STATIC IMPORTED)
 set_target_properties(hardforks PROPERTIES IMPORTED_LOCATION
         ${EXTERNAL_LIBS_DIR}/${ANDROID_ABI}/monero/libhardforks.a)
@@ -191,13 +203,16 @@ else()
     set(EXTRA_LIBS "")
 endif()
 
-target_link_libraries(  monerujo
+target_link_libraries(  monerujo 
 
                         wallet_api
                         wallet
                         cryptonote_core
                         cryptonote_basic
                         cryptonote_format_utils_basic
+                        polyseed
+                        polyseed-wrapper
+                        utf8proc
                         mnemonics
                         ringct
                         ringct_basic
@@ -237,3 +252,4 @@ target_link_libraries(  monerujo
 
                        ${log-lib}
                        )
+

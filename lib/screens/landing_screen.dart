@@ -12,6 +12,7 @@ import 'package:anon_wallet/screens/onboard/restore/restore_from_seed.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_view_only.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
+import 'package:anon_wallet/widgets/number_pad.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -65,10 +66,9 @@ class _LandingScreenState extends State<LandingScreen> {
                     ? Consumer(
                         builder: (context, ref, c) {
                           var existingNode = ref.watch(nodeFromPrefs);
-                          return ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white),
+                          return OutlinedButton(
                             onPressed: () async {
+                              numberList = '0,1,2,3,4,5,6,7,8,9'.split(',');
                               ref.read(remoteUserName.notifier).state = "";
                               ref.read(remotePassword.notifier).state = "";
                               ref.read(remoteHost.notifier).state = "";
@@ -82,38 +82,8 @@ class _LandingScreenState extends State<LandingScreen> {
                                 ref.read(remoteHost.notifier).state =
                                     existingNode.value!.toNodeString();
                               }
-                              // showDialog(
-                              //     context: context,
-                              //     builder: (context) {
-                              //       return AlertDialog(
-                              //           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                              //           content: SizedBox(
-                              //             height: 60,
-                              //             child: Column(children: [
-                              //               const Center(
-                              //                 child: CircularProgressIndicator(
-                              //                   strokeWidth: 1,
-                              //                 ),
-                              //               ),
-                              //               const Padding(padding: EdgeInsets.only(bottom: 8)),
-                              //               Text(
-                              //                 "Please wait,wallet is creating...",
-                              //                 style: Theme.of(context).textTheme.caption,
-                              //               )
-                              //             ]),
-                              //           ));
-                              //     });
-                              try {
-                                // if(pin == null){
-                                //   return;
-                                // }
-                                // var wallet = await WalletChannel().create(pin);
-                                // wallet.pin = pin;
-                                // Navigator.pop(context);
-                                // wallet.seed = "scorpion enough attitude image mountain off stem head this quick vivid defy exotic reveal type monitor crash mosquito universe oxygen clap wedding vocal labor".split(" ");
-                                // await Future.delayed(Duration(milliseconds: 120));
-                                // NodeChannel().testRPC();
 
+                              try {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -127,9 +97,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelLarge
-                                    ?.copyWith(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w700)),
+                                    ?.copyWith(fontWeight: FontWeight.w700)),
                           );
                         },
                       )
@@ -139,19 +107,16 @@ class _LandingScreenState extends State<LandingScreen> {
                     : const SizedBox(),
                 Column(
                   children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white),
+                    OutlinedButton(
                       onPressed: () {
+                        numberList = '0,1,2,3,4,5,6,7,8,9'.split(',');
                         showRestoreOptions(context);
                       },
                       child: Text("RESTORE WALLET",
                           style: Theme.of(context)
                               .textTheme
                               .labelLarge
-                              ?.copyWith(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w700)),
+                              ?.copyWith(fontWeight: FontWeight.w700)),
                     ),
                   ],
                 )

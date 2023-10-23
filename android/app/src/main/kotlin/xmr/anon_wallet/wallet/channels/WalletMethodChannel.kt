@@ -240,6 +240,8 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                 "address" to wallet.address,
                                 "secretViewKey" to wallet.secretViewKey,
                                 "seed" to wallet.getSeed(seedPassphrase),
+                                "legacySeed" to wallet.getLegacySeed(seedPassphrase),
+                                "isPolyseedSupported" to wallet.isPolyseedSupported(seedPassphrase),
                                 "spendKey" to wallet.secretSpendKey,
                                 "restoreHeight" to wallet.restoreHeight
                             )
@@ -407,6 +409,8 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                                 } else {
                                     WalletEventsChannel.initialized = wallet.init(0, getProxyTor())
                                 }
+                            } else {
+                                WalletEventsChannel.initialized = wallet.init(0, "")
                             }
                             Prefs.restoreHeight?.let {
                                 if (it != 0L)
@@ -491,6 +495,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     val newWalletFile = File(AnonWallet.walletDir, walletName)
                     val default = "English"
                     //Close if wallet is already open
+                    Log.d("WalletMethodChannel.kt", "closing wallet")
                     WalletManager.getInstance().wallet?.close()
                     // NOTE: I don't think that we really need to set proxy here?
                     // TODO: check for leaks
@@ -512,8 +517,10 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                             "state" to true
                         )
                     )
+                    Log.d("WalletMethodChannel.kt", "Creating wallet")
                     val wallet = WalletManager.getInstance()
-                        .createWallet(newWalletFile, walletPin, default, restoreHeight)
+                        .createWallet(newWalletFile, walletPin, seedPhrase, default, restoreHeight)
+                    Log.d("WalletMethodChannel.kt", "Wallet created")
                     AnonPreferences(context = AnonWallet.getAppContext()).passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), seedPhrase)
                     val map = wallet.walletToHashMap()
                     map["seed"] = wallet.getSeed(seedPhrase ?: "")
@@ -521,22 +528,25 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     result.success(map)
                     if (AnonPreferences(AnonWallet.getAppContext()).serverUrl != null) {
                         NodeManager.setNode()
+                    } else {
+                        if (WalletManager.getInstance().reopen()) {
+                            WalletEventsChannel.initWalletListeners()
+                        }
                     }
-                    WalletEventsChannel.initWalletListeners()
                     if (wallet.status.isOk) {
                         wallet.refresh()
                         sendEvent(wallet.walletToHashMap())
-                        WalletManager.getInstance().daemonAddress?.let {
-                            // WalletEventsChannel.initialized = wallet.init(0)
+                        if (WalletManager.getInstance().daemonAddress != null) {
                             if (WalletManager.getInstance().daemonAddress.toString().contains(".i2p")) {
                                 WalletEventsChannel.initialized = wallet.init(0, getProxyI2p())
-                                // wallet.setProxy(getProxyI2p())
                             } else {
                                 WalletEventsChannel.initialized = wallet.init(0, getProxyTor())
-                                // wallet.setProxy(getProxyTor())
                             }
-                            sendEvent(wallet.walletToHashMap())
+                        } else {
+                            WalletEventsChannel.initialized = wallet.init(0, "")
                         }
+                        sendEvent(wallet.walletToHashMap())
+
                         wallet.refreshHistory()
                         sendEvent(
                             hashMapOf(

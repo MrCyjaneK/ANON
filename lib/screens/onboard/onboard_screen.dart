@@ -1,4 +1,3 @@
-import 'package:anon_wallet/models/config.dart';
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
@@ -113,9 +112,7 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 controller: pageController,
                 children: [
-                  const RemoteNodeWidget(
-                    heroEnabled: false,
-                  ),
+                  const RemoteNodeWidget(),
                   WalletPassphraseWidget(
                     heroEnabled: false,
                     onPassSeedPhraseAdded: (value) {
@@ -175,28 +172,36 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                 }
                 if (page == 2) {
                   nextButton = "";
+                  return Container();
                 }
                 if (page == 3) {
                   nextButton = "Finish";
                 }
                 return Container(
+                  alignment: Alignment.bottomCenter,
                   padding:
-                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.white),
-                    onPressed: () async {
-                      if (rHost.isEmpty && page == 0) {
-                        showConfirmColdAlert();
-                      } else if (value) {
-                        onNext(context);
-                      }
-                    },
-                    child: Text(
-                      nextButton,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Colors.black, fontWeight: FontWeight.w700),
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                          side:
+                              const BorderSide(width: 1.0, color: Colors.white),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  width: 12, color: Colors.white),
+                              borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 6)),
+                      onPressed: () async {
+                        if (rHost.isEmpty && page == 0) {
+                          showConfirmColdAlert();
+                        } else if (value) {
+                          onNext(context);
+                        }
+                      },
+                      child: Text(nextButton),
                     ),
                   ),
                 );
@@ -263,10 +268,10 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
   onNext(BuildContext context, {bool coldMode = false}) async {
     FocusManager.instance.primaryFocus?.unfocus();
     Node? connectionState = ref.read(nodeConnectionState).value;
-    if ((pageController.page == 0 &&
+    if (coldMode ||
+        (pageController.page == 0 &&
             connectionState != null &&
-            connectionState.isConnected()) ||
-        coldMode) {
+            connectionState.isConnected())) {
       pageController.nextPage(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOutSine);

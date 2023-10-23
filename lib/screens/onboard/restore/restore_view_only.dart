@@ -1,15 +1,10 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
-import 'package:anon_wallet/models/config.dart';
 import 'package:anon_wallet/screens/onboard/restore/restore_node_setup.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/widgets/qr_scanner.dart';
-import 'package:anon_wallet/widgets/show_passphrase_dialog.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -48,7 +43,7 @@ class _RestoreViewOnlyWalletState extends State<RestoreViewOnlyWallet> {
                 style: Theme.of(context)
                     .textTheme
                     .displaySmall
-                    ?.copyWith(fontSize: 22),
+                    ?.copyWith(fontSize: 22, color: Colors.white),
               ),
             ),
             Expanded(

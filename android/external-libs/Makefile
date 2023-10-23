@@ -41,7 +41,7 @@ include:
 	mkdir include
 
 VERSION:
-	echo MONERUJO_$(FLAVOUR) `git -C . branch | grep "^\*" | sed 's/^..//'` with $(FLAVOUR) `git -C $(FLAVOUR) branch | grep "^\*" | sed 's/^..//'` > VERSION
+	echo MONERUJO_$(FLAVOUR) `git -C . branch | grep "^\*" | sed 's/^..//'` with $(FLAVOUR) `git -C $(FLAVOUR) branch | grep "^\*" | sed 's/^..//'` `git -C $(FLAVOUR) rev-parse --short=12 HEAD` > VERSION
 
 clean:
 	-rm -rf arm64-v8a

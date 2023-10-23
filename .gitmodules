@@ -1,0 +1,4 @@
+[submodule "monero"]
+	path = android/external-libs/monero
+	url = https://git.mrcyjanek.net/mrcyjanek/monero.git
+	branch = release-v0.18.3.1-anonero-patch2

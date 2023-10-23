@@ -6,7 +6,6 @@ import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/channel/wallet_events_channel.dart';
-import 'package:anon_wallet/models/config.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/screens/home/spend/anon_progress.dart';
 import 'package:anon_wallet/screens/home/spend/spend_progress_widget.dart';
@@ -213,7 +212,7 @@ class LockScreen extends HookWidget {
     } on PlatformException catch (e) {
       error.value = e.message;
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     } finally {
       loading.value = false;
     }
@@ -249,7 +248,6 @@ Future<void> showServiceNotification() async {
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
-  print("here0");
 
   final confOk = await service.configure(
     androidConfiguration: AndroidConfiguration(
@@ -271,14 +269,14 @@ Future<void> showServiceNotification() async {
     ),
   );
   if (!confOk) {
-    print(
+    debugPrint(
       "WARN: Failed to service.configure. Background mode will not work as expected",
     );
   }
   await setStats('Loading wallet...');
   final startOk = await service.startService();
   if (!startOk) {
-    print("WARN: failed to start service");
+    debugPrint("WARN: failed to start service");
   }
 }
 

@@ -101,20 +101,26 @@ class SubAddressItem extends StatelessWidget {
                   return SubAddressEditDialog(subAddress);
                 });
           },
-          title: Text(
-            subAddress.getLabel(),
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: Theme.of(context).primaryColor),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  subAddress.getLabel(),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Theme.of(context).primaryColor),
+                ),
+              ),
+              Text(
+                formatMonero(subAddress.totalAmount),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).primaryColor,
+                    ),
+              ),
+            ],
           ),
           subtitle: Text("${subAddress.squashedAddress}"),
-          trailing: Text(
-            formatMonero(subAddress.totalAmount),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).primaryColor,
-                ),
-          ),
         ),
       ),
     );

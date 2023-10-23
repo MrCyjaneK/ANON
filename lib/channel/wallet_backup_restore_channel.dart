@@ -49,6 +49,11 @@ class BackUpRestoreChannel {
     });
   }
 
+  Future restoreFromPolyseed(String seed, String passPhrase, String pin) async {
+    return platform.invokeMethod("restoreFromPolyseed",
+        {"seed": seed, "pin": pin, "passPhrase": passPhrase});
+  }
+
   Future restoreViewOnly(
       String primaryAddress, String privateViewKey, num num, String pin) async {
     return platform.invokeMethod("restoreViewOnly", {

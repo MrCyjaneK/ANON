@@ -22,6 +22,8 @@ class ViewWalletSeed extends ConsumerStatefulWidget {
 }
 
 class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
+  bool useLegacy = false;
+
   @override
   Widget build(BuildContext context) {
     Wallet? wallet = ref.watch(viewPrivateWalletProvider);
@@ -29,12 +31,14 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
         .textTheme
         .titleLarge
         ?.copyWith(color: Theme.of(context).primaryColor);
+
     final data = {
       "version": 0,
       "primaryAddress": wallet?.address,
       "privateViewKey": wallet?.secretViewKey,
       "restoreHeight": wallet?.restoreHeight
     };
+
     return WillPopScope(
       onWillPop: () async {
         ref.read(viewPrivateWalletProvider.notifier).clear();
@@ -73,13 +77,28 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                     ),
                     SliverToBoxAdapter(
                       child: ListTile(
-                        title: Text("MNEMONIC", style: titleStyle),
+                        onTap: !wallet.isPolyseedSupported
+                            ? null
+                            : () {
+                                setState(() {
+                                  useLegacy = !useLegacy;
+                                });
+                              },
+                        title: Text(
+                            (useLegacy ? wallet.legacySeed : wallet.seed)
+                                        .length ==
+                                    16
+                                ? "POLYSEED MNEMONIC"
+                                : "LEGACY MNEMONIC",
+                            style: titleStyle),
                         subtitle: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Wrap(
-                              children: (wallet.seed).map((e) {
+                              children:
+                                  (useLegacy ? wallet.legacySeed : wallet.seed)
+                                      .map((e) {
                                 return Container(
                                   padding: const EdgeInsets.all(4),
                                   margin: const EdgeInsets.all(4),
@@ -136,8 +155,7 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                         title: Text("RESTORE HEIGHT", style: titleStyle),
                         subtitle: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: SelectableText(
-                              "${wallet.restoreHeight ?? "N/A"} ",
+                          child: SelectableText("${wallet.restoreHeight}",
                               style: Theme.of(context).textTheme.bodyLarge),
                         ),
                       ),
@@ -278,6 +296,7 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
                               .read(viewPrivateWalletProvider.notifier)
                               .getWallet(controller.text);
                           AppHaptics.lightImpact();
+                          if (!mounted) return;
                           Navigator.pop(context);
                         } on PlatformException catch (e, s) {
                           debugPrintStack(stackTrace: s);

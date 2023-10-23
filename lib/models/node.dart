@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 class Node {
@@ -70,7 +68,7 @@ class Node {
 
   String toNodeString() {
     if (host != null && (host?.isNotEmpty ?? false)) {
-      Map<String, String> params = Map();
+      Map<String, String> params = {};
       if (username != null && (username?.isNotEmpty ?? false)) {
         params["username"] = username!;
       }

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/models/transaction.dart';
@@ -24,6 +22,8 @@ class Wallet {
   num numSubaddresses = 0;
   num restoreHeight = 0;
   List<String> seed = [];
+  List<String> legacySeed = [];
+  bool isPolyseedSupported = false;
   SubAddress? currentAddress;
   List<Transaction> transactions = [];
 
@@ -52,6 +52,10 @@ class Wallet {
     if (json.containsKey("seed")) {
       seed = (json['seed'] as String).split(" ");
     }
+    if (json.containsKey("legacySeed")) {
+      legacySeed = (json['legacySeed'] as String).split(" ");
+    }
+    isPolyseedSupported = json['isPolyseedSupported'] ?? false;
     if (json.containsKey("spendKey")) {
       spendKey = (json['spendKey'] as String);
     }

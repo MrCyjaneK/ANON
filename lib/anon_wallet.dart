@@ -1,6 +1,5 @@
 //START WALLET num-pad consts
 import 'package:anon_wallet/channel/wallet_channel.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 const maxPinSize = 12;
 const minPinSize = 5;

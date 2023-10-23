@@ -1,7 +1,6 @@
 import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/models/transaction.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
-import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

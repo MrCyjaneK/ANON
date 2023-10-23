@@ -30,6 +30,9 @@ class TransactionStateNotifier extends StateNotifier<TxState> {
 
   createPreview(String amount, String address, bool sweepAll, String notes,
       List<String> keyImages) async {
+    if (sweepAll) {
+      amount = '0.000000000001';
+    }
     if (keyImages.isEmpty) {
       print("WARN: keyImages is empty. Filling with all keys");
       final value = await WalletChannel().getUtxos();
@@ -53,6 +56,7 @@ class TransactionStateNotifier extends StateNotifier<TxState> {
       print('createPreview(');
       print('\tamount: $amount');
       print('\taddress: $address');
+      print('\tsweepAll: $sweepAll');
       print('\tnotes: $notes');
       print("\tkeyImages: $keyImages");
       print(")");

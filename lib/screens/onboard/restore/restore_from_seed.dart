@@ -42,7 +42,7 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
               style: Theme.of(context)
                   .textTheme
                   .displaySmall
-                  ?.copyWith(fontSize: 22),
+                  ?.copyWith(fontSize: 22, color: Colors.white),
             ),
             Expanded(
               child: RestoreNodeSetup(
@@ -72,12 +72,12 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
               style: Theme.of(context)
                   .textTheme
                   .displaySmall
-                  ?.copyWith(fontSize: 22),
+                  ?.copyWith(fontSize: 22, color: Colors.white),
             ),
             Expanded(
               child: SeedEntry(
                 heroEnabled: false,
-                onSeedEntered: (List<String> seed, num height) {
+                onSeedEntered: (List<String> seed, num? height) {
                   onSeedEntered(seed, height, context);
                 },
               ),
@@ -116,7 +116,7 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
     ));
   }
 
-  onSeedEntered(List<String> seed, num height, BuildContext context) async {
+  onSeedEntered(List<String> seed, num? height, BuildContext context) async {
     FocusScope.of(context).requestFocus(FocusNode());
     final navigator = Navigator.of(context);
     String? passPhrase = await showPassPhraseDialog(
@@ -132,14 +132,22 @@ class _RestoreFromSeedState extends State<RestoreFromSeed> {
       _pageController.nextPage(
           duration: const Duration(milliseconds: 500), curve: Curves.ease);
       await Future.delayed(const Duration(milliseconds: 600));
-      BackUpRestoreChannel()
-          .restoreFromSeed(seed.join(" "), height, passPhrase, pin);
+      if (height != null) {
+        print("restore from seed:");
+        BackUpRestoreChannel()
+            .restoreFromSeed(seed.join(" "), height, passPhrase, pin);
+      } else {
+        print("restore from polyseed:");
+
+        BackUpRestoreChannel()
+            .restoreFromPolyseed(seed.join(" "), passPhrase, pin);
+      }
     }
   }
 }
 
 class SeedEntry extends StatefulWidget {
-  final Function(List<String> seed, num height) onSeedEntered;
+  final Function(List<String> seed, num? height) onSeedEntered;
   final bool heroEnabled;
   const SeedEntry(
       {Key? key, required this.onSeedEntered, required this.heroEnabled})
@@ -175,12 +183,11 @@ class _SeedEntryState extends State<SeedEntry> {
                     style: Theme.of(context)
                         .textTheme
                         .displaySmall
-                        ?.copyWith(fontSize: 22),
+                        ?.copyWith(fontSize: 22, color: Colors.white),
                   )
                 ],
               ),
             ),
-          const SliverPadding(padding: EdgeInsets.all(24)),
           SliverToBoxAdapter(
             child: ListTile(
               title: Padding(
@@ -249,7 +256,7 @@ class _SeedEntryState extends State<SeedEntry> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Opacity(
-                  opacity: seed.length >= 25 ? 1 : 0,
+                  opacity: seed.length >= 16 ? 1 : 0,
                   child: Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(
@@ -265,12 +272,16 @@ class _SeedEntryState extends State<SeedEntry> {
                               borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 6)),
-                      onPressed: () async {
-                        var restoreHeight =
-                            num.parse(_restoreHeightController.text);
-                        widget.onSeedEntered(seed, restoreHeight);
-                      },
-                      child: const Text("Next"),
+                      onPressed: (seed.length != 16 && seed.length != 25)
+                          ? null
+                          : () async {
+                              var restoreHeight =
+                                  num.tryParse(_restoreHeightController.text);
+                              widget.onSeedEntered(seed, restoreHeight);
+                            },
+                      child: Text((seed.length != 16 && seed.length != 25)
+                          ? "Invalid Seed"
+                          : "Next"),
                     ),
                   ),
                 ),

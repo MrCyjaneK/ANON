@@ -42,6 +42,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "parseBackup" -> parseBackup(call, result)
             "restore" -> restore(call, result)
             "restoreFromSeed" -> restoreFromSeed(call, result)
+            "restoreFromPolyseed" -> restoreFromPolyseed(call, result)
         }
     }
 
@@ -165,6 +166,34 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             }
         }
     }
+
+
+    private fun restoreFromPolyseed(call: MethodCall, result: Result) {
+        val seed = call.argument<String>("seed")
+        val pin = call.argument<String>("pin")
+        val passPhrase = call.argument<String?>("passPhrase")
+        val walletFileName = "default"
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                val walletFile = File(AnonWallet.walletDir, walletFileName)
+                val wallet = WalletManager.getInstance().recoveryWalletPolyseed(walletFile, pin, seed, passPhrase ?: "")
+                Prefs.passPhraseHash = KeyStoreHelper.getCrazyPass(AnonWallet.getAppContext(), passPhrase)
+                Prefs.restoreHeight = wallet.restoreHeight
+                val isOk = wallet.status.isOk
+                wallet.store()
+                wallet.close()
+                if (!isOk) {
+                    result.error("0", "Unable to restore wallet", null)
+                    return@withContext
+                }
+                //wait for preferences to be saved
+                delay(600)
+                result.success(true)
+                activity.restart()
+            }
+        }
+    }
+
 
     private fun openBackupFile(call: MethodCall, result: Result) {
         currentResult = result

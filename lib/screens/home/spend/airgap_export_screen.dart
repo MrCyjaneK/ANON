@@ -203,7 +203,10 @@ class _ImportFromQRScreenState extends ConsumerState<ExportQRScreen> {
             try {
               var errorMessage =
                   (error as PlatformException).message ?? "Unable to process";
-            } catch (e) {}
+              debugPrint(errorMessage);
+            } catch (e) {
+              debugPrint(e.toString());
+            }
             return Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
