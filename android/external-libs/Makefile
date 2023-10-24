@@ -49,7 +49,6 @@ clean:
 	-rm -rf x86_64
 	-rm -rf x86
 	-rm -rf include
-	-rm -f VERSION
 
 distclean: clean
 	-docker container rm $(FLAVOUR)-android-arm64 -f

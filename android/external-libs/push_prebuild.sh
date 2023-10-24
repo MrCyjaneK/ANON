@@ -4,7 +4,7 @@
 cd "$(dirname "$0")"
 set -xe
 rm build.tar.gz || true
-tar --use-compress-program="pigz --best --recursive" -cf build.tar.gz arm64-v8a x86_64 armeabi-v7a x86 VERSION
+tar --use-compress-program="pigz --best --recursive" -cf build.tar.gz arm64-v8a x86_64 armeabi-v7a x86 include VERSION
 
 uname -a > builder.txt
 set +e
