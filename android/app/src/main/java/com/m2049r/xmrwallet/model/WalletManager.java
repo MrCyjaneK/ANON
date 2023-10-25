@@ -127,17 +127,8 @@ public class WalletManager {
         Log.d("WalletManager.java", "wallet.getStatus().isOk()");
         if (wallet.getStatus().isOk()) {
             Log.d("WalletManager.java", "wallet.getStatus().isOk(): true");
-            // (Re-)Estimate restore height based on what we know
-            final long oldHeight = wallet.getRestoreHeight();
-            // Go back 4 days if we don't have a precise restore height
-            Calendar restoreDate = Calendar.getInstance();
-            restoreDate.add(Calendar.DAY_OF_MONTH, -4);
-            final long restoreHeight =
-                    (height > -1) ? height : RestoreHeight.getInstance().getHeight(restoreDate.getTime());
-            wallet.setRestoreHeight(restoreHeight);
-            Timber.d("Changed Restore Height from %d to %d", oldHeight, wallet.getRestoreHeight());
             wallet.setPassword(password); // this rewrites the keys file (which contains the restore height)
-        } else {
+        } else { 
             Timber.e(wallet.getStatus().toString());
         }
 
