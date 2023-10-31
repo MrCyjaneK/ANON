@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
-
+import 'dart:math' as math; // import this
 import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
@@ -128,69 +128,126 @@ class AppMain extends ConsumerWidget {
   }
 }
 
+enum AfterSelectAction {
+  actionReceive,
+  actionSend,
+  actionNone,
+}
+
 class LockScreen extends HookWidget {
   const LockScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final action = useState<AfterSelectAction>(AfterSelectAction.actionNone);
     final error = useState<String?>(null);
+    final currentPin = useState<String>("");
     final loading = useState<bool>(false);
 
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: loading.value ? const LinearProgressIndicator() : null,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Hero(
-            tag: "anon_logo",
-            child: SizedBox(
-                width: 180, child: Image.asset("assets/anon_logo.png")),
-          ),
-          const Text("Please enter your pin"),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 6)),
-          AnimatedOpacity(
-            opacity: error.value == null ? 0 : 1,
-            duration: const Duration(milliseconds: 300),
-            child: Text(
-              error.value ?? "",
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall
-                  ?.copyWith(color: Colors.red),
+      body: SafeArea(
+        child: Column(
+          //mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          //mainAxisSize: MainAxisSize.max,
+          children: [
+            Hero(
+              tag: "anon_logo",
+              child: SizedBox(
+                  width: 180, child: Image.asset("assets/anon_logo.png")),
             ),
-          ),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 4)),
-          Expanded(
-            child: Container(
-              alignment: Alignment.bottomCenter,
+            const Text("Status: LOCKED"),
+            const Padding(padding: EdgeInsets.symmetric(vertical: 6)),
+            AnimatedOpacity(
+              opacity: error.value == null ? 0 : 1,
+              duration: const Duration(milliseconds: 300),
+              child: Text(
+                error.value ?? "",
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(color: Colors.red),
+              ),
+            ),
+            const Padding(padding: EdgeInsets.symmetric(vertical: 4)),
+            Expanded(
+              child: Container(
+                alignment: Alignment.bottomCenter,
+                child: Consumer(
+                  builder: (context, ref, c) {
+                    return NumberPadWidget(
+                      maxPinSize: maxPinSize,
+                      onKeyPress: (String key, String value) {
+                        currentPin.value = value;
+                        error.value = null;
+                      },
+                      minPinSize: minPinSize,
+                      onSubmit: (String pin) {
+                        onSubmit(
+                            pin, context, ref, error, loading, action.value);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 42),
               child: Consumer(
                 builder: (context, ref, c) {
-                  return NumberPadWidget(
-                    maxPinSize: maxPinSize,
-                    onKeyPress: (s) {
-                      error.value = null;
-                    },
-                    minPinSize: minPinSize,
-                    onSubmit: (String pin) {
-                      onSubmit(pin, context, ref, error, loading);
-                    },
+                  return Row(
+                    children: [
+                      const Spacer(),
+                      InkWell(
+                        onTap: () {
+                          onSubmit(currentPin.value, context, ref, error,
+                              loading, AfterSelectAction.actionReceive);
+                        },
+                        child: Transform(
+                          alignment: Alignment.center,
+                          transform: Matrix4.rotationY(math.pi),
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.rotationX(math.pi),
+                            child: const Icon(
+                              Icons.arrow_outward,
+                              size: 75,
+                              color: null,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      InkWell(
+                        onTap: () {
+                          onSubmit(currentPin.value, context, ref, error,
+                              loading, AfterSelectAction.actionSend);
+                        },
+                        child: Icon(
+                          Icons.arrow_outward,
+                          size: 75,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      const Spacer(),
+                    ],
                   );
                 },
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  void onSubmit(String pin, BuildContext context, WidgetRef ref,
-      ValueNotifier<String?> error, ValueNotifier<bool> loading) async {
+  void onSubmit(
+      String pin,
+      BuildContext context,
+      WidgetRef ref,
+      ValueNotifier<String?> error,
+      ValueNotifier<bool> loading,
+      AfterSelectAction action) async {
     try {
       error.value = null;
       loading.value = true;
@@ -202,10 +259,11 @@ class LockScreen extends HookWidget {
       WalletEventsChannel().initEventChannel();
       loading.value = false;
       if (wallet != null) {
+        // ignore: use_build_context_synchronously
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-                builder: (c) => const WalletHome(),
+                builder: (c) => WalletHome(startScreen: getStartScreen(action)),
                 settings: const RouteSettings(name: "/")),
             (route) => false);
       }
@@ -215,6 +273,17 @@ class LockScreen extends HookWidget {
       debugPrint(e.toString());
     } finally {
       loading.value = false;
+    }
+  }
+
+  int getStartScreen(AfterSelectAction action) {
+    switch (action) {
+      case AfterSelectAction.actionReceive:
+        return 1;
+      case AfterSelectAction.actionSend:
+        return 2;
+      case AfterSelectAction.actionNone:
+        return 0;
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/receive_screen.dart';
 import 'package:anon_wallet/screens/home/settings/settings_main.dart';
+import 'package:anon_wallet/screens/home/spend/airgap_export_screen.dart';
 import 'package:anon_wallet/screens/home/spend/spend_form_main.dart';
 import 'package:anon_wallet/screens/home/transactions/transactions_list.dart';
 import 'package:anon_wallet/state/node_state.dart';
@@ -15,7 +16,11 @@ import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class WalletHome extends ConsumerStatefulWidget {
-  const WalletHome({Key? key}) : super(key: key);
+  final int startScreen;
+  const WalletHome({
+    this.startScreen = 0,
+    Key? key,
+  }) : super(key: key);
 
   @override
   ConsumerState<WalletHome> createState() => WalletHomeState();
@@ -24,8 +29,9 @@ class WalletHome extends ConsumerStatefulWidget {
 final lockPageViewScroll = StateProvider<bool>((ref) => false);
 
 class WalletHomeState extends ConsumerState<WalletHome> {
-  int _currentView = 0;
-  final PageController _pageController = PageController();
+  late int _currentView = widget.startScreen;
+  late final PageController _pageController =
+      PageController(initialPage: _currentView);
   GlobalKey scaffoldState = GlobalKey<ScaffoldState>();
   PersistentBottomSheetController? _bottomSheetController;
   List<String>? outputs;
@@ -133,8 +139,14 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                     },
                   ),
                 ),
-                body:
-                    AnonSpendForm(outputs: outputs ?? [], maxAmount: maxAmount),
+                body: AnonSpendForm(
+                    outputs: outputs ?? [],
+                    maxAmount: maxAmount,
+                    goBack: () {
+                      _pageController.animateToPage(0,
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.ease);
+                    }),
               ),
               Scaffold(
                 appBar: AppBar(
@@ -164,16 +176,17 @@ class WalletHomeState extends ConsumerState<WalletHome> {
             ref.listen<String?>(nodeErrorState,
                 (String? previousCount, String? newValue) {
               if (newValue != null && scaffoldState.currentContext != null) {
-                ScaffoldMessenger.of(scaffoldState.currentContext!)
-                    .showMaterialBanner(
-                        MaterialBanner(content: Text(newValue), actions: [
-                  TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context)
-                            .hideCurrentMaterialBanner();
-                      },
-                      child: const Text("Close"))
-                ]));
+                // NOTE: Node not connected, old banner.
+                // ScaffoldMessenger.of(scaffoldState.currentContext!)
+                //     .showMaterialBanner(
+                //         MaterialBanner(content: Text(newValue), actions: [
+                //   TextButton(
+                //       onPressed: () {
+                //         ScaffoldMessenger.of(context)
+                //             .hideCurrentMaterialBanner();
+                //       },
+                //       child: const Text("Close"))
+                // ]));
               } else {
                 ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
               }
@@ -242,18 +255,25 @@ class WalletHomeState extends ConsumerState<WalletHome> {
             case UrType.xmrOutPut:
               String message = "";
               if (result!.urResult.isNotEmpty) {
-                message = "Output imported successfully";
+                message = "";
               }
               if (result!.urError != null) {
                 message = result!.urError!;
               }
-              messenger.showSnackBar(SnackBar(
-                  backgroundColor: Colors.grey[900],
-                  content: Text(
-                    message,
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: theme.primaryColor),
-                  )));
+              if (message != "") {
+                messenger.showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.grey[900],
+                    content: Text(
+                      message,
+                      style: theme.textTheme.bodyMedium
+                          ?.copyWith(color: theme.primaryColor),
+                    ),
+                  ),
+                );
+              }
+              Future.delayed(Duration.zero)
+                  .then((_) => exportKeyImages(context));
               break;
             case UrType.xmrKeyImage:
               String message = "";
@@ -277,7 +297,12 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                   return AnonSpendForm(
                       scannedType: UrType.xmrTxUnsigned,
                       outputs: outputs ?? [],
-                      maxAmount: maxAmount);
+                      maxAmount: maxAmount,
+                      goBack: () {
+                        _pageController.animateToPage(0,
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.ease);
+                      });
                 },
               ));
               break;
@@ -287,7 +312,12 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                   return AnonSpendForm(
                       scannedType: UrType.xmrTxSigned,
                       outputs: outputs ?? [],
-                      maxAmount: maxAmount);
+                      maxAmount: maxAmount,
+                      goBack: () {
+                        _pageController.animateToPage(0,
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.ease);
+                      });
                 },
               ));
               break;
@@ -297,6 +327,29 @@ class WalletHomeState extends ConsumerState<WalletHome> {
         }
       }
     });
+  }
+
+  void exportKeyImages(BuildContext context) async {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) {
+        return ExportQRScreen(
+          title: "KEY IMAGES",
+          buttonText: "SCAN UNSIGNED TX",
+          exportType: UrType.xmrKeyImage,
+          counterScanCalled: (String data, BuildContext newContext) async {
+            // await BackUpRestoreChannel().exportFile(data);
+            Future.delayed(Duration.zero).then(
+              (value) {
+                showModalScanner(newContext);
+              },
+            );
+          },
+          onScanClick: () async {
+            showModalScanner(context);
+          },
+        );
+      },
+    ));
   }
 }
 

@@ -15,7 +15,7 @@ class ReceiveWidget extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     var subAddress = ref.watch(currentSubAddressProvider);
     var address = subAddress?.address ?? "";
-
+    if (address == "") return const Scaffold();
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -109,7 +109,10 @@ class ReceiveWidget extends ConsumerWidget {
                   child: Center(
                     child: Text(
                       address,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 17),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(fontSize: 17),
                     ),
                   ),
                 ),

@@ -65,17 +65,18 @@ class _SetPinScreenState extends State<SetPinScreen> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 48, horizontal: 12),
                       child: NumberPadWidget(
-                          maxPinSize: maxPinSize,
-                          value: key,
-                          minPinSize: minPinSize,
-                          onSubmit: (String pin) {
-                            setState(() {
-                              confirmKey = pin;
-                              if (confirmKey == key) {
-                                Navigator.pop(context, confirmKey);
-                              }
-                            });
-                          }),
+                        maxPinSize: maxPinSize,
+                        value: key,
+                        minPinSize: minPinSize,
+                        onSubmit: (String pin) {
+                          setState(() {
+                            confirmKey = pin;
+                            if (confirmKey == key) {
+                              Navigator.pop(context, confirmKey);
+                            }
+                          });
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -93,16 +94,16 @@ class NumberPadWidget extends StatefulWidget {
   final int minPinSize;
   final String? value;
   final void Function(String key) onSubmit;
-  final void Function(String key)? onKeyPress;
+  final void Function(String key, String value)? onKeyPress;
 
-  const NumberPadWidget(
-      {Key? key,
-      this.maxPinSize = 10,
-      this.minPinSize = 4,
-      this.value,
-      required this.onSubmit,
-      this.onKeyPress})
-      : super(key: key);
+  const NumberPadWidget({
+    Key? key,
+    this.maxPinSize = 10,
+    this.minPinSize = 4,
+    this.value,
+    required this.onSubmit,
+    this.onKeyPress,
+  }) : super(key: key);
 
   @override
   State<NumberPadWidget> createState() => _NumberPadWidgetState();
@@ -141,7 +142,7 @@ class _NumberPadWidgetState extends State<NumberPadWidget> {
               value = "$value$key";
               _onValueChanges();
             });
-            widget.onKeyPress?.call(key);
+            widget.onKeyPress?.call(key, value);
           },
           onDeleteLongPress: () {
             setState(() {

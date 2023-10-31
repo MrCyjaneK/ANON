@@ -205,6 +205,7 @@ object NodeManager {
     }
 
     suspend fun addNode(node: NodeInfo) {
+        readNodes() // it can't hurt.
         nodes.add(node)
         storeNodesList()
     }

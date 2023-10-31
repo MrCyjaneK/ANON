@@ -23,15 +23,19 @@ class ExportQRScreen extends ConsumerStatefulWidget {
   final String buttonText;
   final bool isInTxComposeMode;
 
-  final Function counterScanCalled;
+  final Function(String data, BuildContext newContext) counterScanCalled;
 
-  const ExportQRScreen(
-      {super.key,
-      required this.exportType,
-      required this.counterScanCalled,
-      required this.title,
-      this.isInTxComposeMode = false,
-      required this.buttonText});
+  const ExportQRScreen({
+    super.key,
+    required this.exportType,
+    required this.counterScanCalled,
+    required this.title,
+    this.isInTxComposeMode = false,
+    required this.buttonText,
+    required this.onScanClick,
+  });
+
+  final void Function() onScanClick;
 
   @override
   ConsumerState<ExportQRScreen> createState() => _ImportFromQRScreenState();
@@ -81,144 +85,142 @@ class _ImportFromQRScreenState extends ConsumerState<ExportQRScreen> {
         }
         return Future.value(true);
       },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: BackButton(
-            onPressed: () async {
-              if (widget.isInTxComposeMode) {
-                return await showDialog(
-                    context: context,
-                    barrierColor: barrierColor,
-                    builder: (context) {
-                      return AlertDialog(
-                        backgroundColor:
-                            Theme.of(context).scaffoldBackgroundColor,
-                        content: const Text("Do you want to cancel ?"),
-                        actions: [
-                          TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(false);
-                              },
-                              child: const Text("No")),
-                          TextButton(
-                              onPressed: () {
-                                navigateToHome(context);
-                                return;
-                              },
-                              child: const Text("Yes")),
-                        ],
-                      );
-                    });
-              } else {
-                Navigator.pop(context);
-              }
-            },
-          ),
-        ),
-        body: asyncQRData.when(
-          data: (data) {
-            return Scaffold(
+      child: asyncQRData.when(
+        data: (data) {
+          return Scaffold(
               primary: false,
-              body: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        child: Text(widget.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.w600)),
-                      ),
+              body: Column(
+                children: [
+                  AppBar(
+                    leading: BackButton(
+                      onPressed: () async {
+                        if (widget.isInTxComposeMode) {
+                          return await showDialog(
+                              context: context,
+                              barrierColor: barrierColor,
+                              builder: (context) {
+                                return AlertDialog(
+                                  backgroundColor:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  content:
+                                      const Text("Do you want to cancel ?"),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(false);
+                                        },
+                                        child: const Text("No")),
+                                    TextButton(
+                                        onPressed: () {
+                                          navigateToHome(context);
+                                          return;
+                                        },
+                                        child: const Text("Yes")),
+                                  ],
+                                );
+                              });
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: Center(
-                      child: AirGapQR(
-                        showPlaceHolder: false,
-                        urGenerateRequest: URGenerateRequest(
-                            type: widget.exportType, fpath: data),
-                      ),
+                  const Padding(padding: EdgeInsets.all(12)),
+                  Center(
+                    child: Text(widget.title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 26)),
+                  ),
+                  const Padding(padding: EdgeInsets.all(18)),
+                  Center(
+                    child: AirGapQR(
+                      showPlaceHolder: false,
+                      urGenerateRequest: URGenerateRequest(
+                          type: widget.exportType, fpath: data),
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 8),
-                      child: TextButton.icon(
-                          onPressed: () async {
-                            try {
-                              BackUpRestoreChannel().exportFile(data);
-                            } catch (e) {
-                              if (kDebugMode) {
-                                print(e);
-                              }
+                  const Padding(padding: EdgeInsets.all(12)),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    child: TextButton.icon(
+                        onPressed: () async {
+                          try {
+                            BackUpRestoreChannel().exportFile(data);
+                          } catch (e) {
+                            if (kDebugMode) {
+                              print(e);
                             }
-                          },
-                          icon: const Icon(Icons.save_alt),
-                          label: const Text("Export as File")),
+                          }
+                        },
+                        icon: const Icon(Icons.save_alt),
+                        label: const Text("Export as File")),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    width: double.maxFinite,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 24)
+                          .add(const EdgeInsets.only(bottom: 12)),
+                      child: Builder(builder: (context) {
+                        return Opacity(
+                          opacity:
+                              View.of(context).viewInsets.bottom > 0 ? 0 : 1,
+                          child: Hero(
+                            tag: "main_button",
+                            child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                    side: const BorderSide(
+                                        width: 1.0, color: Colors.white),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                        side: const BorderSide(
+                                            width: 12, color: Colors.white),
+                                        borderRadius: BorderRadius.circular(8)),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16, horizontal: 6)),
+                                onPressed: () async {
+                                  print('airgap_export_screen.dart');
+                                  widget.counterScanCalled.call(data, context);
+                                },
+                                child: Text(widget.buttonText)),
+                          ),
+                        );
+                      }),
                     ),
                   ),
                 ],
               ),
-              bottomNavigationBar: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24)
-                    .add(const EdgeInsets.only(bottom: 12)),
-                child: Builder(builder: (context) {
-                  return Opacity(
-                    opacity: View.of(context).viewInsets.bottom > 0 ? 0 : 1,
-                    child: Hero(
-                      tag: "main_button",
-                      child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                  width: 1.0, color: Colors.white),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  side: const BorderSide(
-                                      width: 12, color: Colors.white),
-                                  borderRadius: BorderRadius.circular(8)),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 6)),
-                          onPressed: () async {
-                            widget.counterScanCalled.call();
-                          },
-                          child: Text(widget.buttonText)),
-                    ),
-                  );
-                }),
-              ),
-            );
-          },
-          loading: () {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
-          error: (error, stackTrace) {
-            var errorMessage = "$error";
-            try {
-              var errorMessage =
-                  (error as PlatformException).message ?? "Unable to process";
-              debugPrint(errorMessage);
-            } catch (e) {
-              debugPrint(e.toString());
-            }
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(errorMessage,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(color: Colors.red)),
-              ),
-            );
-          },
-        ),
+              bottomNavigationBar: null);
+        },
+        loading: () {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+        error: (error, stackTrace) {
+          var errorMessage = "$error";
+          try {
+            var errorMessage =
+                (error as PlatformException).message ?? "Unable to process";
+            debugPrint(errorMessage);
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(errorMessage,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Colors.red)),
+            ),
+          );
+        },
       ),
     );
   }
@@ -288,12 +290,6 @@ Future<QRResult?> scanURPayload(
                     }
                   },
                 ),
-                Align(
-                  alignment: Alignment.center.add(const Alignment(0, -.64)),
-                  child: Text(importTitle,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w800, fontSize: 18)),
-                ),
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 320),
                   opacity: progress.value ? 1 : 0,
@@ -305,15 +301,6 @@ Future<QRResult?> scanURPayload(
                         )),
                   ),
                 ),
-                Align(
-                  alignment: Alignment.center.add(const Alignment(0, .64)),
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      pickFromFile(progress);
-                    },
-                    child: const Text("Import File"),
-                  ),
-                )
               ],
             ),
           );

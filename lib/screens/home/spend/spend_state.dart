@@ -9,13 +9,13 @@ class SpendValidationNotifier extends ChangeNotifier {
   bool? validAddress;
   bool? validAmount;
 
-  Future<bool> validate(String amount, String address) async {
+  Future<bool> validate(String amount, String address, bool sweepAll) async {
     dynamic response =
         await SpendMethodChannel().validateAddress(amount, address);
     validAddress = response['address'] == true;
-    validAmount = response['amount'] == true;
+    validAmount = response['amount'] == true || sweepAll;
     notifyListeners();
-    return validAddress == true && validAmount == true;
+    return validAddress == true && (validAmount == true || sweepAll);
   }
 
   clear() {
@@ -91,7 +91,6 @@ class TransactionStateNotifier extends StateNotifier<TxState> {
     var returnValue = await SpendMethodChannel()
         .composeAndBroadcast(amount, address, sweepAll, notes, keyImages);
     state = TxState.fromJson(returnValue);
-    AppHaptics.mediumImpact();
     AppHaptics.mediumImpact();
   }
 

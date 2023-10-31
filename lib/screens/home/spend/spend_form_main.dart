@@ -23,8 +23,10 @@ class AnonSpendForm extends ConsumerStatefulWidget {
     required this.outputs,
     required this.maxAmount,
     this.addAppBar = false,
+    required this.goBack,
   }) : super(key: key);
 
+  final void Function() goBack;
   final List<String> outputs;
   final num maxAmount;
   final bool addAppBar;
@@ -97,7 +99,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
       if (widget.scannedType == UrType.xmrTxUnsigned) {
         navigator.pushNamed("/loading-tx");
         await ref.read(transactionStateProvider.notifier).loadUnSignedTx();
-        navigator.pushReplacement(MaterialPageRoute(
+        navigator.push(MaterialPageRoute(
           builder: (context) => AnonSpendReview(
             onActionClicked: signAndShowTx,
           ),
@@ -145,14 +147,19 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
     if (!isViewOnly && isAirgapEnabled) {
       navigator.pushNamed("/loading-tx-signing");
       await ref.read(transactionStateProvider.notifier).signUnSigned();
-      navigator.pushReplacement(MaterialPageRoute(
+      navigator.push(MaterialPageRoute(
         builder: (context) {
           return ExportQRScreen(
             title: "SIGNED TX",
             isInTxComposeMode: true,
             exportType: UrType.xmrTxSigned,
-            buttonText: "IMPORT SIGNED TX",
-            counterScanCalled: () {},
+            buttonText: "FINISH",
+            counterScanCalled: (_, newContext) {
+              navigateToHome(newContext);
+              Future.delayed(Duration.zero).then((_) => widget.goBack());
+            },
+            onScanClick: () =>
+                print("spend_from_main.dart: onScanClick is not supported"),
           );
         },
       ));
@@ -451,11 +458,16 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                 onActionClicked: () {
                   navigator.push(MaterialPageRoute(
                     builder: (context) => ExportQRScreen(
-                        exportType: UrType.xmrTxUnsigned,
-                        buttonText: "SCAN SIGNED TX",
-                        isInTxComposeMode: true,
-                        counterScanCalled: () => onScanSignedTxPressed(context),
-                        title: "UNSIGNED TX"),
+                      exportType: UrType.xmrTxUnsigned,
+                      buttonText: "SCAN SIGNED TX",
+                      isInTxComposeMode: true,
+                      counterScanCalled: (_, newContext) {
+                        onScanSignedTxPressed(newContext);
+                      },
+                      title: "UNSIGNED TX",
+                      onScanClick: () => print(
+                          "spend_from_main.dart: onScanClick is not supported2"),
+                    ),
                   ));
                 },
               ),
@@ -475,21 +487,21 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
   }
 
   onScanSignedTxPressed(BuildContext c) async {
-    final navigator = Navigator.of(context);
+    final navigator = Navigator.of(c);
     final value =
-        await scanURPayload(UrType.xmrTxSigned, context, "IMPORT SIGNED TX");
+        await scanURPayload(UrType.xmrTxSigned, c, "IMPORT SIGNED TX");
     if (value != null) {
       if (value.urType == UrType.xmrTxSigned && value.urError == null) {
         if (isViewOnly) {
           try {
             Widget alert = AlertDialog(
-              backgroundColor: Theme.of(context).canvasColor,
+              backgroundColor: Theme.of(c).canvasColor,
               title: const Text("Broadcast Transaction"),
               content: const Text("Do you want to broadcast this transaction?"),
               actions: [
                 TextButton(
                     onPressed: () async {
-                      navigateToHome(context);
+                      navigateToHome(c);
                     },
                     child: const Text("NO")),
                 TextButton(
@@ -499,6 +511,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                         await SpendMethodChannel().broadcastSigned();
                         navigator.pushNamed("/tx-success");
                       } on PlatformException catch (e) {
+                        print(e);
                         showErrorDialog(e);
                       }
                     },
@@ -506,7 +519,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
               ],
             );
             showDialog(
-              context: context,
+              context: c,
               barrierDismissible: false,
               useRootNavigator: true,
               builder: (context) => alert,
@@ -528,7 +541,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
     String address = ref.read(addressStateProvider);
     SpendValidationNotifier validationNotifier = ref.read(validationProvider);
     bool valid =
-        await validationNotifier.validate(amountStr, address) || sweepAll;
+        await validationNotifier.validate(amountStr, address, sweepAll);
     if (valid) {
       //if view only then export outputs and start working unsigned tx
       if (isViewOnly) {
@@ -540,10 +553,12 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                 title: "OUTPUTS",
                 isInTxComposeMode: true,
                 exportType: UrType.xmrOutPut,
-                buttonText: "IMPORT KEY IMAGES",
-                counterScanCalled: () {
-                  onImportKeyPressed(context);
+                buttonText: "SCAN KEY IMAGES",
+                counterScanCalled: (_, newContext) async {
+                  await onImportKeyPressed(newContext);
                 },
+                onScanClick: () => print(
+                    "spend_from_main.dart: onScanClick is not supported3"),
               );
             },
           ));
@@ -562,10 +577,12 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                 exportType: UrType.xmrTxSigned,
                 buttonText: "FINISH",
                 isInTxComposeMode: true,
-                counterScanCalled: () {
-                  navigatorState
-                      .popUntil((route) => route.settings.name == "/");
+                counterScanCalled: (_, newContext) async {
+                  await navigateToHome(newContext);
+                  Future.delayed(Duration.zero).then((_) => widget.goBack());
                 },
+                onScanClick: () => print(
+                    "spend_from_main.dart: onScanClick is not supported4"),
                 title: "SIGNED TX",
               ),
             ));

@@ -270,7 +270,7 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
                         setTxUserNotes(controller.text, context);
                         Navigator.pop(context);
                       },
-                      child: const Text("Confirm"))
+                      child: const Text("CONFIRM"))
                 ],
               );
             },

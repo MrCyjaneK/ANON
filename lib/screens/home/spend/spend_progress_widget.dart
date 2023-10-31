@@ -1,5 +1,6 @@
 import 'package:anon_wallet/models/broadcast_tx_state.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
+import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 //
@@ -181,16 +182,15 @@ class SpendSuccessWidget extends ConsumerWidget {
                   color: Theme.of(context).primaryColor,
                 ),
                 const Text("Successfully sent transaction."),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 44),
-                  child: SelectableText(txState.txId ?? "",
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center),
-                ),
                 TextButton(
                     onPressed: () {
-                      Navigator.popUntil(
-                          context, (route) => route.settings.name == "/");
+                      Future.delayed(const Duration(milliseconds: 222)).then(
+                        (_) => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (c) => const WalletHome(startScreen: 0),
+                              settings: const RouteSettings(name: "/")),
+                        ),
+                      );
                     },
                     child: const Text("close")),
                 const Spacer(),

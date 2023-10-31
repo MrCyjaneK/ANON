@@ -78,13 +78,14 @@ class _OutputsScreenState extends State<OutputsScreen> {
                           }
                         }
                         return AnonSpendForm(
-                          outputs: outs,
-                          maxAmount: maxAmount,
-                          addAppBar: true,
-                          // onValidationComplete: () {
-                          //   print('output_screen.dart on validate complete');
-                          // },
-                        );
+                            outputs: outs,
+                            maxAmount: maxAmount,
+                            addAppBar: true,
+                            // onValidationComplete: () {
+                            //   print('output_screen.dart on validate complete');
+                            // },
+                            goBack: () =>
+                                print("outputs_screen.dart: goBack()"));
                       },
                     ),
                   );

@@ -18,7 +18,9 @@ class BackUpRestoreChannel {
   }
 
   Future<bool> exportFile(String path) async {
+    print("exprotFile:");
     bool value = await platform.invokeMethod("exportFile", {"path": path});
+    print(value);
     return value;
   }
 

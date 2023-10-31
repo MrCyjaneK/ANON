@@ -101,13 +101,21 @@ class AnonSpendReview extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: Container(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                    child: const Text("Close"),
-                    onPressed: () {
-                      navigateToHome(context);
-                    },
-                  )),
+                alignment: Alignment.center,
+                child: TextButton(
+                  child: const Text("Close"),
+                  onPressed: () {
+                    // navigateToHome(context);
+                    Future.delayed(const Duration(milliseconds: 222)).then(
+                      (_) => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (c) => const WalletHome(startScreen: 0),
+                            settings: const RouteSettings(name: "/")),
+                      ),
+                    );
+                  },
+                ),
+              ),
             )
           ],
         ),
@@ -227,7 +235,7 @@ class AnonSpendReview extends ConsumerWidget {
                       onActionClicked?.call();
                     }
                   },
-                  child: const Text("Confirm")),
+                  child: const Text("CONFIRM")),
             ),
           );
         }),

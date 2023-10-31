@@ -12,6 +12,7 @@ import 'package:anon_wallet/screens/home/outputs/outputs_screen.dart';
 import 'package:anon_wallet/screens/home/transactions/sticky_progress.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_details.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
+import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/screens/home/wallet_lock.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
@@ -23,9 +24,10 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
 class TransactionsList extends StatefulWidget {
-  final VoidCallback? onScanClick;
+  final VoidCallback onScanClick;
 
-  const TransactionsList({Key? key, this.onScanClick}) : super(key: key);
+  const TransactionsList({Key? key, required this.onScanClick})
+      : super(key: key);
 
   @override
   State<TransactionsList> createState() => _TransactionsListState();
@@ -105,7 +107,7 @@ class _TransactionsListState extends State<TransactionsList> {
               ),
               IconButton(
                   onPressed: () {
-                    widget.onScanClick?.call();
+                    widget.onScanClick.call();
                   },
                   icon: const Icon(Icons.crop_free)),
               isViewOnly ? _buildViewOnlyMenu(context) : _buildMenu(context),
@@ -203,7 +205,7 @@ class _TransactionsListState extends State<TransactionsList> {
             exportOutput(context);
             break;
           case 2:
-            importOutputs(context);
+            importOutputs(context, callback: importKeyImages);
             break;
           case 3:
             doBroadcastStuff(context);
@@ -265,6 +267,11 @@ class _TransactionsListState extends State<TransactionsList> {
           case 4:
             importUnsignedTx(context);
             break;
+          case 5:
+            importOutputs(context, callback: (_) {
+              //Navigator.of(context).pop();
+            });
+            break;
           case 6:
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -287,11 +294,11 @@ class _TransactionsListState extends State<TransactionsList> {
         PopupMenuItem<int>(
           enabled: isAirgapEnabled,
           value: 5,
-          child: const Text('Import Wallet Outputs'),
+          child: const Text('Import Outputs'),
         ),
         const PopupMenuItem<int>(
           value: 4,
-          child: Text('Sign Tx'),
+          child: Text('Sign Transaction'),
         ),
         const PopupMenuItem<int>(
           value: 6,
@@ -318,6 +325,7 @@ class _TransactionsListState extends State<TransactionsList> {
             scannedType: UrType.xmrTxUnsigned,
             outputs: outputs!,
             maxAmount: maxAmount,
+            goBack: () => print("transactions_list.dart: goBack()"),
           );
         },
       ));
@@ -341,48 +349,61 @@ class _TransactionsListState extends State<TransactionsList> {
             scannedType: UrType.xmrTxSigned,
             maxAmount: maxAmount,
             outputs: outputs!,
+            goBack: () => print("transactions_list.dart: goBack()1"),
           );
         },
       ));
     }
   }
-}
 
-void importOutputs(BuildContext context) async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    dialogTitle: 'Import outputs',
-    allowMultiple: false,
-  );
-  if (result == null) return;
-  // await WalletChannel().setTrustedDaemon(true);
-  final resp = await WalletChannel().importOutputsJ(result.files[0].path!);
-  scLog(context, resp.toString());
-}
+  void importOutputs(BuildContext context,
+      {required void Function(BuildContext context) callback}) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Import outputs',
+      allowMultiple: false,
+    );
+    if (result == null) return;
+    // await WalletChannel().setTrustedDaemon(true);
+    final resp = await WalletChannel().importOutputsJ(result.files[0].path!);
+    if (resp != "Imported") {
+      scLog(context, resp.toString());
+    }
+    callback(context);
+  }
 
-void exportKeyImages(BuildContext context) async {
-  Navigator.push(context, MaterialPageRoute(
-    builder: (context) {
-      return ExportQRScreen(
-        title: "KEY IMAGES",
-        buttonText: "Save as File",
-        exportType: UrType.xmrKeyImage,
-        counterScanCalled: () {},
-      );
-    },
-  ));
-}
+  void exportKeyImages(BuildContext context) async {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) {
+        return ExportQRScreen(
+          title: "KEY IMAGES",
+          buttonText: "SCAN UNSIGNED TX",
+          exportType: UrType.xmrKeyImage,
+          counterScanCalled: (String data, newContext) async {
+            // await BackUpRestoreChannel().exportFile(data);
+            // navigateToHome(newContext);
+            Future.delayed(Duration.zero).then((value) => widget.onScanClick());
+          },
+          onScanClick: widget.onScanClick,
+        );
+      },
+    ));
+  }
 
-void exportOutput(BuildContext context) async {
-  Navigator.push(context, MaterialPageRoute(
-    builder: (context) {
-      return ExportQRScreen(
-        title: "OUTPUTS",
-        exportType: UrType.xmrOutPut,
-        buttonText: "SAVE AS FILE",
-        counterScanCalled: () {},
-      );
-    },
-  ));
+  void exportOutput(BuildContext context) async {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) {
+        return ExportQRScreen(
+          title: "OUTPUTS",
+          exportType: UrType.xmrOutPut,
+          buttonText: "SCAN KEY IMAGES",
+          counterScanCalled: (String data, newContext) async {
+            Future.delayed(Duration.zero).then((value) => widget.onScanClick());
+          },
+          onScanClick: widget.onScanClick,
+        );
+      },
+    ));
+  }
 }
 
 final generateURQR =

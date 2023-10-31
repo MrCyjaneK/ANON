@@ -3,6 +3,7 @@ import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:anon_wallet/screens/home/spend/airgap_spend/airgap_qr.dart';
 import 'package:anon_wallet/screens/home/spend/airgap_spend/airgap_state.dart';
+import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -101,7 +102,7 @@ class _QRImportExportState extends ConsumerState<PayloadImportExportWidget> {
                         }
                       },
                       icon: const Icon(Icons.save_alt),
-                      label: const Text("Export as File")),
+                      label: const Text("Export As File")),
                 ),
               ],
             ),
@@ -116,7 +117,12 @@ class _QRImportExportState extends ConsumerState<PayloadImportExportWidget> {
                   }),
                 ),
                 onPressed: () async {
-                  widget.onMainButtonPress();
+                  print('import_export_widget.dart');
+//                  widget.onMainButtonPress();
+                  await BackUpRestoreChannel().exportFile(data);
+                  context
+                      .findRootAncestorStateOfType<WalletHomeState>()
+                      ?.showModalScanner(context);
                 },
                 child: Text(widget.buttonText)),
           ),
