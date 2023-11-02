@@ -192,7 +192,7 @@ class LockScreen extends HookWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 42),
+              padding: const EdgeInsets.only(bottom: 42),
               child: Consumer(
                 builder: (context, ref, c) {
                   return Row(
