@@ -121,8 +121,8 @@ class WalletHomeState extends ConsumerState<WalletHome> {
               Builder(
                 builder: (context) {
                   return TransactionsList(
-                    onScanClick: () async {
-                      showModalScanner(context);
+                    onScanClick: (newContext) async {
+                      showModalScanner(newContext);
                     },
                   );
                 },
@@ -347,8 +347,8 @@ class WalletHomeState extends ConsumerState<WalletHome> {
               },
             );
           },
-          onScanClick: () async {
-            showModalScanner(context);
+          onScanClick: (newContext) async {
+            showModalScanner(newContext);
           },
         );
       },

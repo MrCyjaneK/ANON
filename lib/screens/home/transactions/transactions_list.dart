@@ -23,7 +23,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
 class TransactionsList extends StatefulWidget {
-  final VoidCallback onScanClick;
+  final void Function(BuildContext newContext) onScanClick;
 
   const TransactionsList({super.key, required this.onScanClick});
 
@@ -136,7 +136,7 @@ class _TransactionsListState extends State<TransactionsList> {
                     highlightColor: Colors.transparent,
                     splashColor: Colors.transparent,
                     onPressed: () {
-                      widget.onScanClick.call();
+                      widget.onScanClick.call(context);
                     },
                     icon: const Icon(Icons.crop_free)),
               ),
@@ -415,7 +415,8 @@ class _TransactionsListState extends State<TransactionsList> {
           counterScanCalled: (String data, newContext) async {
             // await BackUpRestoreChannel().exportFile(data);
             // navigateToHome(newContext);
-            Future.delayed(Duration.zero).then((value) => widget.onScanClick());
+            Future.delayed(Duration.zero)
+                .then((value) => widget.onScanClick(newContext));
           },
           onScanClick: widget.onScanClick,
         );
@@ -431,7 +432,8 @@ class _TransactionsListState extends State<TransactionsList> {
           exportType: UrType.xmrOutPut,
           buttonText: "SCAN KEY IMAGES",
           counterScanCalled: (String data, newContext) async {
-            Future.delayed(Duration.zero).then((value) => widget.onScanClick());
+            Future.delayed(Duration.zero)
+                .then((value) => widget.onScanClick(newContext));
           },
           onScanClick: widget.onScanClick,
         );

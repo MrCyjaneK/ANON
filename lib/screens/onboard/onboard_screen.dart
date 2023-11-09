@@ -1,3 +1,4 @@
+import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/wallet.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
@@ -161,6 +162,7 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                 if (page == 0) {
                   if (rHost.isEmpty) {
                     nextButton = "Skip";
+                    if (isViewOnly) return Container();
                   } else if (connection != null && connection.isConnected()) {
                     nextButton = "Next";
                   } else {
@@ -194,13 +196,15 @@ class _OnboardScreenState extends ConsumerState<OnboardScreen> {
                               borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 6)),
-                      onPressed: () async {
-                        if (rHost.isEmpty && page == 0) {
-                          showConfirmColdAlert();
-                        } else if (value) {
-                          onNext(context);
-                        }
-                      },
+                      onPressed: ((rHost.isEmpty && page == 0) && isViewOnly)
+                          ? null
+                          : () async {
+                              if (rHost.isEmpty && page == 0) {
+                                showConfirmColdAlert();
+                              } else if (value) {
+                                onNext(context);
+                              }
+                            },
                       child: Text(nextButton),
                     ),
                   ),

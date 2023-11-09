@@ -35,7 +35,7 @@ class ExportQRScreen extends ConsumerStatefulWidget {
     required this.onScanClick,
   });
 
-  final void Function() onScanClick;
+  final void Function(BuildContext context) onScanClick;
 
   @override
   ConsumerState<ExportQRScreen> createState() => _ImportFromQRScreenState();

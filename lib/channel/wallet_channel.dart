@@ -144,4 +144,12 @@ class WalletChannel {
   Future<void> optimizeBattery() async {
     await platform.invokeMethod("optimizeBattery", {});
   }
+
+  Future<bool> hasUnknownKeyImages() async {
+    return await platform.invokeMethod("hasUnknownKeyImages", {});
+  }
+
+  Future<int> viewOnlyBalance() async {
+    return await platform.invokeMethod("viewOnlyBalance", {});
+  }
 }

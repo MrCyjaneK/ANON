@@ -580,6 +580,8 @@ public class Wallet {
     }
 
     public native String importOutputsJ(String filename);
+    public native boolean hasUnknownKeyImages();
+    public native long viewOnlyBalance();
     public native boolean exportKeyImages(String filename, boolean all);
     public native String signAndExportJ(String inputFile, String outputFile);
     public native boolean setTrustedDaemon(boolean arg);

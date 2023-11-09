@@ -92,8 +92,14 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
     );
   }
 
+  int balance = 0;
+
   Future _init() async {
     // final context = context;
+    final newBal = await WalletChannel().viewOnlyBalance();
+    setState(() {
+      balance = newBal;
+    });
     final navigator = Navigator.of(context);
     if (widget.scannedType != null) {
       if (widget.scannedType == UrType.xmrTxUnsigned) {
@@ -158,7 +164,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
               navigateToHome(newContext);
               Future.delayed(Duration.zero).then((_) => widget.goBack());
             },
-            onScanClick: () =>
+            onScanClick: (_) =>
                 print("spend_from_main.dart: onScanClick is not supported"),
           );
         },
@@ -355,6 +361,27 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                           ),
                         ],
                       ),
+                      if (isViewOnly && kDebugMode)
+                        Container(
+                          alignment: Alignment.center,
+                          width: double.infinity,
+                          height: 80,
+                          child: Consumer(
+                            builder: (context, ref, c) {
+                              num amount =
+                                  ref.watch(walletAvailableBalanceProvider);
+                              if (widget.maxAmount != 0) {
+                                amount = widget.maxAmount;
+                              }
+                              return Text(
+                                sweepAll
+                                    ? ""
+                                    : "Quick Spend: ${formatMonero(balance)}",
+                                style: Theme.of(context).textTheme.bodySmall,
+                              );
+                            },
+                          ),
+                        ),
                       InkWell(
                         highlightColor: Colors.transparent,
                         splashColor: Colors.transparent,
@@ -443,10 +470,9 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
     );
   }
 
-  onImportKeyPressed(BuildContext context) async {
-    final navigator = Navigator.of(context);
-    final value =
-        await scanURPayload(UrType.xmrKeyImage, context, "IMPORT KEY IMAGES");
+  onImportKeyPressed(BuildContext newContext) async {
+    final value = await scanURPayload(
+        UrType.xmrKeyImage, newContext, "IMPORT KEY IMAGES");
     if (value != null) {
       if (value.urType == UrType.xmrKeyImage &&
           value.urResult.toLowerCase() == "imported") {
@@ -457,37 +483,43 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
           try {
             ref.read(transactionStateProvider.notifier).composeAndSave(
                 amountStr, address, sweepAll, notes, widget.outputs);
-            navigator.push(MaterialPageRoute(
-              builder: (context) => AnonSpendReview(
-                onActionClicked: () {
-                  navigator.push(MaterialPageRoute(
-                    builder: (context) => ExportQRScreen(
-                      exportType: UrType.xmrTxUnsigned,
-                      buttonText: "SCAN SIGNED TX",
-                      isInTxComposeMode: true,
-                      counterScanCalled: (_, newContext) {
-                        onScanSignedTxPressed(newContext);
-                      },
-                      title: "UNSIGNED TX",
-                      onScanClick: () => print(
-                          "spend_from_main.dart: onScanClick is not supported2"),
-                    ),
-                  ));
-                },
-              ),
-            ));
+            showSpendReview(newContext);
           } catch (e) {
             print(e);
           }
         } else {
           ref.read(transactionStateProvider.notifier).createPreview(
               amountStr, address, sweepAll, notes, widget.outputs);
-          navigator.push(MaterialPageRoute(
-            builder: (context) => const AnonSpendReview(),
+          Navigator.of(newContext).push(MaterialPageRoute(
+            builder: (newContext) => const AnonSpendReview(),
           ));
         }
       }
     }
+  }
+
+  void showSpendReview(BuildContext newContext) {
+    Navigator.of(newContext).push(MaterialPageRoute(
+      builder: (newContext) => AnonSpendReview(
+        onActionClicked: () => scanSignedTx(newContext),
+      ),
+    ));
+  }
+
+  void scanSignedTx(BuildContext newContext) {
+    Navigator.of(newContext).push(MaterialPageRoute(
+      builder: (newContext) => ExportQRScreen(
+        exportType: UrType.xmrTxUnsigned,
+        buttonText: "SCAN SIGNED TX",
+        isInTxComposeMode: true,
+        counterScanCalled: (_, newContext) {
+          onScanSignedTxPressed(newContext);
+        },
+        title: "UNSIGNED TX",
+        onScanClick: (_) =>
+            print("spend_from_main.dart: onScanClick is not supported2"),
+      ),
+    ));
   }
 
   onScanSignedTxPressed(BuildContext c) async {
@@ -539,6 +571,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
   }
 
   onMainActionPressed(BuildContext context) async {
+    print("onMainActionPressed:");
     FocusScope.of(context).unfocus();
     final navigatorState = Navigator.of(context, rootNavigator: false);
     String amountStr = ref.read(amountStateProvider);
@@ -550,22 +583,45 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
       //if view only then export outputs and start working unsigned tx
       if (isViewOnly) {
         try {
-          await WalletChannel().exportOutputs(true);
-          navigatorState.push(MaterialPageRoute(
-            builder: (context) {
-              return ExportQRScreen(
-                title: "OUTPUTS",
-                isInTxComposeMode: true,
-                exportType: UrType.xmrOutPut,
-                buttonText: "SCAN KEY IMAGES",
-                counterScanCalled: (_, newContext) async {
-                  await onImportKeyPressed(newContext);
-                },
-                onScanClick: () => print(
-                    "spend_from_main.dart: onScanClick is not supported3"),
-              );
-            },
-          ));
+          bool needKeyImages = false;
+          print("sweepAll:${await WalletChannel().hasUnknownKeyImages()}");
+          if (sweepAll) {
+            needKeyImages = await WalletChannel().hasUnknownKeyImages();
+          } else {
+            print(amountStr);
+            print("numParse: ${num.tryParse(amountStr)}");
+            print(
+                "await WalletChannel().viewOnlyBalance();${await WalletChannel().viewOnlyBalance()}");
+            needKeyImages = ((num.parse(amountStr) + 0.001) * 1e12) >
+                await WalletChannel().viewOnlyBalance();
+            //     // 0.001 XMR to account for tx fee
+            //     return ((amount + WalletManager::amountFromDouble(0.001)) > m_wallet->viewOnlyBalance(m_wallet->currentSubaddressAccount()));
+          }
+          if (needKeyImages) {
+            await WalletChannel().exportOutputs(true);
+            navigatorState.push(MaterialPageRoute(
+              builder: (context) {
+                return ExportQRScreen(
+                  title: "OUTPUTS",
+                  isInTxComposeMode: true,
+                  exportType: UrType.xmrOutPut,
+                  buttonText: "SCAN KEY IMAGES",
+                  counterScanCalled: (_, newContext) async {
+                    await onImportKeyPressed(newContext);
+                  },
+                  onScanClick: (_) => print(
+                      "spend_from_main.dart: onScanClick is not supported3"),
+                );
+              },
+            ));
+          } else {
+            String amountStr = ref.read(amountStateProvider);
+            String address = ref.read(addressStateProvider);
+            String notes = ref.read(notesStateProvider);
+            ref.read(transactionStateProvider.notifier).composeAndSave(
+                amountStr, address, sweepAll, notes, widget.outputs);
+            showSpendReview(context);
+          }
         } catch (e) {
           print(e);
         }
@@ -585,7 +641,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                   await navigateToHome(newContext);
                   Future.delayed(Duration.zero).then((_) => widget.goBack());
                 },
-                onScanClick: () => print(
+                onScanClick: (_) => print(
                     "spend_from_main.dart: onScanClick is not supported4"),
                 title: "SIGNED TX",
               ),

@@ -1311,6 +1311,18 @@ Java_com_m2049r_xmrwallet_model_Wallet_exportOutputs(JNIEnv *env, jobject instan
     // return env->NewStringUTF(outputs.c_str());
 }
 
+JNIEXPORT jboolean JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_hasUnknownKeyImages(JNIEnv *env, jobject instance, jstring filename, jboolean all) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    return wallet->hasUnknownKeyImages();
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_viewOnlyBalance(JNIEnv *env, jobject instance) {
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    return wallet->viewOnlyBalance(0); //NOTE: hardcoded account index
+}
+
 //virtual bool importOutputs(const std::string &filename) = 0;
 JNIEXPORT jstring JNICALL
 Java_com_m2049r_xmrwallet_model_Wallet_importOutputsJ(JNIEnv *env, jobject instance, jstring filename) {

@@ -66,7 +66,9 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "importOutputsJ" -> importOutputsJ(call, result)
             "exportKeyImages" -> exportKeyImages(result)
             "signAndExportJ" -> signAndExportJ(call, result)
-            "optimizeBattery" -> optimizeBattery(call, result)
+            "optimizeBattery" -> optimizeBattery(result)
+            "hasUnknownKeyImages" -> hasUnknownKeyImages(call, result)
+            "viewOnlyBalance" -> viewOnlyBalance(call, result)
             "setTrustedDaemon" -> setTrustedDaemon(call, result)
             "lock" -> lock(call, result)
             "store" -> store(call, result)
@@ -75,7 +77,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         }
     }
 
-    private fun optimizeBattery(call: MethodCall, result: Result) {
+    private fun optimizeBattery(result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
                 val intent = Intent();
@@ -83,6 +85,22 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                 intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                 intent.setData(Uri.parse("package:" + AnonWallet.getAppContext().getPackageName()));
                 AnonWallet.getAppContext().startActivity(intent);
+            }
+        }
+    }
+
+    private fun hasUnknownKeyImages(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                result.success(WalletManager.getInstance().wallet.hasUnknownKeyImages())
+            }
+        }
+    }
+
+    private fun viewOnlyBalance(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                result.success(WalletManager.getInstance().wallet.viewOnlyBalance())
             }
         }
     }
