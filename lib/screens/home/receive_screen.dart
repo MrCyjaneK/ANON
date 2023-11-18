@@ -9,7 +9,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 class ReceiveWidget extends ConsumerWidget {
   final VoidCallback callback;
 
-  const ReceiveWidget(this.callback, {Key? key}) : super(key: key);
+  const ReceiveWidget(this.callback, {super.key});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -28,6 +28,8 @@ class ReceiveWidget extends ConsumerWidget {
             ),
             actions: [
               IconButton(
+                  highlightColor: Colors.transparent,
+                  splashColor: Colors.transparent,
                   onPressed: () {
                     Navigator.push(
                       context,

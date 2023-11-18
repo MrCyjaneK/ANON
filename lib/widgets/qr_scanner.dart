@@ -12,8 +12,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class QRScannerView extends StatefulWidget {
   final Function(QRResult value) onScanCallback;
 
-  const QRScannerView({Key? key, required this.onScanCallback})
-      : super(key: key);
+  const QRScannerView({super.key, required this.onScanCallback});
 
   @override
   State<StatefulWidget> createState() => _QRScannerViewState();

@@ -73,7 +73,7 @@ typedef QRCallBack = Function(QRResult qrResult);
 class CameraView extends StatefulWidget {
   final QRCallBack callBack;
 
-  const CameraView({Key? key, required this.callBack}) : super(key: key);
+  const CameraView({super.key, required this.callBack});
 
   @override
   State<CameraView> createState() => _CameraViewState();

@@ -7,7 +7,7 @@ import '../../../utils/app_haptics.dart';
 class SubAddressEditDialog extends StatefulWidget {
   final SubAddress subAddress;
 
-  const SubAddressEditDialog(this.subAddress, {Key? key}) : super(key: key);
+  const SubAddressEditDialog(this.subAddress, {super.key});
 
   @override
   State<SubAddressEditDialog> createState() => _SubAddressEditDialogState();

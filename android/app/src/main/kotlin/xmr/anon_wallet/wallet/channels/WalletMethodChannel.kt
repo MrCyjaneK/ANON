@@ -61,6 +61,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "importKeyImages" -> importKeyImages(call, result)
             "submitTransaction" -> submitTransaction(call, result)
             "setTxUserNotes" -> setTxUserNotes(call, result)
+            "isSynchronized" -> isSynchronized(call, result)
             "wipeWallet" -> wipeWallet(call, result)
             "importOutputsJ" -> importOutputsJ(call, result)
             "exportKeyImages" -> exportKeyImages(result)
@@ -68,6 +69,8 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             "optimizeBattery" -> optimizeBattery(call, result)
             "setTrustedDaemon" -> setTrustedDaemon(call, result)
             "lock" -> lock(call, result)
+            "store" -> store(call, result)
+            "unlock" -> unlock(call, result)
             "getUtxos" -> getUtxos(call, result)
         }
     }
@@ -173,23 +176,59 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         }
     }
 
+    private fun store(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    if (WalletManager.getInstance().wallet == null) {
+                        Log.d("WalletMethodChannel.kt", "store(): Wallet is null");
+                        throw Exception("Wallet is null.");
+                    }
+                    WalletManager.getInstance().wallet.store();
+                    result.success("Stored");
+                } catch (e: Exception) {
+                    result.error("0", "Unable to switch to background sync mode.\n${e.message}", null);
+                }
+            }
+        }
+    }
+
     private fun lock(call: MethodCall, result: Result) {
         scope.launch {
             withContext(Dispatchers.IO) {
                 try {
-                    if (WalletManager.getInstance().wallet != null) {
-                        if (!WalletEventsChannel.initialized) {
-                            throw Exception("Unable to lock, wallet is not initialized")
-                        }
-                        WalletManager.getInstance().wallet.pauseRefresh()
-                        delay(200)
-                        WalletManager.getInstance().wallet.store()
-                        delay(600)
-                        result.success(true)
-                        activity.restart()
+                    if (WalletManager.getInstance().wallet == null) {
+                        Log.d("WalletMethodChannel.kt", "lock(): Wallet is null");
+                        throw Exception("Wallet is null.");
                     }
+                    val bgsyncStatus = WalletManager.getInstance().wallet.startBackgroundSync();
+                    if (!bgsyncStatus) {
+                        throw Exception("Failed to startBackgroundSync");
+                    }
+                    result.success("Locked");
                 } catch (e: Exception) {
-                    result.error("0", "Unable to lock ${e.message}", null);
+                    result.error("0", "Unable to switch to background sync mode.\n${e.message}", null);
+                }
+            }
+        }
+    }
+
+    private fun unlock(call: MethodCall, result: Result) {
+        val password = call.argument<String?>("password")
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    if (WalletManager.getInstance().wallet == null) {
+                        Log.d("WalletMethodChannel.kt", "lock(): Wallet is null");
+                        throw Exception("Wallet is null.");
+                    }
+                    val bgsyncStatus = WalletManager.getInstance().wallet.stopBackgroundSync(password);
+                    if (!bgsyncStatus) {
+                        throw Exception("Failed to stopBackgroundSync");
+                    }
+                    result.success("Unlocked");
+                } catch (e: Exception) {
+                    result.error("0", "Unable to return from background sync mode.\n${e.message}", null);
                 }
             }
         }
@@ -666,6 +705,19 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     }
                 } else {
                     result.error("0", "invalid params", null)
+                }
+            }
+        }
+    }
+
+    private fun isSynchronized(call: MethodCall, result: MethodChannel.Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    result.success(NodeManager.getNode() == null || WalletManager.getInstance().wallet.isSynchronized)
+                } catch (e: Exception) {
+                    result.error("1", e.message, "")
+                    throw CancellationException(e.message)
                 }
             }
         }

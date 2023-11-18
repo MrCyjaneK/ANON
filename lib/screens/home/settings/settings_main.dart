@@ -15,7 +15,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -205,7 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 class WipeDialog extends HookWidget {
-  const WipeDialog({Key? key}) : super(key: key);
+  const WipeDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +296,7 @@ class WipeDialog extends HookWidget {
 }
 
 class BackupDialog extends HookWidget {
-  const BackupDialog({Key? key}) : super(key: key);
+  const BackupDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

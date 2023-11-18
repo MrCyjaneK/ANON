@@ -130,11 +130,11 @@ class RoundedLinearProgressBar extends StatelessWidget {
   final double height;
 
   const RoundedLinearProgressBar({
-    Key? key,
+    super.key,
     required this.max,
     required this.current,
     this.height = 1,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

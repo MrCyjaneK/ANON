@@ -377,6 +377,10 @@ public class Wallet {
 
     public native void pauseRefresh();
 
+    public native boolean startBackgroundSync();
+
+    public native boolean stopBackgroundSync(String password);
+
     public native boolean refresh();
 
     public native void refreshAsync();

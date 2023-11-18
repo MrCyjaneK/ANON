@@ -73,6 +73,11 @@ class WalletChannel {
     return value;
   }
 
+  Future<bool> isSynchronized() async {
+    bool value = await platform.invokeMethod("isSynchronized", {});
+    return value;
+  }
+
   Future startSync() async {
     await platform.invokeMethod("startSync");
   }
@@ -119,8 +124,16 @@ class WalletChannel {
     return await platform.invokeMethod("getUtxos", {});
   }
 
-  Future lock() async {
-    return platform.invokeMethod("lock");
+  Future<String> store() async {
+    return await platform.invokeMethod("store");
+  }
+
+  Future<String> lock() async {
+    return await platform.invokeMethod("lock");
+  }
+
+  Future<String> unlock(String password) async {
+    return await platform.invokeMethod("unlock", {"password": password});
   }
 
   Future<bool> importFromFile(UrType type, String path) async {
@@ -128,8 +141,7 @@ class WalletChannel {
         "importFromFile", {"importType": type.type, "file": path});
   }
 
-  Future<Wallet?> optimizeBattery() async {
-    dynamic value = await platform.invokeMethod("optimizeBattery", {});
-    return Wallet.fromJson(value);
+  Future<void> optimizeBattery() async {
+    await platform.invokeMethod("optimizeBattery", {});
   }
 }

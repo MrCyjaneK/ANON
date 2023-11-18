@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 class SetPinScreen extends StatefulWidget {
   final String title;
 
-  const SetPinScreen({Key? key, this.title = "Enter your PIN"})
-      : super(key: key);
+  const SetPinScreen({super.key, this.title = "Enter your PIN"});
 
   @override
   State<SetPinScreen> createState() => _SetPinScreenState();
@@ -97,13 +96,13 @@ class NumberPadWidget extends StatefulWidget {
   final void Function(String key, String value)? onKeyPress;
 
   const NumberPadWidget({
-    Key? key,
+    super.key,
     this.maxPinSize = 10,
     this.minPinSize = 4,
     this.value,
     required this.onSubmit,
     this.onKeyPress,
-  }) : super(key: key);
+  });
 
   @override
   State<NumberPadWidget> createState() => _NumberPadWidgetState();
@@ -191,7 +190,7 @@ class _NumberPadWidgetState extends State<NumberPadWidget> {
 }
 
 class Circle extends StatelessWidget {
-  const Circle({Key? key}) : super(key: key);
+  const Circle({super.key});
 
   @override
   Widget build(BuildContext context) {

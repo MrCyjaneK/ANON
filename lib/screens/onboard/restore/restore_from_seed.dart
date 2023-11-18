@@ -6,7 +6,7 @@ import 'package:anon_wallet/widgets/show_passphrase_dialog.dart';
 import 'package:flutter/material.dart';
 
 class RestoreFromSeed extends StatefulWidget {
-  const RestoreFromSeed({Key? key}) : super(key: key);
+  const RestoreFromSeed({super.key});
 
   @override
   State<RestoreFromSeed> createState() => _RestoreFromSeedState();
@@ -150,8 +150,7 @@ class SeedEntry extends StatefulWidget {
   final Function(List<String> seed, num? height) onSeedEntered;
   final bool heroEnabled;
   const SeedEntry(
-      {Key? key, required this.onSeedEntered, required this.heroEnabled})
-      : super(key: key);
+      {super.key, required this.onSeedEntered, required this.heroEnabled});
 
   @override
   State<SeedEntry> createState() => _SeedEntryState();

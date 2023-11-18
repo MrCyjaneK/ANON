@@ -12,7 +12,6 @@ import 'package:anon_wallet/screens/home/outputs/outputs_screen.dart';
 import 'package:anon_wallet/screens/home/transactions/sticky_progress.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_details.dart';
 import 'package:anon_wallet/screens/home/transactions/tx_item_widget.dart';
-import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/screens/home/wallet_lock.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
@@ -26,8 +25,7 @@ import 'package:path_provider/path_provider.dart';
 class TransactionsList extends StatefulWidget {
   final VoidCallback onScanClick;
 
-  const TransactionsList({Key? key, required this.onScanClick})
-      : super(key: key);
+  const TransactionsList({super.key, required this.onScanClick});
 
   @override
   State<TransactionsList> createState() => _TransactionsListState();
@@ -84,19 +82,42 @@ class _TransactionsListState extends State<TransactionsList> {
                   bool isConnecting = ref.watch(connectingToNodeStateProvider);
                   bool isWalletOpening =
                       ref.watch(walletLoadingProvider) ?? false;
-                  bool isLoading = isConnecting || isWalletOpening;
+                  Map<String, num>? sync = ref.watch(syncProgressStateProvider);
+                  bool isLoading = (isConnecting ||
+                      isWalletOpening ||
+                      (sync?['remaining'] != 0 && sync?['remaining'] != null));
                   return Opacity(
                     opacity: isLoading ? 0.5 : 1,
                     child: IconButton(
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onPressed: isLoading
                             ? null
-                            : () {
-                                if (isLoading) return;
+                            : () async {
+                                if ((await WalletChannel().isSynchronized()) ==
+                                    false) return;
+
+                                if (isLoading) {
+                                  return;
+                                }
+                                // ignore: use_build_context_synchronously
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const WalletLock()));
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      globalAutolockTimer.cancel();
+                                      isScheduledAutolockTimer = false;
+                                      if (isViewOnly) {
+                                        // We are doing a 'fake' lock, since
+                                        // WalletLock is actually locking the
+                                        // wallet (turning background-sync on)
+                                        // and we don't want it for viewonly.
+                                        return const LockedWallet();
+                                      }
+                                      return const WalletLock();
+                                    },
+                                  ),
+                                );
                               },
                         icon: const Hero(
                           tag: "lock",
@@ -106,6 +127,8 @@ class _TransactionsListState extends State<TransactionsList> {
                 },
               ),
               IconButton(
+                  highlightColor: Colors.transparent,
+                  splashColor: Colors.transparent,
                   onPressed: () {
                     widget.onScanClick.call();
                   },
@@ -113,6 +136,8 @@ class _TransactionsListState extends State<TransactionsList> {
               isViewOnly ? _buildViewOnlyMenu(context) : _buildMenu(context),
             ],
             flexibleSpace: InkWell(
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
               onLongPress: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -120,8 +145,6 @@ class _TransactionsListState extends State<TransactionsList> {
                   ),
                 );
               },
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
               enableFeedback: false,
               child: FlexibleSpaceBar(
                 centerTitle: true,
@@ -180,6 +203,8 @@ class _TransactionsListState extends State<TransactionsList> {
       child: Consumer(
         builder: (context, ref, c) {
           return InkWell(
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
             onTap: () {
               Navigator.push(
                   context,

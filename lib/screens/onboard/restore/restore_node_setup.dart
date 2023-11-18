@@ -14,11 +14,10 @@ class RestoreNodeSetup extends ConsumerWidget {
   final bool skipAppBar;
 
   const RestoreNodeSetup(
-      {Key? key,
+      {super.key,
       required this.onButtonPressed,
       this.skipAppBar = false,
-      required this.pageController})
-      : super(key: key);
+      required this.pageController});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,6 +34,8 @@ class RestoreNodeSetup extends ConsumerWidget {
               ? SliverAppBar(
                   title: const Text("Node Setup"),
                   leading: IconButton(
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
                     onPressed: () {
                       pageController.previousPage(
                           curve: Curves.easeInOutQuad,

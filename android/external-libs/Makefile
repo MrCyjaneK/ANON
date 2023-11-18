@@ -65,4 +65,4 @@ distclean: clean
 $(FLAVOUR):
 	$(error Please ln -s $(FLAVOUR))
 
-.PHONY: all clean distclean
+.PHONY: all clean distclean VERSION include/wallet2_api.h

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
-import 'dart:math' as math; // import this
+import 'dart:math' as math;
 import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/node_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
@@ -11,10 +11,12 @@ import 'package:anon_wallet/screens/home/spend/anon_progress.dart';
 import 'package:anon_wallet/screens/home/spend/spend_progress_widget.dart';
 import 'package:anon_wallet/screens/home/spend/spend_review.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
+import 'package:anon_wallet/screens/home/wallet_lock.dart';
 import 'package:anon_wallet/screens/landing_screen.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/json_state.dart';
+import 'package:anon_wallet/utils/viewonly_cachepin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,7 +40,7 @@ void main() async {
 }
 
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +56,7 @@ class SplashScreen extends StatelessWidget {
 class AnonApp extends StatefulWidget {
   final WalletState state;
 
-  const AnonApp(this.state, {Key? key}) : super(key: key);
+  const AnonApp(this.state, {super.key});
 
   @override
   State<AnonApp> createState() => _AnonAppState();
@@ -64,46 +66,50 @@ class _AnonAppState extends State<AnonApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ProviderScope(
-      child: MaterialApp(
-        title: 'anon',
-        onGenerateRoute: (settings) {
-          if (settings.name == "/review") {
-            return MaterialPageRoute(
-                builder: (context) => const AnonSpendReview());
-          }
-          if (settings.name == "/loading-tx-construct") {
-            return MaterialPageRoute(
-                builder: (context) => const CircleProgressWidget(
-                      progressMessage: "CONSTRUCTING TRANSACTION...",
-                    ));
-          }
-          if (settings.name == "/loading-broadcast-tx") {
-            return MaterialPageRoute(
-                builder: (context) => const CircleProgressWidget(
-                      progressMessage: "SENDING TRANSACTION...",
-                    ));
-          }
-          if (settings.name == "/loading-tx-signing") {
-            return MaterialPageRoute(
-                builder: (context) => const CircleProgressWidget(
-                      progressMessage: "SIGNING TRANSACTION...",
-                    ));
-          }
-          if (settings.name == "/loading-tx") {
-            return MaterialPageRoute(
-                builder: (context) => const CircleProgressWidget(
-                      progressMessage: "LOADING TRANSACTION...",
-                    ));
-          }
-          if (settings.name == "/tx-success") {
-            return MaterialPageRoute(
-                builder: (context) => const SpendSuccessWidget());
-          }
-          return null;
-        },
-        theme: ThemeProvider().getTheme(),
-        home: AppMain(widget.state),
+    return Listener(
+      onPointerDown: (e) => resetAutolock(),
+      child: ProviderScope(
+        child: MaterialApp(
+          title: 'anon',
+          navigatorKey: navigatorKey,
+          onGenerateRoute: (settings) {
+            if (settings.name == "/review") {
+              return MaterialPageRoute(
+                  builder: (context) => const AnonSpendReview());
+            }
+            if (settings.name == "/loading-tx-construct") {
+              return MaterialPageRoute(
+                  builder: (context) => const CircleProgressWidget(
+                        progressMessage: "CONSTRUCTING TRANSACTION...",
+                      ));
+            }
+            if (settings.name == "/loading-broadcast-tx") {
+              return MaterialPageRoute(
+                  builder: (context) => const CircleProgressWidget(
+                        progressMessage: "SENDING TRANSACTION...",
+                      ));
+            }
+            if (settings.name == "/loading-tx-signing") {
+              return MaterialPageRoute(
+                  builder: (context) => const CircleProgressWidget(
+                        progressMessage: "SIGNING TRANSACTION...",
+                      ));
+            }
+            if (settings.name == "/loading-tx") {
+              return MaterialPageRoute(
+                  builder: (context) => const CircleProgressWidget(
+                        progressMessage: "LOADING TRANSACTION...",
+                      ));
+            }
+            if (settings.name == "/tx-success") {
+              return MaterialPageRoute(
+                  builder: (context) => const SpendSuccessWidget());
+            }
+            return null;
+          },
+          theme: ThemeProvider().getTheme(),
+          home: AppMain(widget.state),
+        ),
       ),
     );
   }
@@ -118,7 +124,7 @@ class _AnonAppState extends State<AnonApp> {
 class AppMain extends ConsumerWidget {
   final WalletState state;
 
-  const AppMain(this.state, {Key? key}) : super(key: key);
+  const AppMain(this.state, {super.key});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -135,14 +141,14 @@ enum AfterSelectAction {
 }
 
 class LockScreen extends HookWidget {
-  const LockScreen({Key? key}) : super(key: key);
-
+  const LockScreen({super.key});
   @override
   Widget build(BuildContext context) {
     final action = useState<AfterSelectAction>(AfterSelectAction.actionNone);
     final error = useState<String?>(null);
     final currentPin = useState<String>("");
     final loading = useState<bool>(false);
+    final status = useState<String>("LOCKED");
 
     return Scaffold(
       body: SafeArea(
@@ -156,7 +162,7 @@ class LockScreen extends HookWidget {
               child: SizedBox(
                   width: 180, child: Image.asset("assets/anon_logo.png")),
             ),
-            const Text("Status: LOCKED"),
+            Text(status.value),
             const Padding(padding: EdgeInsets.symmetric(vertical: 6)),
             AnimatedOpacity(
               opacity: error.value == null ? 0 : 1,
@@ -183,8 +189,8 @@ class LockScreen extends HookWidget {
                       },
                       minPinSize: minPinSize,
                       onSubmit: (String pin) {
-                        onSubmit(
-                            pin, context, ref, error, loading, action.value);
+                        onSubmit(pin, context, ref, error, loading,
+                            action.value, status);
                       },
                     );
                   },
@@ -199,9 +205,11 @@ class LockScreen extends HookWidget {
                     children: [
                       const Spacer(),
                       InkWell(
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () {
                           onSubmit(currentPin.value, context, ref, error,
-                              loading, AfterSelectAction.actionReceive);
+                              loading, AfterSelectAction.actionReceive, status);
                         },
                         child: Transform(
                           alignment: Alignment.center,
@@ -219,9 +227,11 @@ class LockScreen extends HookWidget {
                       ),
                       const Spacer(),
                       InkWell(
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () {
                           onSubmit(currentPin.value, context, ref, error,
-                              loading, AfterSelectAction.actionSend);
+                              loading, AfterSelectAction.actionSend, status);
                         },
                         child: Icon(
                           Icons.arrow_outward,
@@ -247,8 +257,10 @@ class LockScreen extends HookWidget {
       WidgetRef ref,
       ValueNotifier<String?> error,
       ValueNotifier<bool> loading,
-      AfterSelectAction action) async {
+      AfterSelectAction action,
+      ValueNotifier<String> status) async {
     try {
+      status.value = "UNLOCKING";
       error.value = null;
       loading.value = true;
       var proxy = await NodeChannel().getProxy();
@@ -259,6 +271,10 @@ class LockScreen extends HookWidget {
       WalletEventsChannel().initEventChannel();
       loading.value = false;
       if (wallet != null) {
+        if (isViewOnly) {
+          storePassword(pin);
+        }
+        scheduleAutolockTimer();
         // ignore: use_build_context_synchronously
         Navigator.pushAndRemoveUntil(
             context,
@@ -268,23 +284,25 @@ class LockScreen extends HookWidget {
             (route) => false);
       }
     } on PlatformException catch (e) {
+      status.value = "LOCKED";
       error.value = e.message;
     } catch (e) {
+      status.value = "LOCKED";
       debugPrint(e.toString());
     } finally {
       loading.value = false;
     }
   }
+}
 
-  int getStartScreen(AfterSelectAction action) {
-    switch (action) {
-      case AfterSelectAction.actionReceive:
-        return 1;
-      case AfterSelectAction.actionSend:
-        return 2;
-      case AfterSelectAction.actionNone:
-        return 0;
-    }
+int getStartScreen(AfterSelectAction action) {
+  switch (action) {
+    case AfterSelectAction.actionReceive:
+      return 1;
+    case AfterSelectAction.actionSend:
+      return 2;
+    case AfterSelectAction.actionNone:
+      return 0;
   }
 }
 

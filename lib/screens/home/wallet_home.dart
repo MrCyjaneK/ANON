@@ -14,13 +14,14 @@ import 'package:anon_wallet/widgets/qr_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:sembast/sembast.dart';
 
 class WalletHome extends ConsumerStatefulWidget {
   final int startScreen;
   const WalletHome({
     this.startScreen = 0,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState<WalletHome> createState() => WalletHomeState();
@@ -91,7 +92,9 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                         },
                         child: const Text("No")),
                     TextButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await WalletChannel().store();
+                          if (!mounted) return;
                           Navigator.of(context).pop(true);
                           SystemNavigator.pop(animated: true);
                         },

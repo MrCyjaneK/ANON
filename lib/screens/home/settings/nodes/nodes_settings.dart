@@ -11,7 +11,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class NodesSettingsScreens extends ConsumerStatefulWidget {
-  const NodesSettingsScreens({Key? key}) : super(key: key);
+  const NodesSettingsScreens({super.key});
 
   @override
   ConsumerState<NodesSettingsScreens> createState() =>
@@ -255,6 +255,8 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                   ],
                                 )
                               : IconButton(
+                                  highlightColor: Colors.transparent,
+                                  splashColor: Colors.transparent,
                                   onPressed: () async {
                                     showDialog(
                                       context: context,
@@ -329,7 +331,7 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
 class NodeDetails extends ConsumerStatefulWidget {
   final Node node;
 
-  const NodeDetails(this.node, {Key? key}) : super(key: key);
+  const NodeDetails(this.node, {super.key});
 
   @override
   ConsumerState<NodeDetails> createState() => _NodeDetailsState();
@@ -491,7 +493,7 @@ final nodeRemoteConnectionProvider =
 });
 
 class RemoteNodeAddSheet extends HookConsumerWidget {
-  const RemoteNodeAddSheet({Key? key}) : super(key: key);
+  const RemoteNodeAddSheet({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

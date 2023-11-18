@@ -5,8 +5,7 @@ class PolySeedWidget extends StatefulWidget {
   final bool heroEnabled;
 
   const PolySeedWidget(
-      {Key? key, required this.seedWords, required this.heroEnabled})
-      : super(key: key);
+      {super.key, required this.seedWords, required this.heroEnabled});
 
   @override
   State<PolySeedWidget> createState() => _PolySeedWidgetState();

@@ -5,7 +5,7 @@ import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/material.dart';
 
 class OutputsScreen extends StatefulWidget {
-  const OutputsScreen({Key? key}) : super(key: key);
+  const OutputsScreen({super.key});
 
   @override
   State<OutputsScreen> createState() => _OutputsScreenState();

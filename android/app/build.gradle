@@ -29,7 +29,7 @@ android {
     defaultConfig {
         multiDexEnabled true
     }
-    compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -111,38 +111,32 @@ android {
     }
     flavorDimensions "app"
     productFlavors {
-        mainNet {
+        anon {
             dimension "app"
             resValue 'string', 'app_title', '"ANON"'
             buildConfigField 'boolean', 'VIEW_ONLY', 'false'
             buildConfigField 'String', 'NETWORK', '"main"'
         }
-        dev{
+        devanon{
             dimension "app"
             resValue 'string', 'app_title', '"ANON Dev"'
             buildConfigField 'String', 'NETWORK', '"main"'
+            buildConfigField 'boolean', 'VIEW_ONLY', 'false'
             applicationIdSuffix ".dev"
         }
-        stageNet {
-            dimension "app"
-            resValue 'string', 'app_title', '"ANON StageNet"'
-            buildConfigField 'String', 'NETWORK', '"staging"'
-            buildConfigField 'boolean', 'VIEW_ONLY', 'false'
-            applicationIdSuffix ".staging"
-        }
-        viewOnlymainNet {
+        nero {
             dimension "app"
             resValue 'string', 'app_title', '"NERO"'
             buildConfigField 'String', 'NETWORK', '"main"'
             buildConfigField 'boolean', 'VIEW_ONLY', 'true'
             applicationIdSuffix ".view"
         }
-        viewOnlystageNet {
+        devnero{
             dimension "app"
-            resValue 'string', 'app_title', '"NERO StageNet"'
+            resValue 'string', 'app_title', '"NERO Dev"'
             buildConfigField 'boolean', 'VIEW_ONLY', 'true'
-            buildConfigField 'String', 'NETWORK', '"staging"'
-            applicationIdSuffix ".view.staging"
+            buildConfigField 'String', 'NETWORK', '"main"'
+            applicationIdSuffix ".dev.view"
         }
     }
     namespace 'anon.xmr.app.anon_wallet'

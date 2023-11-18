@@ -18,13 +18,13 @@ class AnonSpendForm extends ConsumerStatefulWidget {
   final UrType? scannedType;
 
   const AnonSpendForm({
-    Key? key,
+    super.key,
     this.scannedType,
     required this.outputs,
     required this.maxAmount,
     this.addAppBar = false,
     required this.goBack,
-  }) : super(key: key);
+  });
 
   final void Function() goBack;
   final List<String> outputs;
@@ -394,6 +394,8 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                       Container(
                         alignment: Alignment.center,
                         child: IconButton(
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
                           iconSize: 48,
                           onPressed: () {
                             context

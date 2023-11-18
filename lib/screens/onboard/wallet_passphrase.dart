@@ -5,10 +5,9 @@ class WalletPassphraseWidget extends StatelessWidget {
   final Function(String value) onPassSeedPhraseAdded;
 
   WalletPassphraseWidget(
-      {Key? key,
+      {super.key,
       required this.onPassSeedPhraseAdded,
-      required this.heroEnabled})
-      : super(key: key);
+      required this.heroEnabled});
   final TextEditingController passPhraseController = TextEditingController();
 
   final bool heroEnabled;

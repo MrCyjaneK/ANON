@@ -15,7 +15,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class ViewWalletSeed extends ConsumerStatefulWidget {
-  const ViewWalletSeed({Key? key}) : super(key: key);
+  const ViewWalletSeed({super.key});
 
   @override
   ConsumerState<ViewWalletSeed> createState() => _ViewWalletSeedState();
@@ -317,7 +317,7 @@ class _ViewWalletSeedState extends ConsumerState<ViewWalletSeed> {
 
 /// Cool widget for sensitive data. I'm leaving it here just in case.
 class BluredQrWidget extends StatefulWidget {
-  const BluredQrWidget({Key? key, required this.data}) : super(key: key);
+  const BluredQrWidget({super.key, required this.data});
 
   final String data;
   @override
@@ -368,6 +368,8 @@ class BluredQrWidgetState extends State<BluredQrWidget> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
       onTap: () {
         setState(() {
           isQrRevealed = !isQrRevealed;

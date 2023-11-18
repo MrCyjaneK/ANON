@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class RestoreViewOnlyWallet extends StatefulWidget {
-  const RestoreViewOnlyWallet({Key? key}) : super(key: key);
+  const RestoreViewOnlyWallet({super.key});
 
   @override
   State<RestoreViewOnlyWallet> createState() => _RestoreViewOnlyWalletState();
@@ -124,8 +124,7 @@ class ImportViewOnlyKeys extends StatefulWidget {
   final PageController pageController;
 
   const ImportViewOnlyKeys(
-      {Key? key, required this.pageController, required this.onDone})
-      : super(key: key);
+      {super.key, required this.pageController, required this.onDone});
 
   final Function() onDone;
 
@@ -241,6 +240,8 @@ class _ImportViewOnlyKeysState extends State<ImportViewOnlyKeys> {
               child: Container(
                 alignment: Alignment.center,
                 child: IconButton(
+                  highlightColor: Colors.transparent,
+                  splashColor: Colors.transparent,
                   iconSize: 72,
                   onPressed: () {
                     showDialog(

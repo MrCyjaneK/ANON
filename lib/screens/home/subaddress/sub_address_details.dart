@@ -14,8 +14,7 @@ import '../../../models/transaction.dart';
 class SubAddressDetails extends ConsumerStatefulWidget {
   final SubAddress subAddress;
 
-  const SubAddressDetails({Key? key, required this.subAddress})
-      : super(key: key);
+  const SubAddressDetails({super.key, required this.subAddress});
 
   @override
   ConsumerState<SubAddressDetails> createState() => _SubAddressDetailsState();
@@ -31,6 +30,8 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
         actions: [
           Builder(builder: (context) {
             return IconButton(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
                 onPressed: () {
                   if (subAddress.address == null) return;
                   Clipboard.setData(ClipboardData(text: subAddress.address!));
@@ -47,6 +48,8 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                 icon: const Icon(Icons.copy));
           }),
           IconButton(
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
               onPressed: () {
                 showDialog(
                     barrierColor: barrierColor,
@@ -58,6 +61,8 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
               icon: const Icon(Icons.edit)),
           Builder(builder: (context) {
             return IconButton(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
@@ -134,6 +139,8 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
             return Container(
               margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
               child: InkWell(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
                 onTap: () {
                   Navigator.push(
                       context,

@@ -15,7 +15,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class OnboardScreen extends ConsumerStatefulWidget {
-  const OnboardScreen({Key? key}) : super(key: key);
+  const OnboardScreen({super.key});
 
   @override
   ConsumerState<OnboardScreen> createState() => _OnboardScreenState();

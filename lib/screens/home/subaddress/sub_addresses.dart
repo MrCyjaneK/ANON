@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SubAddressesList extends ConsumerStatefulWidget {
-  const SubAddressesList({Key? key}) : super(key: key);
+  const SubAddressesList({super.key});
 
   @override
   ConsumerState<SubAddressesList> createState() => _SubAddressesListState();
@@ -30,6 +30,8 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
         title: const Text("SubAddresses"),
         actions: [
           IconButton(
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
               onPressed: () {
                 AddressChannel().deriveNewSubAddress();
               },
@@ -75,7 +77,7 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
 class SubAddressItem extends StatelessWidget {
   final SubAddress subAddress;
 
-  const SubAddressItem(this.subAddress, {Key? key}) : super(key: key);
+  const SubAddressItem(this.subAddress, {super.key});
 
   @override
   Widget build(BuildContext context) {

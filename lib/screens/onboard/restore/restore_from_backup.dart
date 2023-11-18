@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 class RestoreFromBackup extends StatefulWidget {
   final AnonBackupModel? anonBackupModel;
 
-  const RestoreFromBackup({Key? key, this.anonBackupModel}) : super(key: key);
+  const RestoreFromBackup({super.key, this.anonBackupModel});
 
   @override
   State<RestoreFromBackup> createState() => _RestoreFromBackupState();
@@ -110,11 +110,10 @@ class BackupPreviewScreen extends StatelessWidget {
   final AnonBackupModel? walletBackUpModel;
 
   const BackupPreviewScreen(
-      {Key? key,
+      {super.key,
       required this.walletBackUpModel,
       required this.onButtonPressed,
-      required this.pageController})
-      : super(key: key);
+      required this.pageController});
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +124,8 @@ class BackupPreviewScreen extends StatelessWidget {
           title: const Text("Backup Preview"),
           centerTitle: true,
           leading: IconButton(
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
             icon: const Icon(Icons.close),
             onPressed: () {
               Navigator.pop(context);

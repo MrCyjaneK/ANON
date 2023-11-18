@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class PolySeedEntry extends StatefulWidget {
   final String seedWords;
 
-  const PolySeedEntry({Key? key, required this.seedWords}) : super(key: key);
+  const PolySeedEntry({super.key, required this.seedWords});
 
   @override
   State<PolySeedEntry> createState() => _PolySeedEntryState();

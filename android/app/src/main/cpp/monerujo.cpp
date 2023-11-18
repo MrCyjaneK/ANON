@@ -376,6 +376,7 @@ JNIEXPORT jlong JNICALL
 Java_com_m2049r_xmrwallet_model_WalletManager_openWalletJ(JNIEnv *env, jobject instance,
                                                           jstring path, jstring password,
                                                           jint networkType) {
+    LOGD("openWalletJ(): start");
     const char *_path = env->GetStringUTFChars(path, nullptr);
     const char *_password = env->GetStringUTFChars(password, nullptr);
     Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
@@ -385,6 +386,13 @@ Java_com_m2049r_xmrwallet_model_WalletManager_openWalletJ(JNIEnv *env, jobject i
                     std::string(_password),
                     _networkType);
 
+    // setup background sync
+    bool setupStatus = wallet->setupBackgroundSync(Monero::Wallet::BackgroundSync_ReusePassword, std::string(_password), {});
+    if (setupStatus == true) {
+        LOGD("openWalletJ(): setupBackgroundSync(): success!");
+    } else {
+        LOGD("openWalletJ(): setupBackgroundSync(): failure!");
+    }
     env->ReleaseStringUTFChars(path, _path);
     env->ReleaseStringUTFChars(password, _password);
     return reinterpret_cast<jlong>(wallet);
@@ -856,7 +864,7 @@ Java_com_m2049r_xmrwallet_model_Wallet_store(JNIEnv *env, jobject instance,
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     bool success = wallet->store(std::string(_path));
     if (!success) {
-        LOGE("store() %s", wallet->errorString().c_str());
+        LOGE("store(): %s", wallet->errorString().c_str());
     }
     env->ReleaseStringUTFChars(path, _path);
     return static_cast<jboolean>(success);
@@ -1109,6 +1117,35 @@ JNIEXPORT void JNICALL
 Java_com_m2049r_xmrwallet_model_Wallet_pauseRefresh(JNIEnv *env, jobject instance) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     wallet->pauseRefresh();
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_startBackgroundSync(JNIEnv *env, jobject instance) {
+    LOGD("startBackgroundSync(): start");
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+
+    bool bgsyncStatus = wallet->startBackgroundSync();
+    if (bgsyncStatus == true) {
+        LOGD("startBackgroundSync(): end: success!");
+    } else {
+        LOGD("startBackgroundSync(): end: fail!");
+    }
+    return static_cast<jboolean>(bgsyncStatus);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_m2049r_xmrwallet_model_Wallet_stopBackgroundSync(JNIEnv *env, jobject instance, jstring password) {
+    LOGD("stopBackgroundSync(): start");
+    Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
+    const char *_password = env->GetStringUTFChars(password, nullptr);
+    bool bgsyncStatus = wallet->stopBackgroundSync(std::string(_password));
+    if (bgsyncStatus == true) {
+        LOGD("stopBackgroundSync(): end: success!");
+    } else {
+        LOGD("stopBackgroundSync(): end: fail!");
+    }
+    env->ReleaseStringUTFChars(password, _password);
+    return static_cast<jboolean>(bgsyncStatus);
 }
 
 JNIEXPORT jboolean JNICALL

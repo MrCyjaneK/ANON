@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 
 class TxOutputElement extends StatelessWidget {
   const TxOutputElement({
-    Key? key,
+    super.key,
     required this.utxo,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
   final /* Map<String, dynamic> */ dynamic utxo;

@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 class TxDetails extends ConsumerStatefulWidget {
   final Transaction transaction;
 
-  const TxDetails({Key? key, required this.transaction}) : super(key: key);
+  const TxDetails({super.key, required this.transaction});
 
   @override
   ConsumerState<TxDetails> createState() => _TxDetailsState();
@@ -321,6 +321,8 @@ class _TxDetailsState extends ConsumerState<TxDetails> {
           leading: const Icon(Icons.info_outline),
           actions: [
             IconButton(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
                 onPressed: () {
                   ScaffoldMessenger.of(context).clearMaterialBanners();
                 },

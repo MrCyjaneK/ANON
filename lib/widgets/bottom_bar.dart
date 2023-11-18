@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BottomBar extends StatelessWidget {
   /// {@macro bottom_bar}
   const BottomBar({
-    Key? key,
+    super.key,
     required this.selectedIndex,
     this.curve = Curves.easeOutQuint,
     this.duration = const Duration(milliseconds: 750),
@@ -16,7 +16,7 @@ class BottomBar extends StatelessWidget {
     required this.items,
     required this.onTap,
     this.textStyle = const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-  }) : super(key: key);
+  });
 
   /// Index of selected item
   final int selectedIndex;
@@ -115,7 +115,7 @@ class BottomBar extends StatelessWidget {
 class _BottomBarItemWidget extends StatelessWidget {
   /// Creates a Widget that displays the contents of a `BottomBarItem`
   const _BottomBarItemWidget({
-    Key? key,
+    super.key,
     required this.index,
     required this.isSelected,
     required this.activeBackgroundColor,
@@ -133,7 +133,7 @@ class _BottomBarItemWidget extends StatelessWidget {
     this.inactiveIcon,
     required this.title,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final int index;
   final bool isSelected;
@@ -173,12 +173,10 @@ class _BottomBarItemWidget extends StatelessWidget {
               : Colors.transparent,
           shape: border,
           child: InkWell(
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
             onTap: onTap,
             customBorder: border,
-            focusColor: activeBackgroundColor,
-            highlightColor: activeBackgroundColor,
-            splashColor: activeBackgroundColor,
-            hoverColor: activeBackgroundColor,
             child: Padding(
               padding: itemPadding -
                   (title == null

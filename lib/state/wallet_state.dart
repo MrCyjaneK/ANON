@@ -24,6 +24,13 @@ final walletNodeDaemonHeight = Provider<int>((ref) {
   return wallet != null ? wallet.blockChainHeight.toInt() : 0;
 });
 
+final walletIsDownloadingBlocks = Provider<bool>((ref) {
+  var walletAsync = ref.watch(walletStateStreamProvider);
+  Wallet? wallet = walletAsync.value;
+  return wallet != null &&
+      wallet.blockChainHeight.toInt() != wallet.daemonBlockChainHeight.toInt();
+});
+
 final connectionStatus = Provider<bool>((ref) {
   var walletAsync = ref.watch(walletStateStreamProvider);
   Wallet? wallet = walletAsync.value;

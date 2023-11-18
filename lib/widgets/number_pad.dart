@@ -16,14 +16,14 @@ class NumberPad extends StatelessWidget {
   final Widget doneIcon;
 
   const NumberPad({
-    Key? key,
+    super.key,
     required this.onDeleteCancelTap,
     required this.onDoneCallback,
     required this.onDeleteLongPress,
     required this.onTap,
     required this.showDoneButton,
     required this.doneIcon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => _buildKeyboard(context);
@@ -69,11 +69,9 @@ class NumberPad extends StatelessWidget {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
+                      highlightColor: Colors.transparent,
+                      splashColor: Colors.transparent,
                       onLongPress: () => onDeleteLongPress(),
-                      highlightColor: Theme.of(context).scaffoldBackgroundColor,
-                      splashColor: Theme.of(context)
-                          .scaffoldBackgroundColor
-                          .withOpacity(0.4),
                       onTap: onDeleteCancelTap,
                       child: const Center(
                         child: Icon(Icons.backspace),
@@ -97,9 +95,8 @@ class NumberPad extends StatelessWidget {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        highlightColor:
-                            Theme.of(context).primaryColor.withOpacity(0.5),
-                        splashColor: Theme.of(context).primaryColor,
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () => onDoneCallback(),
                         child: Center(child: doneIcon),
                       ),
@@ -127,8 +124,8 @@ class NumberPad extends StatelessWidget {
         child: Material(
           color: Theme.of(context).scaffoldBackgroundColor,
           child: InkWell(
-            highlightColor: Theme.of(context).primaryColor.withOpacity(0.8),
-            splashColor: Theme.of(context).primaryColor,
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
             onTap: () {
               onTap(text);
             },

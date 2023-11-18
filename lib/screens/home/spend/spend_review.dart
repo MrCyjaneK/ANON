@@ -11,7 +11,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class AnonSpendReview extends ConsumerWidget {
   final Function? onActionClicked;
 
-  const AnonSpendReview({Key? key, this.onActionClicked}) : super(key: key);
+  const AnonSpendReview({super.key, this.onActionClicked});
   void showFeeNotification(
       BuildContext context, Function? onActionClicked) async {
     showDialog(
@@ -250,12 +250,11 @@ class SpendListItem extends StatelessWidget {
   final bool isLoading;
   final Color? color;
   const SpendListItem(
-      {Key? key,
+      {super.key,
       required this.title,
       this.isLoading = false,
       required this.subTitle,
-      this.color})
-      : super(key: key);
+      this.color});
 
   @override
   Widget build(BuildContext context) {
