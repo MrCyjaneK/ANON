@@ -159,8 +159,10 @@ class LockScreen extends HookWidget {
           children: [
             Hero(
               tag: "anon_logo",
-              child: SizedBox(
-                  width: 180, child: Image.asset("assets/anon_logo.png")),
+              child: Semantics(
+                label: 'anon',
+                child: SizedBox(
+                  width: 180, child: Image.asset("assets/anon_logo.png"))),
             ),
             Text(status.value),
             const Padding(padding: EdgeInsets.symmetric(vertical: 6)),
@@ -204,7 +206,9 @@ class LockScreen extends HookWidget {
                   return Row(
                     children: [
                       const Spacer(),
-                      InkWell(
+                      Semantics(
+                        label: 'quick receive',
+                        child: InkWell(
                         highlightColor: Colors.transparent,
                         splashColor: Colors.transparent,
                         onTap: () {
@@ -220,13 +224,15 @@ class LockScreen extends HookWidget {
                             child: const Icon(
                               Icons.arrow_outward,
                               size: 75,
-                              color: null,
-                            ),
+                              color: null,),
                           ),
+                        ),
                         ),
                       ),
                       const Spacer(),
-                      InkWell(
+                      Semantics(
+                        label: 'quick send',
+                        child: InkWell(
                         highlightColor: Colors.transparent,
                         splashColor: Colors.transparent,
                         onTap: () {
@@ -238,6 +244,7 @@ class LockScreen extends HookWidget {
                           size: 75,
                           color: colorScheme.primary,
                         ),
+                      ),
                       ),
                       const Spacer(),
                     ],

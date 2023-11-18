@@ -393,17 +393,19 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                       ),
                       Container(
                         alignment: Alignment.center,
-                        child: IconButton(
+                        child: Semantics(
+                          label: 'Scan QR code',
+                          child: IconButton(
+                          iconSize: 48,
                           highlightColor: Colors.transparent,
                           splashColor: Colors.transparent,
-                          iconSize: 48,
                           onPressed: () {
                             context
                                 .findRootAncestorStateOfType<WalletHomeState>()
                                 ?.showModalScanner(context);
                           },
                           icon: const Icon(Icons.crop_free_sharp),
-                        ),
+                        )),
                       ),
                     ],
                   ),

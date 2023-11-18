@@ -29,7 +29,9 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
       appBar: AppBar(
         actions: [
           Builder(builder: (context) {
-            return IconButton(
+            return Semantics(
+                label: 'Copy SubAddress',
+                child: IconButton(
                 highlightColor: Colors.transparent,
                 splashColor: Colors.transparent,
                 onPressed: () {
@@ -45,9 +47,11 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                     behavior: SnackBarBehavior.floating,
                   ));
                 },
-                icon: const Icon(Icons.copy));
+                icon: const Icon(Icons.copy)));
           }),
-          IconButton(
+          Semantics(
+                label: 'Edit name',
+                child: IconButton(
               highlightColor: Colors.transparent,
               splashColor: Colors.transparent,
               onPressed: () {
@@ -58,9 +62,11 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                       return SubAddressEditDialog(subAddress);
                     });
               },
-              icon: const Icon(Icons.edit)),
+              icon: const Icon(Icons.edit))),
           Builder(builder: (context) {
-            return IconButton(
+            return Semantics(
+                label: 'Show QR code',
+                child: IconButton(
                 highlightColor: Colors.transparent,
                 splashColor: Colors.transparent,
                 onPressed: () {
@@ -93,7 +99,7 @@ class _SubAddressDetailsState extends ConsumerState<SubAddressDetails> {
                     },
                   );
                 },
-                icon: const Icon(Icons.qr_code_2_outlined));
+                icon: const Icon(Icons.qr_code_2_outlined)));
           })
         ],
       ),

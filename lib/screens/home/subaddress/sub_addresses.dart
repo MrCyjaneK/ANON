@@ -29,13 +29,15 @@ class _SubAddressesListState extends ConsumerState<SubAddressesList> {
       appBar: AppBar(
         title: const Text("SubAddresses"),
         actions: [
-          IconButton(
+          Semantics(
+                label: 'Add SubAddress',
+                child: IconButton(
               highlightColor: Colors.transparent,
               splashColor: Colors.transparent,
               onPressed: () {
                 AddressChannel().deriveNewSubAddress();
               },
-              icon: const Icon(Icons.add))
+              icon: const Icon(Icons.add)))
         ],
       ),
       body: value.map(

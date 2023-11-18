@@ -88,7 +88,9 @@ class _TransactionsListState extends State<TransactionsList> {
                       (sync?['remaining'] != 0 && sync?['remaining'] != null));
                   return Opacity(
                     opacity: isLoading ? 0.5 : 1,
-                    child: IconButton(
+                    child: Semantics(
+                      label: 'lock wallet',
+                      child: IconButton(
                         highlightColor: Colors.transparent,
                         splashColor: Colors.transparent,
                         onPressed: isLoading
@@ -122,17 +124,20 @@ class _TransactionsListState extends State<TransactionsList> {
                         icon: const Hero(
                           tag: "lock",
                           child: Icon(Icons.lock),
-                        )),
+                        )), ),
                   );
                 },
               ),
-              IconButton(
+
+              Semantics(
+                label: 'scan qr',
+                child: IconButton(
                   highlightColor: Colors.transparent,
                   splashColor: Colors.transparent,
                   onPressed: () {
                     widget.onScanClick.call();
                   },
-                  icon: const Icon(Icons.crop_free)),
+                  icon: const Icon(Icons.crop_free)),),
               isViewOnly ? _buildViewOnlyMenu(context) : _buildMenu(context),
             ],
             flexibleSpace: InkWell(
@@ -168,7 +173,9 @@ class _TransactionsListState extends State<TransactionsList> {
               verticalDirection: VerticalDirection.up,
               crossAxisAlignment: WrapCrossAlignment.start,
               children: [
-                Text(isViewOnly ? "[ИΞR0]" : "[ΛИ0И]"),
+                Semantics(
+                label: 'anon',
+                child: Text(isViewOnly ? "[ИΞR0]" : "[ΛИ0И]")),
               ],
             ),
           ),

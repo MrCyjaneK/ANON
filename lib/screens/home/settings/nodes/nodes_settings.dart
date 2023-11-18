@@ -254,7 +254,9 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                             .labelSmall)
                                   ],
                                 )
-                              : IconButton(
+                              : Semantics(
+                                  label: 'delete node',
+                                  child: IconButton(
                                   highlightColor: Colors.transparent,
                                   splashColor: Colors.transparent,
                                   onPressed: () async {
@@ -295,7 +297,7 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                                       },
                                     );
                                   },
-                                  icon: const Icon(Icons.delete)),
+                                  icon: const Icon(Icons.delete)), ),
                         ),
                       ),
                     ),

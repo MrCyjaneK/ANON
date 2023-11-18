@@ -68,13 +68,15 @@ class NumberPad extends StatelessWidget {
                 child: ClipOval(
                   child: Material(
                     color: Colors.transparent,
-                    child: InkWell(
+                    child: Semantics(
+                      label: 'delete',
+                      child: InkWell(
                       highlightColor: Colors.transparent,
                       splashColor: Colors.transparent,
                       onLongPress: () => onDeleteLongPress(),
                       onTap: onDeleteCancelTap,
                       child: const Center(
-                        child: Icon(Icons.backspace),
+                        child: Icon(Icons.backspace),),
                       ),
                     ),
                   ),
@@ -94,11 +96,14 @@ class NumberPad extends StatelessWidget {
                   child: ClipOval(
                     child: Material(
                       color: Colors.transparent,
+                      child: Semantics(
+                      label: 'enter',
                       child: InkWell(
                         highlightColor: Colors.transparent,
                         splashColor: Colors.transparent,
                         onTap: () => onDoneCallback(),
                         child: Center(child: doneIcon),
+                      ),
                       ),
                     ),
                   ),

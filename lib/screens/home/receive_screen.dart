@@ -27,7 +27,9 @@ class ReceiveWidget extends ConsumerWidget {
               },
             ),
             actions: [
-              IconButton(
+              Semantics(
+                label: 'Recent SubAddresses',
+                child: IconButton(
                   highlightColor: Colors.transparent,
                   splashColor: Colors.transparent,
                   onPressed: () {
@@ -41,7 +43,7 @@ class ReceiveWidget extends ConsumerWidget {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.history))
+                  icon: const Icon(Icons.history)))
             ],
           ),
           const SliverPadding(padding: EdgeInsets.all(8)),
