@@ -170,23 +170,40 @@ class RestoreNodeSetup extends ConsumerWidget {
                 }, []);
                 return Container(
                   width: MediaQuery.of(context).size.width,
-                  padding: const EdgeInsets.only(top: 24),
-                  child: TextButton.icon(
-                    style: ButtonStyle(
-                        foregroundColor: proxy.isConnected()
-                            ? MaterialStateColor.resolveWith(
-                                (states) => Colors.green)
-                            : MaterialStateColor.resolveWith(
-                                (states) => Theme.of(context).primaryColor)),
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (context) {
-                          return const ProxySettings();
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (context) {
+                              return const ProxySettings();
+                            },
+                          ));
                         },
-                      ));
-                    },
-                    label: const Text("Proxy Settings"),
-                    icon: const Icon(Icons.shield_outlined),
+                        label: Text(
+                          "PROXY",
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 18,
+                                  ),
+                        ),
+                        icon: const Icon(Icons.settings),
+                      ),
+                      if (!proxy.isConnected())
+                        Container(
+                          height: 12,
+                          width: 12,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.red,
+                          ),
+                        ),
+                    ],
                   ),
                 );
               },

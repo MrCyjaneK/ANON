@@ -9,10 +9,10 @@ nero:
 dev: devanon devnero
 
 devanon:
-	flutter build apk --flavor devanon
+	flutter build apk --verbose --no-tree-shake-icons --flavor devanon
 
 devnero:
-	flutter build apk --flavor devnero
+	flutter build apk --verbose --no-tree-shake-icons --flavor devnero
 
 clean:
 	flutter clean

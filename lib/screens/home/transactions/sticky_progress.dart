@@ -1,5 +1,6 @@
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -20,12 +21,15 @@ class ProgressSliverWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     bool isConnecting = ref.watch(connectingToNodeStateProvider);
-    bool isWalletOpening = ref.watch(walletLoadingProvider) ?? false;
+    bool isWalletOpening = ref.watch(walletLoadingProvider) ?? true;
     bool connected = ref.watch(connectionStatus) ?? false;
     Map<String, num>? sync = ref.watch(syncProgressStateProvider);
-    bool isActive = isConnecting || isWalletOpening || sync != null;
+    bool isActive = kDebugMode ||
+        (sync != null && sync['remaining'] != 0) ||
+        (isConnecting || isWalletOpening) ||
+        (!connected);
 
-    double height = sync != null ? 44 : 14;
+    double height = (sync != null || kDebugMode) ? 44 : 14;
 
     return AnimatedContainer(
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -37,6 +41,10 @@ class ProgressSliverWidget extends ConsumerWidget {
         child: Builder(
           builder: (context) {
             if (sync != null && sync['remaining'] != 0) {
+              if (kDebugMode) {
+                return (const SelectableText(
+                    "(sync != null && sync['remaining'] != 0)"));
+              }
               double progress = sync['progress']?.toDouble() ?? 0.0;
               return SizedBox(
                 height: 28,
@@ -76,6 +84,10 @@ class ProgressSliverWidget extends ConsumerWidget {
                 ),
               );
             } else if (isConnecting || isWalletOpening) {
+              if (kDebugMode) {
+                return (const SelectableText(
+                    "(isConnecting || isWalletOpening)"));
+              }
               return ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: const LinearProgressIndicator(
@@ -83,23 +95,23 @@ class ProgressSliverWidget extends ConsumerWidget {
                   minHeight: 4,
                 ),
               );
+            } else if (!connected) {
+              if (kDebugMode) return (const SelectableText("(!connected)"));
+              return Column(
+                children: [
+                  const LinearProgressIndicator(
+                    minHeight: 4,
+                  ),
+                  const Padding(padding: EdgeInsets.all(6)),
+                  Text(
+                    "Disconnected",
+                    style: Theme.of(context).textTheme.bodySmall,
+                  )
+                ],
+              );
             } else {
-              if (!connected) {
-                return Column(
-                  children: [
-                    const LinearProgressIndicator(
-                      minHeight: 4,
-                    ),
-                    const Padding(padding: EdgeInsets.all(6)),
-                    Text(
-                      "Disconnected",
-                      style: Theme.of(context).textTheme.bodySmall,
-                    )
-                  ],
-                );
-              } else {
-                return Container();
-              }
+              if (kDebugMode) return (const SelectableText("Connected!"));
+              return Container();
             }
           },
         ),

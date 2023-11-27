@@ -15,6 +15,7 @@ import 'package:anon_wallet/screens/home/wallet_lock.dart';
 import 'package:anon_wallet/screens/landing_screen.dart';
 import 'package:anon_wallet/screens/set_pin_screen.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
+import 'package:anon_wallet/utils/embed_tor.dart';
 import 'package:anon_wallet/utils/json_state.dart';
 import 'package:anon_wallet/utils/viewonly_cachepin.dart';
 import 'package:flutter/foundation.dart';
@@ -29,10 +30,11 @@ import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   // I kinda lose logs at the beginning..
-  if (kDebugMode) {
-    await Future.delayed(const Duration(seconds: 3));
-  }
+  // if (kDebugMode) {
+  //   await Future.delayed(const Duration(seconds: 3));
+  // }
   runApp(const SplashScreen());
+  unawaited(runEmbeddedTor());
   WalletState state = await WalletChannel().getWalletState();
   await Permission.notification.request();
   await showServiceNotification();
@@ -160,9 +162,9 @@ class LockScreen extends HookWidget {
             Hero(
               tag: "anon_logo",
               child: Semantics(
-                label: 'anon',
-                child: SizedBox(
-                  width: 180, child: Image.asset("assets/anon_logo.png"))),
+                  label: 'anon',
+                  child: SizedBox(
+                      width: 180, child: Image.asset("assets/anon_logo.png"))),
             ),
             Text(status.value),
             const Padding(padding: EdgeInsets.symmetric(vertical: 6)),
@@ -209,42 +211,49 @@ class LockScreen extends HookWidget {
                       Semantics(
                         label: 'quick receive',
                         child: InkWell(
-                        highlightColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        onTap: () {
-                          onSubmit(currentPin.value, context, ref, error,
-                              loading, AfterSelectAction.actionReceive, status);
-                        },
-                        child: Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.rotationY(math.pi),
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          onTap: () {
+                            onSubmit(
+                                currentPin.value,
+                                context,
+                                ref,
+                                error,
+                                loading,
+                                AfterSelectAction.actionReceive,
+                                status);
+                          },
                           child: Transform(
                             alignment: Alignment.center,
-                            transform: Matrix4.rotationX(math.pi),
-                            child: const Icon(
-                              Icons.arrow_outward,
-                              size: 75,
-                              color: null,),
+                            transform: Matrix4.rotationY(math.pi),
+                            child: Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.rotationX(math.pi),
+                              child: const Icon(
+                                Icons.arrow_outward,
+                                size: 75,
+                                color: null,
+                              ),
+                            ),
                           ),
-                        ),
                         ),
                       ),
                       const Spacer(),
                       Semantics(
                         label: 'quick send',
                         child: InkWell(
-                        highlightColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        onTap: () {
-                          onSubmit(currentPin.value, context, ref, error,
-                              loading, AfterSelectAction.actionSend, status);
-                        },
-                        child: Icon(
-                          Icons.arrow_outward,
-                          size: 75,
-                          color: colorScheme.primary,
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          onTap: () {
+                            onSubmit(currentPin.value, context, ref, error,
+                                loading, AfterSelectAction.actionSend, status);
+                          },
+                          child: Icon(
+                            Icons.arrow_outward,
+                            size: 75,
+                            color: colorScheme.primary,
+                          ),
                         ),
-                      ),
                       ),
                       const Spacer(),
                     ],

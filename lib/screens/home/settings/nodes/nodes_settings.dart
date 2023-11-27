@@ -257,47 +257,51 @@ class _NodesSettingsScreensState extends ConsumerState<NodesSettingsScreens> {
                               : Semantics(
                                   label: 'delete node',
                                   child: IconButton(
-                                  highlightColor: Colors.transparent,
-                                  splashColor: Colors.transparent,
-                                  onPressed: () async {
-                                    showDialog(
-                                      context: context,
-                                      barrierColor: barrierColor,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          backgroundColor: Theme.of(context)
-                                              .scaffoldBackgroundColor,
-                                          content: const Text(
-                                              "Do you want to remove this node ?"),
-                                          actions: [
-                                            TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text("Cancel")),
-                                            TextButton(
-                                                onPressed: () async {
-                                                  try {
-                                                    await NodeChannel()
-                                                        .removeNode(
-                                                            nodes[index]);
-                                                    ref.refresh(
-                                                        _nodesListProvider);
-                                                  } catch (e) {
-                                                    ref.refresh(
-                                                        _nodesListProvider);
-                                                    debugPrint(e.toString());
-                                                  }
-                                                  if (!mounted) return;
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text("Delete")),
-                                          ],
+                                      highlightColor: Colors.transparent,
+                                      splashColor: Colors.transparent,
+                                      onPressed: () async {
+                                        showDialog(
+                                          context: context,
+                                          barrierColor: barrierColor,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              backgroundColor: Theme.of(context)
+                                                  .scaffoldBackgroundColor,
+                                              content: const Text(
+                                                  "Do you want to remove this node ?"),
+                                              actions: [
+                                                TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child:
+                                                        const Text("Cancel")),
+                                                TextButton(
+                                                    onPressed: () async {
+                                                      try {
+                                                        await NodeChannel()
+                                                            .removeNode(
+                                                                nodes[index]);
+                                                        ref.refresh(
+                                                            _nodesListProvider);
+                                                      } catch (e) {
+                                                        ref.refresh(
+                                                            _nodesListProvider);
+                                                        debugPrint(
+                                                            e.toString());
+                                                      }
+                                                      if (!mounted) return;
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child:
+                                                        const Text("Delete")),
+                                              ],
+                                            );
+                                          },
                                         );
                                       },
-                                    );
-                                  },
-                                  icon: const Icon(Icons.delete)), ),
+                                      icon: const Icon(Icons.delete)),
+                                ),
                         ),
                       ),
                     ),
@@ -621,22 +625,39 @@ class RemoteNodeAddSheet extends HookConsumerWidget {
                 return Container(
                   width: MediaQuery.of(context).size.width,
                   padding: const EdgeInsets.only(top: 8),
-                  child: TextButton.icon(
-                    style: ButtonStyle(
-                        foregroundColor: proxy.isConnected()
-                            ? MaterialStateColor.resolveWith(
-                                (states) => Colors.green)
-                            : MaterialStateColor.resolveWith(
-                                (states) => Theme.of(context).primaryColor)),
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (context) {
-                          return const ProxySettings();
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (context) {
+                              return const ProxySettings();
+                            },
+                          ));
                         },
-                      ));
-                    },
-                    label: const Text("Proxy Settings"),
-                    icon: const Icon(Icons.shield_outlined),
+                        label: Text(
+                          "PROXY",
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 18,
+                                  ),
+                        ),
+                        icon: const Icon(Icons.settings),
+                      ),
+                      if (!proxy.isConnected())
+                        Container(
+                          height: 12,
+                          width: 12,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.red,
+                          ),
+                        ),
+                    ],
                   ),
                 );
               },

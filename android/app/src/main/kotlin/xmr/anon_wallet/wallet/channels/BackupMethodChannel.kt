@@ -35,6 +35,7 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
         when (call.method) {
             "backup" -> backup(call, result)
             "exportFile" -> exportFile(call, result)
+            "getAndroidNativeLibraryDirectory" -> getAndroidNativeLibraryDirectory(call, result)
             "validatePayload" -> validatePayload(call, result)
             "openBackupFile" -> openBackupFile(call, result)
             "restoreViewOnly" -> restoreViewOnly(call, result)
@@ -286,6 +287,19 @@ class BackupMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
                     } else {
                         result.error("1", "Invalid passphrase", "")
                     }
+                } catch (e: Exception) {
+                    result.error("2", e.message, "")
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun getAndroidNativeLibraryDirectory(call: MethodCall, result: Result) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    result.success(AnonWallet.getAppContext().applicationInfo.nativeLibraryDir.toString())
                 } catch (e: Exception) {
                     result.error("2", e.message, "")
                     e.printStackTrace()

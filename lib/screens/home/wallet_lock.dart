@@ -231,9 +231,7 @@ class _LockedWalletState extends State<LockedWallet> {
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-// 60 seconds for debug
-// 10 minutes for release
-const defaultAutolockTimer = (kDebugMode) ? 60 : 10 * 60;
+const defaultAutolockTimer = 10 * 60;
 
 int autolockLeft = defaultAutolockTimer;
 

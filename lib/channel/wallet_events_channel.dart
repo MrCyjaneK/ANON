@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/models/sub_address.dart';
 import 'package:anon_wallet/models/wallet.dart';
+import 'package:anon_wallet/utils/embed_tor.dart';
 import 'package:anon_wallet/utils/json_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -66,13 +67,17 @@ class WalletEventsChannel {
             {
               if (kDebugMode) {
                 setStats(
-                  'DEBUG: ${event['isConnected']} | ${event['height']}',
+                  'DEBUG: ${event['isConnected']} | ${event['height']} | tor: ${proc == null}',
                 );
               } else {
+                String torInfo = "";
+                if (proc != null) {
+                  torInfo = "[Embedded Tor]";
+                }
                 if (event['isConnected'] == true) {
-                  setStats('Synced: ${event['height']}');
+                  setStats('Synced: ${event['height']} $torInfo');
                 } else {
-                  setStats("Connecting...");
+                  setStats("Connecting... $torInfo");
                 }
               }
               List<SubAddress> addresses = [];

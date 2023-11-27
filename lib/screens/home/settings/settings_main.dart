@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/channel/wallet_backup_restore_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
@@ -9,6 +12,7 @@ import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
+import 'package:anon_wallet/utils/embed_tor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -53,19 +57,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const EdgeInsets.symmetric(horizontal: 34),
                         onTap: () {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const NodesSettingsScreens()));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const NodesSettingsScreens(),
+                            ),
+                          );
                         },
                         title: const Text("Node"),
-                        subtitle: Text("Manage nodes",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: dividerColor)),
+                        subtitle: Text(
+                          "Manage nodes",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: dividerColor),
+                        ),
                       )
                     : const SizedBox.shrink(),
+                Divider(color: dividerColor, height: 2),
                 !isAirgapEnabled
                     ? HookConsumer(builder: (context, ref, child) {
                         Proxy proxy = ref.watch(proxyStateProvider);
@@ -83,30 +92,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     builder: (context) =>
                                         const ProxySettings()));
                           },
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                height: 12,
+                                width: 12,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color:
+                                      isConnected ? Colors.green : Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
                           title: const Text("Proxy"),
                           contentPadding:
                               const EdgeInsets.symmetric(horizontal: 34),
                           subtitle: proxy.isConnected()
-                              ? Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                              color: isConnected
-                                                  ? Colors.green
-                                                  : dividerColor,
-                                              fontSize: 11,
-                                              wordSpacing: 0),
-                                      isConnected
-                                          ? "Connected : ${proxy.serverUrl}:${proxy.portTor}/${proxy.portI2p}"
-                                          : "Disconnected : ${proxy.serverUrl}:${proxy.portTor}/${proxy.portI2p}",
-                                    ),
-                                  ],
-                                )
+                              ? null
                               : Text("Disabled",
                                   style: Theme.of(context)
                                       .textTheme

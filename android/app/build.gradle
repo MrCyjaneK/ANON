@@ -26,32 +26,38 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    defaultConfig {
-        multiDexEnabled true
-    }
     compileSdkVersion 34
     ndkVersion flutter.ndkVersion
-
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
     compileOptions {
         // Flag to enable support for the new language APIs
         coreLibraryDesugaringEnabled true
         // Sets Java compatibility to Java 8
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        // sourceCompatibility JavaVersion.VERSION_1_8
+        // targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+    buildFeatures.buildConfig true
+
     defaultConfig {
         applicationId "anon.xmr"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         minSdkVersion 24
+        multiDexEnabled true
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -102,10 +108,15 @@ android {
     }
 
     buildTypes {
-
+        // debug {
+        //     shrinkResources false
+        //     minifyEnabled true
+        //     signingConfig signingConfigs.debug
+        // }
         release {
             // Signing with the debug keys for now, so `flutter run --release` works.
-
+            shrinkResources false
+            minifyEnabled true
             signingConfig signingConfigs.debug
         }
     }
@@ -183,4 +194,11 @@ dependencies {
     // https://github.com/flutter/flutter/issues/110658
     implementation 'androidx.window:window:1.0.0'
     implementation 'androidx.window:window-java:1.0.0'
+
+    // Tor
+    implementation("io.matthewnelson.kotlin-components:kmp-tor-binary-android:4.8.6-0")
+    // implementation("io.matthewnelson.kotlin-components:kmp-tor-binary-extract-android:4.8.6-0")
+    // implementation("io.matthewnelson.kotlin-components:kmp-tor-binary-android-android:4.8.6-0")
+    // implementation("io.matthewnelson.kotlin-components:kmp-tor-binary-geoip-android:4.8.6-0")
+
 }

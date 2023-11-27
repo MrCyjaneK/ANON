@@ -24,6 +24,12 @@ class BackUpRestoreChannel {
     return value;
   }
 
+  Future<String> getAndroidNativeLibraryDirectory() async {
+    String value =
+        await platform.invokeMethod("getAndroidNativeLibraryDirectory", {});
+    return value;
+  }
+
   Future<String> parseBackUp(String backupFileUri, String passPhrase) async {
     String value = await platform.invokeMethod("parseBackup",
         {"backupFileUri": backupFileUri, "passphrase": passPhrase});
