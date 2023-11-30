@@ -132,44 +132,46 @@ class _LockedWalletState extends State<LockedWallet> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 42),
-                child: Row(
-                  children: [
-                    const Spacer(),
-                    InkWell(
-                      highlightColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      onTap: () =>
-                          unlockWallet(pin, AfterSelectAction.actionReceive),
-                      child: Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.rotationY(math.pi),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 42),
+                  child: Row(
+                    children: [
+                      const Spacer(),
+                      InkWell(
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        onTap: () =>
+                            unlockWallet(pin, AfterSelectAction.actionReceive),
                         child: Transform(
                           alignment: Alignment.center,
-                          transform: Matrix4.rotationX(math.pi),
-                          child: const Icon(
-                            Icons.arrow_outward,
-                            size: 75,
-                            color: null,
+                          transform: Matrix4.rotationY(math.pi),
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.rotationX(math.pi),
+                            child: const Icon(
+                              Icons.arrow_outward,
+                              size: 75,
+                              color: null,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const Spacer(),
-                    InkWell(
-                      highlightColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      onTap: () =>
-                          unlockWallet(pin, AfterSelectAction.actionSend),
-                      child: Icon(
-                        Icons.arrow_outward,
-                        size: 75,
-                        color: colorScheme.primary,
+                      const Spacer(),
+                      InkWell(
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        onTap: () =>
+                            unlockWallet(pin, AfterSelectAction.actionSend),
+                        child: Icon(
+                          Icons.arrow_outward,
+                          size: 75,
+                          color: colorScheme.primary,
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                  ],
+                      const Spacer(),
+                    ],
+                  ),
                 ),
               ),
             ],

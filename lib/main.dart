@@ -201,64 +201,72 @@ class LockScreen extends HookWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 42),
-              child: Consumer(
-                builder: (context, ref, c) {
-                  return Row(
-                    children: [
-                      const Spacer(),
-                      Semantics(
-                        label: 'quick receive',
-                        child: InkWell(
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          onTap: () {
-                            onSubmit(
-                                currentPin.value,
-                                context,
-                                ref,
-                                error,
-                                loading,
-                                AfterSelectAction.actionReceive,
-                                status);
-                          },
-                          child: Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.rotationY(math.pi),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 42),
+                child: Consumer(
+                  builder: (context, ref, c) {
+                    return Row(
+                      children: [
+                        const Spacer(),
+                        Semantics(
+                          label: 'quick receive',
+                          child: InkWell(
+                            highlightColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            onTap: () {
+                              onSubmit(
+                                  currentPin.value,
+                                  context,
+                                  ref,
+                                  error,
+                                  loading,
+                                  AfterSelectAction.actionReceive,
+                                  status);
+                            },
                             child: Transform(
                               alignment: Alignment.center,
-                              transform: Matrix4.rotationX(math.pi),
-                              child: const Icon(
-                                Icons.arrow_outward,
-                                size: 75,
-                                color: null,
+                              transform: Matrix4.rotationY(math.pi),
+                              child: Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.rotationX(math.pi),
+                                child: const Icon(
+                                  Icons.arrow_outward,
+                                  size: 75,
+                                  color: null,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      const Spacer(),
-                      Semantics(
-                        label: 'quick send',
-                        child: InkWell(
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          onTap: () {
-                            onSubmit(currentPin.value, context, ref, error,
-                                loading, AfterSelectAction.actionSend, status);
-                          },
-                          child: Icon(
-                            Icons.arrow_outward,
-                            size: 75,
-                            color: colorScheme.primary,
+                        const Spacer(),
+                        Semantics(
+                          label: 'quick send',
+                          child: InkWell(
+                            highlightColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            onTap: () {
+                              onSubmit(
+                                  currentPin.value,
+                                  context,
+                                  ref,
+                                  error,
+                                  loading,
+                                  AfterSelectAction.actionSend,
+                                  status);
+                            },
+                            child: Icon(
+                              Icons.arrow_outward,
+                              size: 75,
+                              color: colorScheme.primary,
+                            ),
                           ),
                         ),
-                      ),
-                      const Spacer(),
-                    ],
-                  );
-                },
+                        const Spacer(),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ],

@@ -421,18 +421,19 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                       Container(
                         alignment: Alignment.center,
                         child: Semantics(
-                          label: 'Scan QR code',
-                          child: IconButton(
-                          iconSize: 48,
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          onPressed: () {
-                            context
-                                .findRootAncestorStateOfType<WalletHomeState>()
-                                ?.showModalScanner(context);
-                          },
-                          icon: const Icon(Icons.crop_free_sharp),
-                        )),
+                            label: 'Scan QR code',
+                            child: IconButton(
+                              iconSize: 48,
+                              highlightColor: Colors.transparent,
+                              splashColor: Colors.transparent,
+                              onPressed: () {
+                                context
+                                    .findRootAncestorStateOfType<
+                                        WalletHomeState>()
+                                    ?.showModalScanner(context);
+                              },
+                              icon: const Icon(Icons.crop_free_sharp),
+                            )),
                       ),
                     ],
                   ),
@@ -598,7 +599,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
             //     return ((amount + WalletManager::amountFromDouble(0.001)) > m_wallet->viewOnlyBalance(m_wallet->currentSubaddressAccount()));
           }
           if (needKeyImages) {
-            await WalletChannel().exportOutputs(true);
+            await WalletChannel().exportOutputs(false);
             navigatorState.push(MaterialPageRoute(
               builder: (context) {
                 return ExportQRScreen(

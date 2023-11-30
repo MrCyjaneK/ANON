@@ -47,7 +47,6 @@ class Wallet {
     unlockedBalance = json['unlockedBalance'] ?? 0;
     numSubaddresses = json['numSubaddresses'] ?? 0;
     height = json['height'] ?? 0;
-    isViewOnly = json['isViewOnly'] ?? false;
     isAirgapEnabled = json['isAirgapEnabled'] ?? false;
     if (json.containsKey("seed")) {
       seed = (json['seed'] as String).split(" ");

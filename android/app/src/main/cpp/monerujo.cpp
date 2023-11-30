@@ -1312,7 +1312,7 @@ Java_com_m2049r_xmrwallet_model_Wallet_exportOutputs(JNIEnv *env, jobject instan
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_m2049r_xmrwallet_model_Wallet_hasUnknownKeyImages(JNIEnv *env, jobject instance, jstring filename, jboolean all) {
+Java_com_m2049r_xmrwallet_model_Wallet_hasUnknownKeyImages(JNIEnv *env, jobject instance, jstring filename) {
     Monero::Wallet *wallet = getHandle<Monero::Wallet>(env, instance);
     return wallet->hasUnknownKeyImages();
 }

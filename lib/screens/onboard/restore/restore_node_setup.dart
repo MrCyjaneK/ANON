@@ -1,3 +1,4 @@
+import 'package:anon_wallet/anon_wallet.dart';
 import 'package:anon_wallet/models/node.dart';
 import 'package:anon_wallet/screens/home/settings/proxy_settings.dart';
 import 'package:anon_wallet/screens/home/settings/settings_state.dart';
@@ -198,7 +199,7 @@ class RestoreNodeSetup extends ConsumerWidget {
                         Container(
                           height: 12,
                           width: 12,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.red,
                           ),
@@ -228,6 +229,7 @@ class RestoreNodeSetup extends ConsumerWidget {
                           vertical: 16, horizontal: 6)),
                   onPressed: () async {
                     if (ref.read(remoteHost).isEmpty) {
+                      if (isViewOnly) return;
                       showConfirmColdAlertExternal(context, () {
                         onButtonPressed();
                       });

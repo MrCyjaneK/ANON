@@ -103,8 +103,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                 );
               });
         } else {
-          _pageController.animateToPage(0,
-              duration: const Duration(milliseconds: 220), curve: Curves.ease);
+          _pageController.jumpToPage(0);
         }
         return false;
       },
@@ -128,17 +127,13 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                 },
               ),
               ReceiveWidget(() {
-                _pageController.animateToPage(0,
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.ease);
+                _pageController.jumpToPage(0);
               }),
               Scaffold(
                 appBar: AppBar(
                   leading: BackButton(
                     onPressed: () {
-                      _pageController.animateToPage(0,
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.ease);
+                      _pageController.jumpToPage(0);
                     },
                   ),
                 ),
@@ -146,9 +141,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                     outputs: outputs ?? [],
                     maxAmount: maxAmount,
                     goBack: () {
-                      _pageController.animateToPage(0,
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.ease);
+                      _pageController.jumpToPage(0);
                     }),
               ),
               Scaffold(
@@ -156,9 +149,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                   title: const Text("Settings"),
                   leading: BackButton(
                     onPressed: () {
-                      _pageController.animateToPage(0,
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.ease);
+                      _pageController.jumpTo(0);
                     },
                   ),
                 ),
@@ -202,9 +193,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
           selectedIndex: _currentView,
           onTap: (int index) {
             setState(() => _currentView = index);
-            _pageController.animateToPage(index,
-                duration: const Duration(milliseconds: 120),
-                curve: Curves.ease);
+            _pageController.jumpToPage(index);
           },
           items: <BottomBarItem>[
             BottomBarItem(
@@ -249,8 +238,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
     bottomSheetController.closed.then((value) async {
       await Future.delayed(const Duration(milliseconds: 200));
       if (result != null && result!.type == QRResultType.text) {
-        _pageController.animateToPage(2,
-            duration: const Duration(milliseconds: 220), curve: Curves.ease);
+        _pageController.jumpTo(2);
       } else {
         if (result != null && result!.type == QRResultType.UR) {
           if (result!.urResult.isNotEmpty) {}
@@ -302,9 +290,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                       outputs: outputs ?? [],
                       maxAmount: maxAmount,
                       goBack: () {
-                        _pageController.animateToPage(0,
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.ease);
+                        _pageController.jumpTo(0);
                       });
                 },
               ));
@@ -317,9 +303,7 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                       outputs: outputs ?? [],
                       maxAmount: maxAmount,
                       goBack: () {
-                        _pageController.animateToPage(0,
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.ease);
+                        _pageController.jumpTo(0);
                       });
                 },
               ));

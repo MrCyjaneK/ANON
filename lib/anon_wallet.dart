@@ -1,5 +1,6 @@
 //START WALLET num-pad consts
 import 'package:anon_wallet/channel/wallet_channel.dart';
+import 'package:anon_wallet/models/config.dart';
 
 const maxPinSize = 12;
 const minPinSize = 5;
@@ -9,7 +10,7 @@ const minPinSize = 5;
 const maxConfirms = 10;
 //END WALLET tx
 
-bool isViewOnly = false;
+bool isViewOnly = anonConfigState.isViewOnly;
 bool isAirgapEnabled = false;
 
 WalletState walletState = WalletState.walletNotInitialized;

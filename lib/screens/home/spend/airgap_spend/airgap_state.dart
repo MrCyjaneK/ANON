@@ -3,7 +3,7 @@ import 'package:anon_wallet/plugins/camera_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final exportWalletOutProvider =
-    FutureProvider<String>((ref) => WalletChannel().exportOutputs(true));
+    FutureProvider<String>((ref) => WalletChannel().exportOutputs(false));
 
 final exportWalletKeyImagesProvider =
     FutureProvider<String>((ref) => WalletChannel().exportKeyImages());

@@ -129,7 +129,7 @@ class WalletMethodChannel(messenger: BinaryMessenger, lifecycle: Lifecycle, priv
             withContext(Dispatchers.IO) {
                 try {
                     val file = File(AnonWallet.getAppContext().cacheDir, AnonWallet.EXPORT_KEY_IMAGE_FILE)
-                    val eo = WalletManager.getInstance().wallet.exportKeyImages(file.absolutePath, true)
+                    val eo = WalletManager.getInstance().wallet.exportKeyImages(file.absolutePath, false)
                     if (eo) {
                         result.success(file.absolutePath)
                     } else {
