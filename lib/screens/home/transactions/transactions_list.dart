@@ -140,7 +140,7 @@ class _TransactionsListState extends State<TransactionsList> {
                     },
                     icon: const Icon(Icons.crop_free)),
               ),
-              isViewOnly ? _buildViewOnlyMenu(context) : _buildMenu(context),
+              isViewOnly ? _buildViewOnlyMenu() : _buildMenu(),
             ],
             flexibleSpace: InkWell(
               highlightColor: Colors.transparent,
@@ -228,7 +228,7 @@ class _TransactionsListState extends State<TransactionsList> {
     );
   }
 
-  _buildViewOnlyMenu(BuildContext context) {
+  _buildViewOnlyMenu() {
     return PopupMenuButton<int>(
       onSelected: (item) {
         switch (item) {
@@ -282,7 +282,7 @@ class _TransactionsListState extends State<TransactionsList> {
     );
   }
 
-  _buildMenu(BuildContext context) {
+  _buildMenu() {
     return PopupMenuButton<int>(
       onSelected: (item) {
         switch (item) {

@@ -222,23 +222,26 @@ class WalletHomeState extends ConsumerState<WalletHome> {
     );
   }
 
-  void showModalScanner(BuildContext context) {
-    final messenger = ScaffoldMessenger.of(context);
+  void showModalScanner(BuildContext newContext) {
+    final messenger = ScaffoldMessenger.of(newContext);
     final theme = Theme.of(context);
     PersistentBottomSheetController? bottomSheetController;
 
     QRResult? result;
     bottomSheetController = showQRBottomSheet(
-      context,
+      newContext,
       onScanCallback: (value) {
         result = value;
       },
     );
-    final navigator = Navigator.of(context);
+    final navigator = Navigator.of(newContext);
     bottomSheetController.closed.then((value) async {
       await Future.delayed(const Duration(milliseconds: 200));
+      print(result?.type);
       if (result != null && result!.type == QRResultType.text) {
-        _pageController.jumpTo(2);
+        _pageController.animateToPage(2,
+            duration: const Duration(milliseconds: 1), curve: Curves.linear);
+        return;
       } else {
         if (result != null && result!.type == QRResultType.UR) {
           if (result!.urResult.isNotEmpty) {}

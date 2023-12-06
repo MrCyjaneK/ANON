@@ -7,6 +7,7 @@ import 'package:anon_wallet/screens/home/spend/spend_review.dart';
 import 'package:anon_wallet/screens/home/spend/spend_state.dart';
 import 'package:anon_wallet/screens/home/wallet_home.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
+import 'package:anon_wallet/theme/theme_provider.dart';
 import 'package:anon_wallet/utils/keyboard_visibility_detector.dart';
 import 'package:anon_wallet/utils/monetary_util.dart';
 import 'package:flutter/foundation.dart';
@@ -222,141 +223,122 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                     children: [
                       Column(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 34, vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("ADDRESS",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                            color: Theme.of(context)
-                                                .primaryColor)),
-                                const Padding(padding: EdgeInsets.all(12)),
-                                TextFormField(
-                                  autofocus: false,
-                                  textAlign: TextAlign.start,
-                                  controller: addressEditingController,
-                                  keyboardType: TextInputType.text,
-                                  maxLines: 3,
-                                  minLines: 1,
-                                  onChanged: (value) {
-                                    ref.read(addressStateProvider.state).state =
-                                        value;
-                                  },
-                                  decoration: InputDecoration(
-                                    alignLabelWithHint: true,
-                                    errorText: addressValid == false
-                                        ? "Invalid address"
-                                        : null,
-                                    border: unFocusedBorder,
-                                    enabledBorder: unFocusedBorder,
-                                    focusedBorder: enabledBorder,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 16, horizontal: 8),
-                                    fillColor: const Color(0xff1E1E1E),
-                                  ),
-                                  style: const TextStyle(fontSize: 13),
-                                ),
-                              ],
+                          ListTile(
+                            title: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Text(
+                                "ADDRESS",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary),
+                              ),
+                            ),
+                            subtitle: TextFormField(
+                              autofocus: false,
+                              textAlign: TextAlign.start,
+                              controller: addressEditingController,
+                              keyboardType: TextInputType.text,
+                              maxLines: 3,
+                              minLines: 1,
+                              onChanged: (value) {
+                                ref.read(addressStateProvider.state).state =
+                                    value;
+                              },
+                              decoration: InputDecoration(
+                                alignLabelWithHint: true,
+                                errorText: addressValid == false
+                                    ? "Invalid address"
+                                    : null,
+                                border: unFocusedBorder,
+                                enabledBorder: unFocusedBorder,
+                                focusedBorder: enabledBorder,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 8),
+                                fillColor: const Color(0xff1E1E1E),
+                              ),
+                              style: const TextStyle(fontSize: 13),
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 34, vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("AMOUNT",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                            color: Theme.of(context)
-                                                .primaryColor)),
-                                const Padding(padding: EdgeInsets.all(12)),
-                                TextFormField(
-                                  // enabled: !sweepAll,
-                                  controller: amountEditingController,
-                                  textAlign: TextAlign.center,
-                                  onChanged: (value) {
-                                    num amount = ref
-                                        .watch(walletAvailableBalanceProvider);
-                                    if (widget.maxAmount != 0) {
-                                      amount = widget.maxAmount;
-                                    }
-                                    num? amtInput = num.tryParse(value);
-                                    if (amtInput == null) {
-                                      setState(() {
-                                        sweepAll = false;
-                                      });
-                                    } else {
-                                      amtInput = amtInput * 1e12;
-                                      setState(() {
-                                        sweepAll = amount == amtInput;
-                                      });
-                                    }
-                                    ref.read(amountStateProvider.state).state =
-                                        value;
-                                  },
-                                  autofocus: false,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    alignLabelWithHint: true,
-                                    errorText: validAmount == false
-                                        ? "Invalid Amount"
-                                        : null,
-                                    //suffixText: "XMR",
-                                    border: unFocusedBorder,
-                                    enabledBorder: unFocusedBorder,
-                                    focusedBorder: enabledBorder,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 16, horizontal: 8),
-                                    fillColor: const Color(0xff1E1E1E),
-                                  ),
-                                  style: const TextStyle(fontSize: 18),
-                                ),
-                              ],
+                          ListTile(
+                            title: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Text(
+                                "AMOUNT",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary),
+                              ),
+                            ),
+                            subtitle: TextFormField(
+                              // enabled: !sweepAll,
+                              controller: amountEditingController,
+                              textAlign: TextAlign.center,
+                              onChanged: (value) {
+                                num amount =
+                                    ref.watch(walletAvailableBalanceProvider);
+                                if (widget.maxAmount != 0) {
+                                  amount = widget.maxAmount;
+                                }
+                                num? amtInput = num.tryParse(value);
+                                if (amtInput == null) {
+                                  setState(() {
+                                    sweepAll = false;
+                                  });
+                                } else {
+                                  amtInput = amtInput * 1e12;
+                                  setState(() {
+                                    sweepAll = amount == amtInput;
+                                  });
+                                }
+                                ref.read(amountStateProvider.state).state =
+                                    value;
+                              },
+                              autofocus: false,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                alignLabelWithHint: true,
+                                errorText: validAmount == false
+                                    ? "Invalid Amount"
+                                    : null,
+                                //suffixText: "XMR",
+                                border: unFocusedBorder,
+                                enabledBorder: unFocusedBorder,
+                                focusedBorder: enabledBorder,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 8),
+                                fillColor: const Color(0xff1E1E1E),
+                              ),
+                              style: const TextStyle(fontSize: 18),
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                    horizontal: 34, vertical: 8)
-                                .add(const EdgeInsets.only(bottom: 2)),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("NOTES",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                            color: Theme.of(context)
-                                                .primaryColor)),
-                                const Padding(padding: EdgeInsets.all(12)),
-                                TextFormField(
-                                  textAlign: TextAlign.start,
-                                  onChanged: (value) {
-                                    ref.read(notesStateProvider.state).state =
-                                        value;
-                                  },
-                                  autofocus: false,
-                                  keyboardType: TextInputType.text,
-                                  decoration: InputDecoration(
-                                    alignLabelWithHint: true,
-                                    border: unFocusedBorder,
-                                    enabledBorder: unFocusedBorder,
-                                    focusedBorder: enabledBorder,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 16, horizontal: 8),
-                                    fillColor: const Color(0xff1E1E1E),
-                                  ),
-                                  style: const TextStyle(fontSize: 18),
-                                ),
-                              ],
+                          ListTile(
+                            title: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Text(
+                                "NOTES",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary),
+                              ),
+                            ),
+                            subtitle: TextFormField(
+                              textAlign: TextAlign.start,
+                              onChanged: (value) {
+                                ref.read(notesStateProvider.state).state =
+                                    value;
+                              },
+                              autofocus: false,
+                              keyboardType: TextInputType.text,
+                              decoration: InputDecoration(
+                                alignLabelWithHint: true,
+                                border: unFocusedBorder,
+                                enabledBorder: unFocusedBorder,
+                                focusedBorder: enabledBorder,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 8),
+                                fillColor: const Color(0xff1E1E1E),
+                              ),
+                              style: const TextStyle(fontSize: 18),
                             ),
                           ),
                         ],

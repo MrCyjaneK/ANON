@@ -33,12 +33,15 @@ class ProgressSliverWidgetState extends ConsumerState<ProgressSliverWidget> {
     super.initState();
   }
 
-  bool isSynchronized = false;
+  bool isSynchronized = true;
 
   void loadTimer() {
     Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (!mounted) return;
       final newIsSynchronized = await WalletChannel().isSynchronized();
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         isSynchronized = newIsSynchronized;
       }); // Trigger
