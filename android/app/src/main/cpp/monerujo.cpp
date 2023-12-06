@@ -366,6 +366,13 @@ Java_com_m2049r_xmrwallet_model_WalletManager_createWalletJ(JNIEnv *env, jobject
                     seed_words,
                     std::string(_passpharse), true);
 
+    bool setupStatus = wallet->setupBackgroundSync(Monero::Wallet::BackgroundSync_ReusePassword, std::string(_password), {});
+    if (setupStatus == true) {
+        LOGD("createWalletJ(): setupBackgroundSync(): success!");
+    } else {
+        LOGD("createWalletJ(): setupBackgroundSync(): failure!");
+    }
+
     env->ReleaseStringUTFChars(path, _path);
     env->ReleaseStringUTFChars(password, _password);
     env->ReleaseStringUTFChars(language, _language);
@@ -419,7 +426,12 @@ Java_com_m2049r_xmrwallet_model_WalletManager_recoveryWalletJ(JNIEnv *env, jobje
                     (uint64_t) restoreHeight,
                     1, // kdf_rounds
                     std::string(_offset));
-
+    bool setupStatus = wallet->setupBackgroundSync(Monero::Wallet::BackgroundSync_ReusePassword, std::string(_password), {});
+    if (setupStatus == true) {
+        LOGD("recoveryWalletJ(): setupBackgroundSync(): success!");
+    } else {
+        LOGD("recoveryWalletJ(): setupBackgroundSync(): failure!");
+    }
     env->ReleaseStringUTFChars(path, _path);
     env->ReleaseStringUTFChars(password, _password);
     env->ReleaseStringUTFChars(mnemonic, _mnemonic);
@@ -445,7 +457,12 @@ Java_com_m2049r_xmrwallet_model_WalletManager_recoveryWalletPolyseedJ(JNIEnv *en
                     _networkType,
                     std::string(_mnemonic), 
                     std::string(_offset), false);
-
+    bool setupStatus = wallet->setupBackgroundSync(Monero::Wallet::BackgroundSync_ReusePassword, std::string(_password), {});
+    if (setupStatus == true) {
+        LOGD("recoveryWalletPolyseedJ(): setupBackgroundSync(): success!");
+    } else {
+        LOGD("recoveryWalletPolyseedJ(): setupBackgroundSync(): failure!");
+    }
     env->ReleaseStringUTFChars(path, _path);
     env->ReleaseStringUTFChars(password, _password);
     env->ReleaseStringUTFChars(mnemonic, _mnemonic);
@@ -480,7 +497,12 @@ Java_com_m2049r_xmrwallet_model_WalletManager_createWalletFromKeysJ(JNIEnv *env,
                     std::string(_addressString),
                     std::string(_viewKeyString),
                     std::string(_spendKeyString));
-
+    bool setupStatus = wallet->setupBackgroundSync(Monero::Wallet::BackgroundSync_ReusePassword, std::string(_password), {});
+    if (setupStatus == true) {
+        LOGD("createWalletFromKeysJ(): setupBackgroundSync(): success!");
+    } else {
+        LOGD("createWalletFromKeysJ(): setupBackgroundSync(): failure!");
+    }
     env->ReleaseStringUTFChars(path, _path);
     env->ReleaseStringUTFChars(password, _password);
     env->ReleaseStringUTFChars(language, _language);
@@ -515,7 +537,12 @@ Java_com_m2049r_xmrwallet_model_WalletManager_createWalletFromDeviceJ(JNIEnv *en
                     std::string(_deviceName),
                     (uint64_t) restoreHeight,
                     std::string(_subaddressLookahead));
-
+    bool setupStatus = wallet->setupBackgroundSync(Monero::Wallet::BackgroundSync_ReusePassword, std::string(_password), {});
+    if (setupStatus == true) {
+        LOGD("createWalletFromDeviceJ(): setupBackgroundSync(): success!");
+    } else {
+        LOGD("createWalletFromDeviceJ(): setupBackgroundSync(): failure!");
+    }
     env->ReleaseStringUTFChars(path, _path);
     env->ReleaseStringUTFChars(password, _password);
     env->ReleaseStringUTFChars(deviceName, _deviceName);

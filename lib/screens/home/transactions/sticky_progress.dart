@@ -1,5 +1,9 @@
+import 'dart:async';
+
+import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/state/node_state.dart';
 import 'package:anon_wallet/state/wallet_state.dart';
+import 'package:anon_wallet/utils/json_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -15,11 +19,34 @@ class SyncProgressSliver extends SingleChildRenderObjectWidget {
   }
 }
 
-class ProgressSliverWidget extends ConsumerWidget {
+class ProgressSliverWidget extends ConsumerStatefulWidget {
   const ProgressSliverWidget({super.key});
 
   @override
-  Widget build(BuildContext context, ref) {
+  ProgressSliverWidgetState createState() => ProgressSliverWidgetState();
+}
+
+class ProgressSliverWidgetState extends ConsumerState<ProgressSliverWidget> {
+  @override
+  void initState() {
+    loadTimer();
+    super.initState();
+  }
+
+  bool isSynchronized = false;
+
+  void loadTimer() {
+    Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (!mounted) return;
+      final newIsSynchronized = await WalletChannel().isSynchronized();
+      setState(() {
+        isSynchronized = newIsSynchronized;
+      }); // Trigger
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     bool isConnecting = ref.watch(connectingToNodeStateProvider);
     bool isWalletOpening = ref.watch(walletLoadingProvider) ?? true;
     bool connected = ref.watch(connectionStatus) ?? false;
@@ -88,15 +115,47 @@ class ProgressSliverWidget extends ConsumerWidget {
                 return (const SelectableText(
                     "(isConnecting || isWalletOpening)"));
               }
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: const LinearProgressIndicator(
-                  backgroundColor: Color(0xFA2A2A2A),
-                  minHeight: 4,
-                ),
+              return Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: const LinearProgressIndicator(
+                      backgroundColor: Color(0xFA2A2A2A),
+                      minHeight: 4,
+                    ),
+                  ),
+                  const Padding(padding: EdgeInsets.all(6)),
+                  Text(
+                    "Connecting...",
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              );
+            } else if (!isSynchronized) {
+              if (kDebugMode) {
+                return (const SelectableText("(!isSynchronized)"));
+              }
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: const LinearProgressIndicator(
+                      backgroundColor: Color(0xFA2A2A2A),
+                      minHeight: 4,
+                    ),
+                  ),
+                  const Padding(padding: EdgeInsets.all(6)),
+                  Text(
+                    "Connecting...",
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               );
             } else if (!connected) {
-              if (kDebugMode) return (const SelectableText("(!connected)"));
+              if (kDebugMode) {
+                return (const SelectableText("(!connected)"));
+              }
               return Column(
                 children: [
                   const LinearProgressIndicator(

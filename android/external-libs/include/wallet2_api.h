@@ -161,6 +161,7 @@ struct UnsignedTransaction
     * return - true on success
     */
     virtual bool sign(const std::string &signedFileName) = 0;
+    virtual bool signToStr(std::string &data) = 0;
 };
 
 /**
@@ -930,6 +931,8 @@ struct Wallet
 
     virtual PendingTransaction * createSweepUnmixableTransaction() = 0;
     
+    virtual PendingTransaction * loadSignedTxFromStr(const std::string &data) = 0;
+
    /*!
     * \brief loadUnsignedTx  - creates transaction from unsigned tx file
     * \return                - UnsignedTransaction object. caller is responsible to check UnsignedTransaction::status()
@@ -967,6 +970,8 @@ struct Wallet
     * \return                  - true on success
     */
     virtual bool exportKeyImages(const std::string &filename, bool all = false) = 0;
+    virtual bool exportKeyImagesToStr(std::string &keyImages, bool all = false) = 0;
+    virtual bool exportKeyImagesForOutputsFromStr(const std::string &outputs, std::string &keyImages) = 0;
    
    /*!
     * \brief importKeyImages - imports key images from file
@@ -974,6 +979,7 @@ struct Wallet
     * \return                  - true on success
     */
     virtual bool importKeyImages(const std::string &filename) = 0;
+    virtual bool importKeyImagesFromStr(const std::string &keyImages) = 0;
 
     /*!
      * \brief importOutputs - exports outputs to file
@@ -981,6 +987,7 @@ struct Wallet
      * \return                  - true on success
      */
     virtual bool exportOutputs(const std::string &filename, bool all = false) = 0;
+    virtual bool exportOutputsToStr(std::string &outputs, bool all = false) = 0;
 
     /*!
      * \brief importOutputs - imports outputs from file
@@ -988,6 +995,7 @@ struct Wallet
      * \return                  - true on success
      */
     virtual bool importOutputs(const std::string &filename) = 0;
+    virtual bool importOutputsFromStr(const std::string &outputs) = 0;
 
     /*!
      * \brief scanTransactions - scan a list of transaction ids, this operation may reveal the txids to the remote node and affect your privacy

@@ -91,41 +91,41 @@ class _TransactionsListState extends State<TransactionsList> {
                     child: Semantics(
                       label: 'lock wallet',
                       child: IconButton(
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          onPressed: isLoading
-                              ? null
-                              : () async {
-                                  if ((await WalletChannel()
-                                          .isSynchronized()) ==
-                                      false) return;
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        onPressed: isLoading
+                            ? null
+                            : () async {
+                                if ((await WalletChannel().isSynchronized()) ==
+                                    false) return;
 
-                                  if (isLoading) {
-                                    return;
-                                  }
-                                  // ignore: use_build_context_synchronously
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        globalAutolockTimer.cancel();
-                                        isScheduledAutolockTimer = false;
-                                        if (isViewOnly) {
-                                          // We are doing a 'fake' lock, since
-                                          // WalletLock is actually locking the
-                                          // wallet (turning background-sync on)
-                                          // and we don't want it for viewonly.
-                                          return const LockedWallet();
-                                        }
-                                        return const WalletLock();
-                                      },
-                                    ),
-                                  );
-                                },
-                          icon: const Hero(
-                            tag: "lock",
-                            child: Icon(Icons.lock),
-                          )),
+                                if (isLoading) {
+                                  return;
+                                }
+                                // ignore: use_build_context_synchronously
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      globalAutolockTimer.cancel();
+                                      isScheduledAutolockTimer = false;
+                                      if (isViewOnly) {
+                                        // We are doing a 'fake' lock, since
+                                        // WalletLock is actually locking the
+                                        // wallet (turning background-sync on)
+                                        // and we don't want it for viewonly.
+                                        return const LockedWallet();
+                                      }
+                                      return const WalletLock();
+                                    },
+                                  ),
+                                );
+                              },
+                        icon: const Hero(
+                          tag: "lock",
+                          child: Icon(Icons.lock),
+                        ),
+                      ),
                     ),
                   );
                 },
