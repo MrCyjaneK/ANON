@@ -20,6 +20,7 @@ Future<void> runEmbeddedTor() async {
   final docs = await getApplicationDocumentsDirectory();
   const port = 42142;
   final proxy = await NodeChannel().getProxy();
+
   final ltpath = p.join(docs.absolute.path, "last-tor-port");
   if (!File(ltpath).existsSync()) {
     File(ltpath).createSync(recursive: true);
@@ -37,11 +38,10 @@ Future<void> runEmbeddedTor() async {
   final node = await NodeChannel().getNodeFromPrefs();
   // node == null should be enough for offline wallet check. We don't want tor
   // there.
-  if (node?.host?.endsWith(".i2p") == true &&
-      node?.host != null &&
+  if (node?.host?.endsWith(".i2p") == true ||
+      node?.host != null ||
       node?.host != "") {
     print("We are connected to i2p (or not at all), ignoring tor config.");
-
     return;
   }
   final torBinPath = p.join(
