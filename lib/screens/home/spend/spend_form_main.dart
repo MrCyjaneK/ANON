@@ -433,18 +433,19 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
                     child: Hero(
                       tag: "main_button",
                       child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                  width: 1.0, color: Colors.white),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  side: const BorderSide(
-                                      width: 12, color: Colors.white),
-                                  borderRadius: BorderRadius.circular(8)),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 6)),
-                          onPressed: () => onMainActionPressed(context),
-                          child: const Text("Continue")),
+                        style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                                width: 1.0, color: Colors.white),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                side: const BorderSide(
+                                    width: 12, color: Colors.white),
+                                borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 6)),
+                        onPressed: () => onMainActionPressed(context),
+                        child: const Text("Continue"),
+                      ),
                     ),
                   );
                 }),
@@ -561,7 +562,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
     String address = ref.read(addressStateProvider);
     SpendValidationNotifier validationNotifier = ref.read(validationProvider);
     bool valid =
-        await validationNotifier.validate(amountStr, address, sweepAll);
+        await validationNotifier.validate(ref, amountStr, address, sweepAll);
     if (valid) {
       //if view only then export outputs and start working unsigned tx
       if (isViewOnly) {

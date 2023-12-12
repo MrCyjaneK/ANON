@@ -1,6 +1,7 @@
 import 'package:anon_wallet/channel/spend_channel.dart';
 import 'package:anon_wallet/channel/wallet_channel.dart';
 import 'package:anon_wallet/models/broadcast_tx_state.dart';
+import 'package:anon_wallet/state/wallet_state.dart';
 import 'package:anon_wallet/utils/app_haptics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,11 +10,16 @@ class SpendValidationNotifier extends ChangeNotifier {
   bool? validAddress;
   bool? validAmount;
 
-  Future<bool> validate(String amount, String address, bool sweepAll) async {
+  Future<bool> validate(
+      WidgetRef ref, String amount, String address, bool sweepAll) async {
     dynamic response =
         await SpendMethodChannel().validateAddress(amount, address);
     validAddress = response['address'] == true;
-    validAmount = response['amount'] == true || sweepAll;
+    validAmount = (response['amount'] == true || sweepAll) &&
+        (((num.parse(amount)) * 1e12) <=
+            ref.read(walletAvailableBalanceProvider));
+    print("aaa${num.parse(amount)}");
+    print("bbb${ref.read(walletAvailableBalanceProvider)}");
     notifyListeners();
     return validAddress == true && (validAmount == true || sweepAll);
   }
