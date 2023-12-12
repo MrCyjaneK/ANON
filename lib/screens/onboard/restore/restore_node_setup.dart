@@ -241,7 +241,11 @@ class RestoreNodeSetup extends ConsumerWidget {
                       ref.read(nodeConnectionProvider.notifier).connect();
                     }
                   },
-                  child: Text(node == null ? "Connect" : "Next"),
+                  child: Text(node == null
+                      ? (ref.watch(remoteHost).isEmpty && !isViewOnly)
+                          ? "Skip"
+                          : "Connect"
+                      : "Next"),
                 ),
               ),
             ),
