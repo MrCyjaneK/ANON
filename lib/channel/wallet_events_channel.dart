@@ -70,6 +70,11 @@ class WalletEventsChannel {
                   'DEBUG: ${event['isConnected']} | ${event['height']} | tor: ${proc == null}',
                 );
               } else {
+                // offline wallet check
+                if (event['height'] == 1) {
+                  setStats("Status: OFFLINE");
+                  return;
+                }
                 String torInfo = "";
                 if (proc != null) {
                   torInfo = "[Embedded Tor]";
