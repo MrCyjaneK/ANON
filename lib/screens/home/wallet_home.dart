@@ -127,13 +127,17 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                 },
               ),
               ReceiveWidget(() {
-                _pageController.jumpToPage(0);
+                _pageController.animateToPage(0,
+                    duration: const Duration(milliseconds: 1),
+                    curve: Curves.linear);
               }),
               Scaffold(
                 appBar: AppBar(
                   leading: BackButton(
                     onPressed: () {
-                      _pageController.jumpToPage(0);
+                      _pageController.animateToPage(0,
+                          duration: const Duration(milliseconds: 1),
+                          curve: Curves.linear);
                     },
                   ),
                 ),
@@ -141,7 +145,9 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                     outputs: outputs ?? [],
                     maxAmount: maxAmount,
                     goBack: () {
-                      _pageController.jumpToPage(0);
+                      _pageController.animateToPage(0,
+                          duration: const Duration(milliseconds: 1),
+                          curve: Curves.linear);
                     }),
               ),
               Scaffold(
@@ -293,7 +299,9 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                       outputs: outputs ?? [],
                       maxAmount: maxAmount,
                       goBack: () {
-                        _pageController.jumpTo(0);
+                        _pageController.animateToPage(0,
+                            duration: const Duration(milliseconds: 1),
+                            curve: Curves.linear);
                       });
                 },
               ));
@@ -306,7 +314,9 @@ class WalletHomeState extends ConsumerState<WalletHome> {
                       outputs: outputs ?? [],
                       maxAmount: maxAmount,
                       goBack: () {
-                        _pageController.jumpTo(0);
+                        _pageController.animateToPage(0,
+                            duration: const Duration(milliseconds: 1),
+                            curve: Curves.linear);
                       });
                 },
               ));

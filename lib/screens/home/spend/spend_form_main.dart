@@ -163,7 +163,7 @@ class _SpendFormState extends ConsumerState<AnonSpendForm> {
             buttonText: "FINISH",
             counterScanCalled: (_, newContext) {
               navigateToHome(newContext);
-              Future.delayed(Duration.zero).then((_) => widget.goBack());
+              // Future.delayed(Duration.zero).then((_) => widget.goBack());
             },
             onScanClick: (_) =>
                 print("spend_from_main.dart: onScanClick is not supported"),
