@@ -16,10 +16,9 @@ class SpendValidationNotifier extends ChangeNotifier {
         await SpendMethodChannel().validateAddress(amount, address);
     validAddress = response['address'] == true;
     validAmount = (response['amount'] == true || sweepAll) &&
-        (((num.parse(amount)) * 1e12) <=
-            ref.read(walletAvailableBalanceProvider));
-    print("aaa${num.parse(amount)}");
-    print("bbb${ref.read(walletAvailableBalanceProvider)}");
+        (num.tryParse(amount) == null ||
+            (((num.parse(amount)) * 1e12) <=
+                ref.read(walletAvailableBalanceProvider)));
     notifyListeners();
     return validAddress == true && (validAmount == true || sweepAll);
   }
