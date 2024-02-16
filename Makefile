@@ -3,6 +3,9 @@ all: anon nero
 anon:
 	flutter build apk --flavor anon
 
+anonstealth:
+	flutter build apk --flavor anonstealth --dart-define=libstealth_calculator=true
+
 nero:
 	flutter build apk --flavor nero
 

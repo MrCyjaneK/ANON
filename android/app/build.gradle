@@ -127,6 +127,19 @@ android {
             resValue 'string', 'app_title', '"ANON"'
             buildConfigField 'boolean', 'VIEW_ONLY', 'false'
             buildConfigField 'String', 'NETWORK', '"main"'
+            manifestPlaceholders = [
+                appIcon: "@mipmap/ic_launcher"
+            ]
+        }
+        anonstealth {
+            dimension "app"
+            resValue 'string', 'app_title', '"Calculator"'
+            buildConfigField 'boolean', 'VIEW_ONLY', 'false'
+            buildConfigField 'String', 'NETWORK', '"main"'
+            applicationId "com.example.calculator"
+            manifestPlaceholders = [
+                appIcon: "@mipmap/ic_launcher_calc"
+            ]
         }
         devanon{
             dimension "app"
@@ -134,6 +147,9 @@ android {
             buildConfigField 'String', 'NETWORK', '"main"'
             buildConfigField 'boolean', 'VIEW_ONLY', 'false'
             applicationIdSuffix ".dev"
+            manifestPlaceholders = [
+                appIcon: "@mipmap/ic_launcher"
+            ]
         }
         nero {
             dimension "app"
@@ -141,6 +157,9 @@ android {
             buildConfigField 'String', 'NETWORK', '"main"'
             buildConfigField 'boolean', 'VIEW_ONLY', 'true'
             applicationIdSuffix ".view"
+            manifestPlaceholders = [
+                appIcon: "@mipmap/ic_launcher"
+            ]
         }
         devnero{
             dimension "app"
@@ -148,6 +167,9 @@ android {
             buildConfigField 'boolean', 'VIEW_ONLY', 'true'
             buildConfigField 'String', 'NETWORK', '"main"'
             applicationIdSuffix ".dev.view"
+            manifestPlaceholders = [
+                appIcon: "@mipmap/ic_launcher"
+            ]
         }
     }
     namespace 'anon.xmr.app.anon_wallet'

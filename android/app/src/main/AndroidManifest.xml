@@ -16,7 +16,7 @@
         android:name="${applicationName}"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="${appIcon}"
         android:label="@string/app_title"
         android:usesCleartextTraffic="true"
         android:extractNativeLibs="true" >

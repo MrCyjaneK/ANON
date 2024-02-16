@@ -27,12 +27,31 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:libstealth_calculator/libstealth_calculator.dart';
 
+const bool libstealthCalculator = bool.hasEnvironment("libstealth_calculator")
+    ? bool.fromEnvironment("libstealth_calculator")
+    : false;
 void main() async {
   // I kinda lose logs at the beginning..
   // if (kDebugMode) {
   //   await Future.delayed(const Duration(seconds: 3));
   // }
+  WidgetsFlutterBinding.ensureInitialized();
+  if (libstealthCalculator) {
+    runApp(StealthHomeScreenCalculator(
+      onSecretGiven: (String secret) async {
+        if (secret.endsWith("48131")) {
+          main_clean();
+          return;
+        }
+        return;
+      },
+    ));
+  }
+}
+
+void main_clean() async {
   runApp(const SplashScreen());
   unawaited(runEmbeddedTor());
   WalletState state = await WalletChannel().getWalletState();
